@@ -19,16 +19,19 @@ import unittest
 from mini_run_pipeline import looks
 
 CANONICAL_LUT_FILENAMES = [
-    "kodak_2383_print.cube",
-    "fuji_3513_print.cube",
-    "teal_and_orange_blockbuster.cube",
-    "moody_dramatic_cinema.cube",
-    "vintage_film_emulation.cube",
     "clean_log_to_rec709.cube",
     "golden_hour_warmth.cube",
-    "bleach_bypass.cube",
-    "urban_desaturated.cube",
+    "kodak_2383_print.cube",
     "sci_netone_balanced.cube",
+    "teal_and_orange_blockbuster.cube",
+    "urban_desaturated.cube",
+    "vintage_film_emulation.cube",
+]
+
+LEGACY_SYNTHETIC_LUT_FILENAMES = [
+    "bleach_bypass.cube",
+    "fuji_3513_print.cube",
+    "moody_dramatic_cinema.cube",
 ]
 
 EXPECTED_LINE_COUNT = 4 + (33 * 33 * 33)  # 35,941 lines
@@ -47,12 +50,21 @@ class CanonicalLutTests(unittest.TestCase):
             f"LUT directory does not exist: {self.lut_dir}",
         )
 
-    def test_all_ten_canonical_lut_files_exist(self):
+    def test_all_authentic_canonical_lut_files_exist(self):
         for filename in CANONICAL_LUT_FILENAMES:
             cube_path = self.lut_dir / filename
             self.assertTrue(
                 cube_path.is_file(),
                 f"Missing canonical LUT file: {cube_path}",
+            )
+
+    def test_legacy_synthetic_luts_purged(self):
+        """Assert that old synthetic/mathematical LUTs are completely purged from disk."""
+        for filename in LEGACY_SYNTHETIC_LUT_FILENAMES:
+            cube_path = self.lut_dir / filename
+            self.assertFalse(
+                cube_path.exists(),
+                f"Legacy synthetic LUT file must be purged: {cube_path}",
             )
 
     def test_lut_file_sizes_and_line_counts(self):
