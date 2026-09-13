@@ -22,7 +22,6 @@ import type {
   TypographyInlineTokenSwap,
   TypographyFrameTreatment,
 } from "@prometheus/shared-types";
-import { VisualHelper, VisualHelperStage } from "./VisualHelpers";
 
 
 // ---------------------------------------------------------------------------
@@ -646,7 +645,6 @@ export type CaptionChunk = {
   annotations?: TypographyAnnotation[];
   subjectZone?: TypographySubjectZone;
   frameTreatment?: TypographyFrameTreatment;
-  visualHelper?: VisualHelper;
 };
 
 export type MiniRunScene = {
@@ -7132,14 +7130,6 @@ export const PrometheusMinRun: React.FC<PrometheusMinRunProps> = ({
                 subjectMatteAvailable={isMatteActive}
                 nextChunkStartFrame={relativeNextChunkStartFrame}
               />
-              {chunk.visualHelper && (
-                <VisualHelperStage
-                  visualHelper={chunk.visualHelper}
-                  frame={Math.max(0, frame - startFrame)}
-                  fps={fps}
-                  palette={chunk.palette}
-                />
-              )}
             </Sequence>
           );
         };

@@ -20,7 +20,6 @@ from typing import Any, Dict, List, Optional
 
 from .motif import resolve_brand_motif, motif_to_brand_palette
 from . import listicles
-from . import visual_helpers
 from . import typography_catalog as _catalog
 
 FONT_JSON_DIR = Path(__file__).resolve().parent.parent / "Yuan Prometheus Screenshots" / "font JSON"
@@ -3025,8 +3024,6 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
 
     # Listicle Intelligence & Numerical Planning
     listicle_planning = listicles.detect_and_plan_listicles(chunks, design_input)
-    # Visual Helper Intelligence (Comparisons, Listicles, Motion Numbers, Callout Badges)
-    visual_helpers_planning = visual_helpers.detect_and_plan_visual_helpers(chunks, design_input)
 
     manifest_chunks = []
     concept_ledger = SemanticConceptLedger()
@@ -4155,7 +4152,6 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
             "layers": rendered_layers,
             "words": chunk_word_objs,
             "listicle": listicle_planning["plans"].get(idx),
-            "visualHelper": visual_helpers_planning.get(idx),
             "treatmentSystem": "hierarchical_asymmetric_lockup" if is_lockup_treatment else prof.get("metadata", {}).get("treatment_system", ""),
             "lockupOption": resolved_lockup_opt if is_lockup_treatment else None,
             "lockupAnimationMode": (
