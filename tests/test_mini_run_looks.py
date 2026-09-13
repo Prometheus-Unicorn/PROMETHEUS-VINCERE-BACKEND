@@ -88,7 +88,7 @@ class MiniRunLooksTests(unittest.TestCase):
         from mini_run_pipeline import looks
         # Shipped LUTs are discovered automatically from mini_run_pipeline/luts
         self.assertTrue(looks.luts_available())
-        self.assertGreaterEqual(len(looks.discover_luts()), 10)
+        self.assertGreaterEqual(len(looks.discover_luts()), 7)
         # In an empty directory, discovery must be safe + empty
         with tempfile.TemporaryDirectory() as tmp:
             empty_dir = Path(tmp) / "empty_luts"

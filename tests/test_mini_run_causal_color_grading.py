@@ -68,11 +68,12 @@ class CausalColorGradingTests(unittest.TestCase):
         # Pillar 4: Non-Linear Highlight Roll-Off / Soft Shoulder
         self.assertIn("curves=all='0/0 0.5/0.5 0.75/0.75 0.88/0.85 0.96/0.92 1.0/0.965'", filter_str)
 
-        # Pillar 6: Subtractive Saturation / Split-Toned Density
-        self.assertIn("colorbalance=rs=-0.08:gs=0.02:bs=0.06:rh=0.04:gh=0.01:bh=-0.04", filter_str)
+        # Pillar 6: Subtractive Saturation / Restrained Density (no harsh rs=-0.08)
+        self.assertIn("eq=saturation=1.02", filter_str)
+        self.assertNotIn("rs=-0.08", filter_str)
 
-        # Pillar 3: Analog Emulsion Film Grain
-        self.assertIn("noise=alls=10:allf=t", filter_str)
+        # Pillar 3: Analog Emulsion Film Grain (restrained to subtle 35mm grain)
+        self.assertIn("noise=alls=2:allf=t", filter_str)
 
     def test_grade_video_shot_produces_output_file(self):
         repo_root = Path(__file__).resolve().parent.parent
@@ -143,7 +144,7 @@ class CausalColorGradingTests(unittest.TestCase):
 
         filter_str = looks.build_grade_filter(plan)
         self.assertIn("curves=all=", filter_str)
-        self.assertIn("colorbalance=", filter_str)
+        self.assertIn("eq=saturation=", filter_str)
         self.assertIn("noise=alls=", filter_str)
 
     def test_custom_reference_lut_routing(self):

@@ -21,13 +21,13 @@ CURATED_MOTIFS = [
 ]
 
 CURATED_LOOKS = [
+    "clean_log_to_rec709",
+    "sci_netone_balanced",
     "kodak_2383_print",
-    "fuji_3513_print",
     "teal_and_orange_blockbuster",
     "golden_hour_warmth",
-    "moody_dramatic_cinema",
-    "sci_netone_balanced",
     "vintage_film_emulation",
+    "urban_desaturated",
 ]
 
 # Use gh CLI to trigger + poll — no extra deps needed

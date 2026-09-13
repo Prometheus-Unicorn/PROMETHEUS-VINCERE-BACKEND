@@ -118,7 +118,7 @@ CINEMATIC_LOOKS: List[Dict[str, Any]] = [
             },
             "eq": {"contrast": 0.95, "saturation": 0.85, "brightness": 0.03, "gamma": 1.05},
             "colortemperature": 4500,
-            "noise": {"type": "grain", "amount": 8, "strength": 0.3},
+            "noise": {"type": "grain", "amount": 2, "strength": 0.1},
             "vignette": {"amount": 0.25},
         },
     },
@@ -285,7 +285,7 @@ CINEMATIC_LOOKS: List[Dict[str, Any]] = [
             },
             "eq": {"contrast": 0.85, "saturation": 0.0, "brightness": 0.02, "gamma": 1.10},
             "colortemperature": 6500,
-            "noise": {"type": "grain", "amount": 6, "strength": 0.2},
+            "noise": {"type": "grain", "amount": 2, "strength": 0.1},
         },
     },
     {
@@ -417,6 +417,9 @@ LOOK_ALIASES: Dict[str, str] = {
     "warm_cinema": "golden_hour_warmth",
     "steelblue": "urban_desaturated",
     "steel_blue": "urban_desaturated",
+    "moody_dramatic_cinema": "urban_desaturated",
+    "bleach_bypass": "urban_desaturated",
+    "fuji_3513_print": "kodak_2383_print",
 }
 
 def get_look(look_id: str) -> Optional[Dict[str, Any]]:
@@ -663,19 +666,24 @@ def build_look_filter_string(
             sub_opt = optical.get("subtractiveSaturation") if isinstance(optical.get("subtractiveSaturation"), dict) else {}
             cb_override = sub_opt.get("colorbalance") or params.get("optical_colorbalance")
             sat_override = sub_opt.get("saturation") or params.get("optical_saturation")
+            has_lut = any("lut3d=" in f for f in filters)
             if cb_override:
-                filters.append(f"colorbalance={cb_override},eq=saturation={sat_override or 1.03}")
+                filters.append(f"colorbalance={cb_override},eq=saturation={sat_override or 1.02}")
+            elif has_lut:
+                # Authentic 3D LUT handles complete color science & density; preserve neutral color balance
+                # and apply subtle subtractive saturation to protect skin tones and avoid cyan shadow cast.
+                filters.append(f"eq=saturation={sat_override or 1.02}")
             elif look_manifest.get("lookId") == "teal_and_orange_blockbuster":
-                # Halved finishing stack for blockbuster look to prevent cyan mud in dark shadows and skin cooling
-                filters.append("colorbalance=rs=-0.02:gs=0.01:bs=0.02:rh=0.01:gh=0.01:bh=-0.01,eq=saturation=1.03")
+                filters.append("colorbalance=rs=-0.02:gs=0.01:bs=0.02:rh=0.01:gh=0.01:bh=-0.01,eq=saturation=1.02")
             else:
-                filters.append("colorbalance=rs=-0.08:gs=0.02:bs=0.06:rh=0.04:gh=0.01:bh=-0.04,eq=saturation=1.10")
+                # Subtle neutral roll-off for non-LUT parametric looks
+                filters.append("colorbalance=rs=-0.01:gs=0.005:bs=0.01:rh=0.01:gh=0.005:bh=-0.01,eq=saturation=1.02")
 
     # 6. Analog Emulsion Film Grain (Luminance-weighted temporal grain)
     grain_enabled = optical.get("filmGrain", False) or optical.get("enableAll", False)
     noise = params.get("noise")
     if grain_enabled and not noise:
-        noise_strength = 2 if look_manifest.get("lookId") == "teal_and_orange_blockbuster" else 10
+        noise_strength = 2
         filters.append(f"noise=alls={noise_strength}:allf=t")
     elif noise:
         _add_noise(filters, noise, intensity)
@@ -845,13 +853,10 @@ def _add_eq(filters: List[str], eq_params: Dict[str, float], intensity: float) -
 
 def _add_noise(filters: List[str], noise_params: Dict[str, Any], intensity: float) -> None:
     noise_type = noise_params.get("type", "grain")
-    amount = int(noise_params.get("amount", 10))
-    scaled_amount = int(amount * intensity)
+    amount = int(noise_params.get("amount", 2))
+    scaled_amount = min(2, max(1, int(amount * intensity)))
     if scaled_amount <= 0:
         return
-    # Temporal noise (t) creates a subtle film-grain effect.  The
-    # "u" (uniform) flag was removed in FFmpeg 5+; only "t" (temporal)
-    # and "a" (averaged) are available.
     flags = "t"
     filters.append(f"noise=alls={scaled_amount}:allf={flags}")
 
