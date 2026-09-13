@@ -20,6 +20,7 @@ from typing import Any, Dict, List, Optional
 
 from .motif import resolve_brand_motif, motif_to_brand_palette
 from . import listicles
+from . import visual_helpers
 from . import typography_catalog as _catalog
 
 FONT_JSON_DIR = Path(__file__).resolve().parent.parent / "Yuan Prometheus Screenshots" / "font JSON"
@@ -3024,6 +3025,8 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
 
     # Listicle Intelligence & Numerical Planning
     listicle_planning = listicles.detect_and_plan_listicles(chunks, design_input)
+    # Visual Helper Intelligence (Comparisons, Listicles, Motion Numbers, Callout Badges)
+    visual_helpers_planning = visual_helpers.detect_and_plan_visual_helpers(chunks, design_input)
 
     manifest_chunks = []
     concept_ledger = SemanticConceptLedger()
@@ -3918,8 +3921,8 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
                     "cadenceMs": round(signal["cadenceMs"]),
                 },
                 "gradient": style_treatment["gradient"],
-                "glow": style_treatment["glow"] if is_hero_layer else "none",
-                "shadow": style_treatment["shadow"],
+                "glow": "none" if layer_behind_subject else (style_treatment["glow"] if is_hero_layer else "none"),
+                "shadow": "0 2px 6px rgba(0, 0, 0, 0.45)" if layer_behind_subject else style_treatment["shadow"],
                 "textFillColor": style_treatment["textFillColor"],
                 "hasGradient": style_treatment["hasGradient"] or bool(layer_effects.get("vertical_gradient") or layer_effects.get("verticalGradient")),
                 "verticalGradient": (
@@ -3927,13 +3930,13 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
                     or layer_effects.get("vertical_gradient")
                     or layer_effects.get("verticalGradient")
                 ),
-                "specularChamfer": style_treatment.get("specularChamfer", True),
-                "specularSheen": style_treatment.get("specularSheen", True),
+                "specularChamfer": False if layer_behind_subject else style_treatment.get("specularChamfer", True),
+                "specularSheen": False if layer_behind_subject else style_treatment.get("specularSheen", True),
                 "specularAngle": style_treatment.get("specularAngle", -35),
                 "volumetricShading": style_treatment.get("volumetricShading", True),
-                "contactShadow": style_treatment.get("contactShadow", "0 2px 10px rgba(0, 0, 0, 0.55)"),
-                "ambientShadow": style_treatment.get("ambientShadow", "none"),
-                "opticalBleed": style_treatment.get("opticalBleed") if is_hero_layer else "none",
+                "contactShadow": "0 2px 6px rgba(0, 0, 0, 0.45)" if layer_behind_subject else style_treatment.get("contactShadow", "0 2px 10px rgba(0, 0, 0, 0.55)"),
+                "ambientShadow": "none" if layer_behind_subject else style_treatment.get("ambientShadow", "none"),
+                "opticalBleed": "none" if layer_behind_subject else (style_treatment.get("opticalBleed") if is_hero_layer else "none"),
                 "doubleUnderline": bool(layer_effects.get("double_underline", False)),
                 "isOverlapping": is_overlapping,
                 "isUnderlapping": False,
@@ -4152,6 +4155,7 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
             "layers": rendered_layers,
             "words": chunk_word_objs,
             "listicle": listicle_planning["plans"].get(idx),
+            "visualHelper": visual_helpers_planning.get(idx),
             "treatmentSystem": "hierarchical_asymmetric_lockup" if is_lockup_treatment else prof.get("metadata", {}).get("treatment_system", ""),
             "lockupOption": resolved_lockup_opt if is_lockup_treatment else None,
             "lockupAnimationMode": (

@@ -22,6 +22,7 @@ import type {
   TypographyInlineTokenSwap,
   TypographyFrameTreatment,
 } from "@prometheus/shared-types";
+import { VisualHelper, VisualHelperStage } from "./VisualHelpers";
 
 
 // ---------------------------------------------------------------------------
@@ -352,8 +353,9 @@ export const resolveTypographyPaintStyle = (layer: TypographyPaintInput): React.
       ? "linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.85) 45%, rgba(255, 255, 255, 0.15) 85%, transparent 100%)"
       : undefined));
   const hasGradient = Boolean(effectiveGradient);
-  const glowActive = Boolean(layer.glow) && layer.glow !== "none";
-  const glowFilter = (glowActive && layer.isHero !== false) ? ` drop-shadow(0 0 10px ${layer.glow})` : "";
+  const isBehind = Boolean(layer.behindSubject);
+  const glowActive = Boolean(layer.glow) && layer.glow !== "none" && !isBehind;
+  const glowFilter = (glowActive && layer.isHero !== false && !isBehind) ? ` drop-shadow(0 0 10px ${layer.glow})` : "";
   const shadowSuppressed = layer.shadow === "none";
   const bloomOnly = shadowSuppressed && glowActive;
   return {
@@ -366,22 +368,24 @@ export const resolveTypographyPaintStyle = (layer: TypographyPaintInput): React.
         ? (glowActive
           ? `drop-shadow(0 0 16px ${layer.glow})`
           : undefined)
-        : (layer.specularChamfer
+        : (layer.specularChamfer && !isBehind
           ? buildPhysicalLightingFilter({
               specularChamfer: true,
               contactShadow: layer.contactShadow,
               ambientShadow: layer.ambientShadow,
               glow: layer.glow || (layer.opticalBleed as string),
             })
-          : `drop-shadow(0 4px 18px rgba(0, 0, 0, 0.95))${glowFilter}`))
+          : (isBehind
+            ? "drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45))"
+            : `drop-shadow(0 4px 18px rgba(0, 0, 0, 0.95))${glowFilter}`)))
       : undefined,
     textShadow: hasGradient
-      ? (shadowSuppressed ? "none" : undefined)
+      ? (shadowSuppressed ? "none" : (isBehind ? "drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45))" : undefined))
       : (layer.shadow === "none"
         ? "none"
-        : (layer.shadow || (layer.behindSubject
-          ? "0 2px 10px rgba(0, 0, 0, 0.55)"
-          : (layer.isHero
+        : (isBehind
+          ? "0 2px 6px rgba(0, 0, 0, 0.45)"
+          : (layer.shadow || (layer.isHero
             ? "0 2px 10px rgba(0, 0, 0, 0.55)"
             : "0 2px 10px rgba(0, 0, 0, 0.55)")))),
     mixBlendMode: undefined,
@@ -642,6 +646,7 @@ export type CaptionChunk = {
   annotations?: TypographyAnnotation[];
   subjectZone?: TypographySubjectZone;
   frameTreatment?: TypographyFrameTreatment;
+  visualHelper?: VisualHelper;
 };
 
 export type MiniRunScene = {
@@ -1350,10 +1355,10 @@ const KineticLayerRenderer: React.FC<{
   const hasGrad = Boolean(activeGradient);
 
   const physicalFilter = buildPhysicalLightingFilter({
-    specularChamfer: layer.specularChamfer !== false,
-    contactShadow: layer.contactShadow,
-    ambientShadow: layer.ambientShadow,
-    glow: layer.glow || (layer.opticalBleed as string),
+    specularChamfer: isBehindSubject ? false : layer.specularChamfer !== false,
+    contactShadow: isBehindSubject ? (layer.contactShadow || "0 2px 6px rgba(0, 0, 0, 0.45)") : layer.contactShadow,
+    ambientShadow: isBehindSubject ? "none" : layer.ambientShadow,
+    glow: isBehindSubject ? "none" : (layer.glow || (layer.opticalBleed as string)),
   });
 
   // Materiality: 3D Bevel, Multi-Shadows, and Drop Shadows from V2
@@ -7127,6 +7132,14 @@ export const PrometheusMinRun: React.FC<PrometheusMinRunProps> = ({
                 subjectMatteAvailable={isMatteActive}
                 nextChunkStartFrame={relativeNextChunkStartFrame}
               />
+              {chunk.visualHelper && (
+                <VisualHelperStage
+                  visualHelper={chunk.visualHelper}
+                  frame={Math.max(0, frame - startFrame)}
+                  fps={fps}
+                  palette={chunk.palette}
+                />
+              )}
             </Sequence>
           );
         };
