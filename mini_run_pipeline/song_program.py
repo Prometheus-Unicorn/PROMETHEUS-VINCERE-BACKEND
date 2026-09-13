@@ -2496,9 +2496,9 @@ def _compute_ducking_profile(track_intensity: str, custom_ducking: Optional[Dict
     defaults = {
         "mode": "sidechain",
         "threshold": 0.085,   # ~ -21.4 dBFS: triggers on clear vocal peaks, leaving quiet speech/gaps open
-        "ratio": 2.2,         # Musical 3.5 dB ducking instead of harsh squashing
-        "attackMs": 85,       # Smooth responsive ramp-down across speech onset
-        "releaseMs": 400,     # Fast recovery so music maintains an audible groove between sentences
+        "ratio": 4.5,         # Vocal priority: 4.5:1 ducking ratio clears space for dialogue
+        "attackMs": 15,       # Fast responsive ramp-down across speech onset
+        "releaseMs": 300,     # Clean recovery so music maintains an audible groove between sentences
     }
     if intensity == "hard":
         # For punchy beats, slightly tighter control
@@ -2769,7 +2769,7 @@ def plan_song_program(
         "selectionNonce": nonce,
         "durationMs": duration_ms,
         "crossfadeMs": crossfade_ms,
-        "baseGainDb": float(design.get("songGainDb", -7.0)),
+        "baseGainDb": float(design.get("songGainDb", -13.0)),
         "prompt": resolved_prompt or None,
         "audioIntent": {
             "activeDomains": audio_intent.get("activeDomains", []),

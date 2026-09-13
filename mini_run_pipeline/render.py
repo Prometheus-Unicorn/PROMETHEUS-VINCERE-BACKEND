@@ -71,7 +71,7 @@ def build_audio_mix_command(
         f"asetpts=PTS-STARTPTS,apad=whole_dur={duration_sec:.3f},"
         f"atrim=duration={duration_sec:.3f},asplit=2[dialogue_sc][dialogue_mix]"
     ]
-    gain_db = _ffmpeg_number(song_program.get("baseGainDb", -7.0))
+    gain_db = _ffmpeg_number(song_program.get("baseGainDb", -13.0))
     for index, song in enumerate(songs):
         source_start = max(0.0, float(song.get("sourceStartMs", 0)) / 1000.0)
         source_end = max(source_start + 0.001, float(song.get("sourceEndMs", 0)) / 1000.0)
@@ -105,9 +105,9 @@ def build_audio_mix_command(
     filters.append(
         f"[{eq_label}][dialogue_sc]sidechaincompress="
         f"threshold={_ffmpeg_number(ducking.get('threshold', 0.085))}:"
-        f"ratio={_ffmpeg_number(ducking.get('ratio', 2.2))}:"
-        f"attack={_ffmpeg_number(ducking.get('attackMs', 85))}:"
-        f"release={_ffmpeg_number(ducking.get('releaseMs', 400))}[ducked_music]"
+        f"ratio={_ffmpeg_number(ducking.get('ratio', 4.5))}:"
+        f"attack={_ffmpeg_number(ducking.get('attackMs', 15))}:"
+        f"release={_ffmpeg_number(ducking.get('releaseMs', 300))}[ducked_music]"
     )
 
     mix_labels = ["[dialogue_mix]", "[ducked_music]"]
@@ -115,7 +115,7 @@ def build_audio_mix_command(
     for index, event in enumerate(renderable_sfx):
         label = f"sfx{index}"
         delay_ms = max(0, int(event.get("triggerMs", 0)))
-        gain = _ffmpeg_number(event.get("gainDb", -6.5))
+        gain = _ffmpeg_number(event.get("gainDb", -3.5))
         filters.append(
             f"[{sfx_input_start + index}:a]atrim=start=0:end=2,asetpts=PTS-STARTPTS,"
             "aresample=48000,aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=stereo,"
@@ -170,7 +170,7 @@ def build_sfx_dialogue_mix_command(
     for index, event in enumerate(renderable_sfx):
         label = f"sfx{index}"
         delay_ms = max(0, int(event.get("triggerMs", 0)))
-        gain = _ffmpeg_number(event.get("gainDb", -9.0))
+        gain = _ffmpeg_number(event.get("gainDb", -3.5))
         filters.append(
             f"[{sfx_input_start + index}:a]atrim=start=0:end=2,asetpts=PTS-STARTPTS,"
             "aresample=48000,aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=stereo,"

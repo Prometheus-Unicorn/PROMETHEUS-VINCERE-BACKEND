@@ -31,8 +31,8 @@ ZOOM_KINDS = {
         "startScale": 1.0,
         "endScale": 1.10,
         "cutbackAtEnd": True,
-        "sfxCue": "click_bupu",
-        "sfxGainDb": -7.0,
+        "sfxCue": "shutter_snap",
+        "sfxGainDb": -6.0,
     },
     # 2. The Smooth Zoom-In: Pushes rapidly into a specific object or face detail.
     "smooth_zoom_in": {
@@ -41,7 +41,7 @@ ZOOM_KINDS = {
         "startScale": 1.0,
         "endScale": 1.14,
         "sfxCue": "whoosh_fast",
-        "sfxGainDb": -7.0,
+        "sfxGainDb": -6.0,
     },
     # 3. The Zoom-Out Snap: Pulls back rapidly from close-up to reveal wider scene.
     "zoom_out_snap": {
@@ -49,8 +49,8 @@ ZOOM_KINDS = {
         "curve": [0.16, 1.0, 0.3, 1.0],
         "startScale": 1.15,
         "endScale": 1.00,
-        "sfxCue": "whoosh_3_bupu",
-        "sfxGainDb": -7.0,
+        "sfxCue": "whoosh_slow",
+        "sfxGainDb": -6.0,
     },
     # 4. The Twist Zoom (Zoom-and-Spin): Rotates camera subtly while zooming.
     "twist_zoom": {
@@ -69,7 +69,7 @@ ZOOM_KINDS = {
         "startScale": 1.0,
         "endScale": 1.18,
         "dollyParallax": {"backgroundScale": 1.22, "subjectScale": 1.02},
-        "sfxCue": "charge_riser_bupu",
+        "sfxCue": "slow_whoosh_reverb",
         "sfxGainDb": -7.0,
     },
     # 6. The Slow Creep: Imperceptible scale growth over multi-chunk monologue for intense tension.
@@ -88,7 +88,7 @@ ZOOM_KINDS = {
         "startScale": 1.0,
         "endScale": 1.14,
         "instantJump": True,
-        "sfxCue": "tap_punch_bupu",
+        "sfxCue": "shutter_snap",
         "sfxGainDb": -6.0,
     },
     # 8. The 3D Zoom Parallax: Multi-plane depth separation.
@@ -107,8 +107,8 @@ ZOOM_KINDS = {
         "curve": [0.16, 1.0, 0.3, 1.0],
         "startScale": 1.14,
         "endScale": 1.00,
-        "sfxCue": "whoosh_3_bupu",
-        "sfxGainDb": -7.0,
+        "sfxCue": "whoosh_fast",
+        "sfxGainDb": -6.0,
     },
     # Legacy aliases (preserving 100% backward compatibility)
     "slow_push_in": {
@@ -117,7 +117,7 @@ ZOOM_KINDS = {
         "startScale": 1.0,
         "endScale": 1.08,
         "sfxCue": "slow_whoosh_reverb",
-        "sfxGainDb": -7.0,
+        "sfxGainDb": -6.5,
     },
     "fast_punch_in": {
         "durationMs": 700,
@@ -125,15 +125,15 @@ ZOOM_KINDS = {
         "startScale": 1.0,
         "endScale": 1.12,
         "sfxCue": "whoosh_fast",
-        "sfxGainDb": -6.5,
+        "sfxGainDb": -6.0,
     },
     "jcut_zoom_in": {
         "durationMs": 1100,
         "curve": [0.3, 0.0, 0.4, 1.0],
         "startScale": 1.0,
         "endScale": 1.10,
-        "sfxCue": "sub_impact_reverb",
-        "sfxGainDb": -6.5,
+        "sfxCue": "whoosh_fast",
+        "sfxGainDb": -6.0,
     },
 }
 
