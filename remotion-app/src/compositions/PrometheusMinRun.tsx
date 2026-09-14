@@ -37,6 +37,7 @@ import { renderOriginRevealWipe } from "./KineticText/OriginRevealWipe";
 import { renderOriginSpotlightReveal } from "./KineticText/OriginSpotlightReveal";
 import { renderOriginSpiralIn } from "./KineticText/OriginSpiralIn";
 import { renderOriginCinematicZoomBlur } from "./KineticText/OriginCinematicZoomBlur";
+import { renderOriginLiquidMelt } from "./KineticText/OriginLiquidMelt";
 
 // Typography Types
 // ---------------------------------------------------------------------------
@@ -485,6 +486,7 @@ export const INTRINSIC_ANIMATION_DURATIONS_MS: Record<string, number> = {
   origin_spotlight_reveal: 1100,
   origin_spiral_in: 1000,
   origin_cinematic_zoom_blur: 1100,
+  origin_liquid_melt: 1100,
 };
 
 export const resolveEntranceDurationFrames = ({
@@ -1036,6 +1038,7 @@ export const RUNTIME_TREATMENT_IDS = new Set([
   "origin_spotlight_reveal",
   "origin_spiral_in",
   "origin_cinematic_zoom_blur",
+  "origin_liquid_melt",
   ...ALL_ARCHETYPE_FX_NAMES,
 ]);
 
@@ -1116,6 +1119,7 @@ const REALIZED_RUNTIME_TREATMENTS = new Set([
   "origin_spotlight_reveal",
   "origin_spiral_in",
   "origin_cinematic_zoom_blur",
+  "origin_liquid_melt",
   ...EXTENDED_ANIMA_TREATMENTS,
   ...ALL_ARCHETYPE_FX_NAMES,
 ]);
@@ -4121,6 +4125,37 @@ const KineticLayerRenderer: React.FC<{
         }}
       >
         {renderOriginCinematicZoomBlur({
+          color: textColor,
+          text: layer.text,
+          localFrame,
+          fps,
+          totalFrames,
+          wordPaintStyle,
+        })}
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Origin Liquid Melt
+  // ---------------------------------------------------------------------------
+  if (fx === "origin_liquid_melt") {
+    const layerEntranceFrame = wordEntranceFrames[0] ?? contentStartFrame;
+    const localFrame = Math.max(0, frame - layerEntranceFrame);
+    
+    return (
+      <div
+        style={{
+          ...baseTextStyle,
+          display: "inline-flex",
+          flexWrap: "nowrap",
+          whiteSpace: "nowrap",
+          justifyContent: "center",
+          alignItems: "center",
+          textShadow: kineticTextShadow("0 4px 18px rgba(0, 0, 0, 0.90), 0 2px 6px rgba(0, 0, 0, 0.82)"),
+        }}
+      >
+        {renderOriginLiquidMelt({
           color: textColor,
           text: layer.text,
           localFrame,

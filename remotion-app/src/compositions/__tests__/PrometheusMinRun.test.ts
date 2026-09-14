@@ -1005,7 +1005,7 @@ describe("origin_wave_color_sweep (expansion plan #1)", () => {
   });
 });
 
-describe("origin expansion presets coverage (#2 - #6, #9)", () => {
+describe("origin expansion presets coverage (#2 - #6, #9, #10, #11)", () => {
   const presets = [
     "origin_inkdrop_spread",
     "origin_fuzzy_noise_overlay",
@@ -1013,6 +1013,8 @@ describe("origin expansion presets coverage (#2 - #6, #9)", () => {
     "origin_matrix_letter_rain",
     "origin_reveal_wipe",
     "origin_spotlight_reveal",
+    "origin_spiral_in",
+    "origin_cinematic_zoom_blur",
   ];
 
   test("normalizeRuntimePreset preserves all newly ported origin presets", () => {
@@ -1031,6 +1033,16 @@ describe("origin expansion presets coverage (#2 - #6, #9)", () => {
   test("origin_spotlight_reveal respects its 1100ms intrinsic duration", () => {
     const dur = resolveEntranceDurationFrames({
       fxPreset: "origin_spotlight_reveal",
+      fps: 30,
+      totalFrames: 90,
+    });
+    expect(dur).toBeGreaterThanOrEqual(20);
+    expect(dur).toBeLessThanOrEqual(30);
+  });
+
+  test("origin_cinematic_zoom_blur respects its 1100ms intrinsic duration", () => {
+    const dur = resolveEntranceDurationFrames({
+      fxPreset: "origin_cinematic_zoom_blur",
       fps: 30,
       totalFrames: 90,
     });

@@ -1917,6 +1917,7 @@ ANIMA_RUNTIME_TREATMENTS: List[Dict[str, Any]] = [
     {"id": "origin_spotlight_reveal", "styles": {"cinematic", "editorial"}, "energy": 0.50, "tier": "premium_new"},
     {"id": "origin_spiral_in", "styles": {"kinetic", "editorial"}, "energy": 0.65, "tier": "premium_new"},
     {"id": "origin_cinematic_zoom_blur", "styles": {"cinematic", "editorial"}, "energy": 0.60, "tier": "premium_new"},
+    {"id": "origin_liquid_melt", "styles": {"kinetic", "cinematic"}, "energy": 0.50, "tier": "premium_new"},
 ]
 
 SINGLE_WORD_HERO_PRESETS: set[str] = {
@@ -2001,6 +2002,7 @@ INTRINSIC_ANIMATION_DURATIONS_MS: Dict[str, int] = {
     "origin_spotlight_reveal": 1100,
     "origin_spiral_in": 1000,
     "origin_cinematic_zoom_blur": 1100,
+    "origin_liquid_melt": 1100,
 }
 
 TALL_FONT_RUNTIME_TREATMENTS = (
@@ -2230,6 +2232,7 @@ INTRINSIC_ANIMATION_DURATIONS_MS: Dict[str, int] = {
     "origin_spotlight_reveal": 1100,
     "origin_spiral_in": 1000,
     "origin_cinematic_zoom_blur": 1100,
+    "origin_liquid_melt": 1100,
     "cyber_matrix_text_scramble": 1200,
     "metallic_chrome_countup_hero": 1200,
     "metallic_chrome_counter": 1000,
@@ -2687,6 +2690,7 @@ def _select_primary_treatment(
         "origin_inkdrop_spread",
         "origin_reveal_wipe",
         "origin_cinematic_zoom_blur",
+        "origin_liquid_melt",
     }
     POP_FAMILY = {
         "origin_outline_flicker_fill",
@@ -4465,6 +4469,10 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
         "profileV2CatalogVersion": "typography-profile-v2-catalog-1.0",
     }
     return font_manifest
+
+
+
+
 
 
 
