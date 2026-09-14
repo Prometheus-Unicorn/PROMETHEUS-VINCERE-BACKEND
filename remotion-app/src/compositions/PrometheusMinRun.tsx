@@ -121,6 +121,9 @@ export type TypographyLayer = {
   stagger?: TypographyStaggerOffset;
   inlineTokenSwaps?: TypographyInlineTokenSwap[];
   profileV2?: TypographyProfileV2;
+  placement?: any;
+  bevel?: any;
+  physicalFilter?: string;
 };
 
 type TypographyPaintInput = Pick<TypographyLayer, "color"> & Partial<Pick<
@@ -653,6 +656,12 @@ export type CaptionChunk = {
   photoTreatment?: any;
   strobeTransition?: any;
   contactSheet?: any;
+  subjectLayering?: {
+    behindSubject?: boolean;
+    isTallProfile?: boolean;
+    mode?: string;
+    [key: string]: any;
+  };
 };
 
 export type MiniRunScene = {
@@ -7289,10 +7298,9 @@ export const PrometheusMinRun: React.FC<PrometheusMinRunProps> = ({
                   durationInFrames={durationFrames}
                 >
                   <VisualHelperStage
-                    helper={chunk.visualHelper}
+                    visualHelper={chunk.visualHelper}
                     frame={frame - startFrame}
                     fps={fps}
-                    durationInFrames={durationFrames}
                   />
                 </Sequence>
               );
