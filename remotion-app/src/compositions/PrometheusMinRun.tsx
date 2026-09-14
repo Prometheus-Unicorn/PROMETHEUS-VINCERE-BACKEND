@@ -4024,6 +4024,38 @@ const KineticLayerRenderer: React.FC<{
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Origin Reveal Wipe
+  // ---------------------------------------------------------------------------
+  if (fx === "origin_reveal_wipe") {
+    const layerEntranceFrame = wordEntranceFrames[0] ?? contentStartFrame;
+    const localFrame = Math.max(0, frame - layerEntranceFrame);
+    
+    return (
+      <div
+        style={{
+          ...baseTextStyle,
+          display: "inline-flex",
+          flexWrap: "nowrap",
+          whiteSpace: "nowrap",
+          justifyContent: "center",
+          alignItems: "center",
+          textShadow: kineticTextShadow("0 4px 18px rgba(0, 0, 0, 0.90), 0 2px 6px rgba(0, 0, 0, 0.82)"),
+        }}
+      >
+        {renderOriginRevealWipe({
+          color: textColor,
+          text: layer.text,
+          localFrame,
+          fps,
+          totalFrames,
+          wordPaintStyle,
+          children: layer.text,
+        })}
+      </div>
+    );
+  }
+
   // Universal Fallback Return
 
   return (
