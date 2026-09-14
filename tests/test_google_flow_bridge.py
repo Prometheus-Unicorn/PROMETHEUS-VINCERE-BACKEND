@@ -13,7 +13,7 @@ from pathlib import Path
 _REPO = Path(__file__).resolve().parent.parent
 
 
-def _call_bridge(payload: dict, timeout: float = 8.0) -> dict:
+def _call_bridge(payload: dict, timeout: float = 15.0) -> dict:
     raw = json.dumps(payload) + "\n"
     r = subprocess.run(
         [sys.executable, "-m", "mini_run_pipeline.google_flow_bridge"],

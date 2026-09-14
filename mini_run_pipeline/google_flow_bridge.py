@@ -92,25 +92,32 @@ def cmd_generate_video(args: dict) -> dict:
     _write_job(job_id, job_data)
 
     # Spawn detached worker (no wait — worker updates the job state file)
+    import subprocess as _sp
     worker_cmd = [
         sys.executable, "-m", "mini_run_pipeline.google_flow_worker",
         str(_job_file(job_id))
     ]
-    creation_flags = 0
+    # On Windows: CREATE_NEW_PROCESS_GROUP creates a new console group without
+    # inheriting the parent stdin/stdout handles — this is what prevents blocking.
+    # start_new_session on non-Windows does the equivalent via setsid().
     if sys.platform == "win32":
-        import subprocess
-        creation_flags = subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS
-
-    import subprocess as _sp
-    _sp.Popen(
-        worker_cmd,
-        cwd=str(_REPO_ROOT),
-        stdin=_sp.DEVNULL,
-        stdout=_sp.DEVNULL,
-        stderr=_sp.DEVNULL,
-        creationflags=creation_flags,
-        close_fds=(sys.platform != "win32"),
-    )
+        _sp.Popen(
+            worker_cmd,
+            cwd=str(_REPO_ROOT),
+            stdin=_sp.DEVNULL,
+            stdout=_sp.DEVNULL,
+            stderr=_sp.DEVNULL,
+            creationflags=_sp.CREATE_NEW_PROCESS_GROUP,
+        )
+    else:
+        _sp.Popen(
+            worker_cmd,
+            cwd=str(_REPO_ROOT),
+            stdin=_sp.DEVNULL,
+            stdout=_sp.DEVNULL,
+            stderr=_sp.DEVNULL,
+            start_new_session=True,
+        )
 
     return {
         "jobId": job_id,

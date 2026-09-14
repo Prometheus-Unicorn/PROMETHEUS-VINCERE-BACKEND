@@ -33,6 +33,7 @@ import { renderOriginInkdropSpread } from "./KineticText/OriginInkdropSpread";
 import { renderOriginFuzzyNoiseOverlay } from "./KineticText/OriginFuzzyNoiseOverlay";
 import { renderOriginOutlineFlickerFill } from "./KineticText/OriginOutlineFlickerFill";
 import { renderOriginMatrixLetterRain } from "./KineticText/OriginMatrixLetterRain";
+import { renderOriginRevealWipe } from "./KineticText/OriginRevealWipe";
 
 // Typography Types
 // ---------------------------------------------------------------------------
@@ -477,6 +478,7 @@ export const INTRINSIC_ANIMATION_DURATIONS_MS: Record<string, number> = {
   origin_fuzzy_noise_overlay: 800,
   origin_outline_flicker_fill: 1000,
   origin_matrix_letter_rain: 1200,
+  origin_reveal_wipe: 850,
 };
 
 export const resolveEntranceDurationFrames = ({
@@ -1023,6 +1025,7 @@ export const RUNTIME_TREATMENT_IDS = new Set([
   "origin_inkdrop_spread",
   "origin_outline_flicker_fill",
   "origin_matrix_letter_rain",
+  "origin_reveal_wipe",
   ...ALL_ARCHETYPE_FX_NAMES,
 ]);
 
@@ -1098,6 +1101,7 @@ const REALIZED_RUNTIME_TREATMENTS = new Set([
   "origin_inkdrop_spread",
   "origin_outline_flicker_fill",
   "origin_matrix_letter_rain",
+  "origin_reveal_wipe",
   ...EXTENDED_ANIMA_TREATMENTS,
   ...ALL_ARCHETYPE_FX_NAMES,
 ]);
