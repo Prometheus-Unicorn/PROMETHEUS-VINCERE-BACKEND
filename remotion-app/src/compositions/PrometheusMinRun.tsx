@@ -39,6 +39,7 @@ import { renderOriginSpiralIn } from "./KineticText/OriginSpiralIn";
 import { renderOriginCinematicZoomBlur } from "./KineticText/OriginCinematicZoomBlur";
 import { renderOriginLiquidMelt } from "./KineticText/OriginLiquidMelt";
 import { renderOriginSplitflapBoard } from "./KineticText/OriginSplitflapBoard";
+import { renderOriginDominoCascade } from "./KineticText/OriginDominoCascade";
 
 // Typography Types
 // ---------------------------------------------------------------------------
@@ -489,6 +490,7 @@ export const INTRINSIC_ANIMATION_DURATIONS_MS: Record<string, number> = {
   origin_cinematic_zoom_blur: 1100,
   origin_liquid_melt: 1100,
   origin_splitflap_board: 1100,
+  origin_domino_cascade: 1200,
 };
 
 export const resolveEntranceDurationFrames = ({
@@ -1042,6 +1044,7 @@ export const RUNTIME_TREATMENT_IDS = new Set([
   "origin_cinematic_zoom_blur",
   "origin_liquid_melt",
   "origin_splitflap_board",
+  "origin_domino_cascade",
   ...ALL_ARCHETYPE_FX_NAMES,
 ]);
 
@@ -1124,6 +1127,7 @@ const REALIZED_RUNTIME_TREATMENTS = new Set([
   "origin_cinematic_zoom_blur",
   "origin_liquid_melt",
   "origin_splitflap_board",
+  "origin_domino_cascade",
   ...EXTENDED_ANIMA_TREATMENTS,
   ...ALL_ARCHETYPE_FX_NAMES,
 ]);
@@ -4191,6 +4195,37 @@ const KineticLayerRenderer: React.FC<{
         }}
       >
         {renderOriginSplitflapBoard({
+          color: textColor,
+          text: layer.text,
+          localFrame,
+          fps,
+          totalFrames,
+          wordPaintStyle,
+        })}
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Origin Domino Cascade
+  // ---------------------------------------------------------------------------
+  if (fx === "origin_domino_cascade") {
+    const layerEntranceFrame = wordEntranceFrames[0] ?? contentStartFrame;
+    const localFrame = Math.max(0, frame - layerEntranceFrame);
+    
+    return (
+      <div
+        style={{
+          ...baseTextStyle,
+          display: "inline-flex",
+          flexWrap: "nowrap",
+          whiteSpace: "nowrap",
+          justifyContent: "center",
+          alignItems: "center",
+          textShadow: kineticTextShadow("0 4px 18px rgba(0, 0, 0, 0.90), 0 2px 6px rgba(0, 0, 0, 0.82)"),
+        }}
+      >
+        {renderOriginDominoCascade({
           color: textColor,
           text: layer.text,
           localFrame,
