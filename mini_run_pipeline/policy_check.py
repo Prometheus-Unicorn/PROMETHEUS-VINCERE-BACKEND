@@ -425,7 +425,8 @@ def measure_pixel_row_projection_lines(
             "bbox": {"x0": x0, "y0": y0, "x1": x1, "y1": y1},
         }
 
-    splits = np.where(np.diff(active_rows) > 8)[0]
+    # Separate text rows by line leading (in 1080x1920, line spacing >= 15px; <=14px is intra-line ascender/descender gap)
+    splits = np.where(np.diff(active_rows) > 15)[0]
     raw_bands = np.split(active_rows, splits + 1)
     valid_bands = []
     for b_idx, band in enumerate(raw_bands):
