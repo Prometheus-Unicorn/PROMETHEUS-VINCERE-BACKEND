@@ -41,6 +41,7 @@ import { renderOriginLiquidMelt } from "./KineticText/OriginLiquidMelt";
 import { renderOriginSplitflapBoard } from "./KineticText/OriginSplitflapBoard";
 import { renderOriginDominoCascade } from "./KineticText/OriginDominoCascade";
 import { renderOriginShinyPill } from "./KineticText/OriginShinyPill";
+import { renderOriginRippleWave } from "./KineticText/OriginRippleWave";
 
 // Typography Types
 // ---------------------------------------------------------------------------
@@ -493,6 +494,7 @@ export const INTRINSIC_ANIMATION_DURATIONS_MS: Record<string, number> = {
   origin_splitflap_board: 1100,
   origin_domino_cascade: 1200,
   origin_shiny_pill: 1100,
+  origin_ripple_wave: 2000,
 };
 
 export const resolveEntranceDurationFrames = ({
@@ -4266,6 +4268,34 @@ const KineticLayerRenderer: React.FC<{
           localFrame,
           fps,
           totalFrames,
+          wordPaintStyle,
+        })}
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Origin Ripple Wave
+  // ---------------------------------------------------------------------------
+  if (fx === "origin_ripple_wave") {
+    // This overlay applies continuously
+    return (
+      <div
+        style={{
+          ...baseTextStyle,
+          display: "inline-flex",
+          flexWrap: "nowrap",
+          whiteSpace: "nowrap",
+          justifyContent: "center",
+          alignItems: "center",
+          textShadow: kineticTextShadow("0 4px 18px rgba(0, 0, 0, 0.90), 0 2px 6px rgba(0, 0, 0, 0.82)"),
+        }}
+      >
+        {renderOriginRippleWave({
+          color: textColor,
+          text: layer.text,
+          frame,
+          fps,
           wordPaintStyle,
         })}
       </div>

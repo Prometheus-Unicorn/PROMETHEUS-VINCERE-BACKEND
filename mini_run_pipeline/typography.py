@@ -1954,6 +1954,7 @@ SIGNATURE_EFFECTS: set[str] = {
 
 ANIMA_OVERLAY_TREATMENTS = [
     "origin_fuzzy_noise_overlay",
+    "origin_ripple_wave",
     "cinematic_viewport_mask_sweep",
     "refraction_shimmer_mask",
 ]
@@ -4481,6 +4482,9 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
         "profileV2CatalogVersion": "typography-profile-v2-catalog-1.0",
     }
     return font_manifest
+
+
+
 
 
 
