@@ -1129,9 +1129,12 @@ export const resolveBehindSubjectMask = (isBehind: boolean): string | undefined 
 // Auto-Fit Scale Calculator (Clamp viewport-safe scale down to 0.70 floor)
 // ---------------------------------------------------------------------------
 export interface AutoFitScaleParams {
-  charLength: number;
+  charLength?: number;
+  text?: string;
   fontSizePx: number;
   fontFamily?: string;
+  letterSpacingEm?: number;
+  maxSafeWidthPx?: number;
   isUppercase?: boolean;
   isScript?: boolean;
   isBehindSubject?: boolean;
@@ -1142,8 +1145,10 @@ export interface AutoFitScaleParams {
 
 export const resolveAutoFitScale = ({
   charLength,
+  text,
   fontSizePx,
   fontFamily,
+  maxSafeWidthPx,
   isUppercase = false,
   isScript = false,
   isBehindSubject = false,
@@ -1151,16 +1156,17 @@ export const resolveAutoFitScale = ({
   isFlank = false,
   estimatedWidthPx: explicitEstimatedWidth,
 }: AutoFitScaleParams): number => {
+  const effectiveLen = charLength ?? (text ? text.length : 0);
   const isDisplaySerif = Boolean(
     fontFamily && /paris|forbel|foglihten|playfair|bogart|parisian|canterbury|migra|editorial|ogg/i.test(fontFamily)
   );
-  const maxAllowedWidthPx = isFlank ? 500 : (isDisplaySerif || isBehindSubject ? 820 : 830);
+  const maxAllowedWidthPx = maxSafeWidthPx ?? (isFlank ? 500 : (isDisplaySerif || isBehindSubject ? 820 : 830));
   const baseAspect = isDisplaySerif ? 0.72 : 0.54;
   const charAspectEstimate = isUppercase ? (isDisplaySerif ? 0.82 : 0.74) : baseAspect;
   const effectiveFontSize = isScript ? Math.max(80, fontSizePx) : fontSizePx;
   const estimatedWidthPx = explicitEstimatedWidth && explicitEstimatedWidth > 0
     ? explicitEstimatedWidth * (isBehindSubject ? behindSubjectScaleX : 1.0)
-    : charLength * effectiveFontSize * charAspectEstimate * (isBehindSubject ? behindSubjectScaleX : 1.0);
+    : effectiveLen * effectiveFontSize * charAspectEstimate * (isBehindSubject ? behindSubjectScaleX : 1.0);
   if (estimatedWidthPx > maxAllowedWidthPx) {
     return Math.max(0.70, maxAllowedWidthPx / estimatedWidthPx);
   }

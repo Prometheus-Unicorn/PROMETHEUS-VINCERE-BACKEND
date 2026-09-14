@@ -110,6 +110,32 @@ class TestAuditRound20HeadOcclusionAndBounds(unittest.TestCase):
         val_right = float(clamped_right.rstrip("%"))
         self.assertGreater(val_right, 50.0)
 
+    def test_antenna_aspect_and_peripheral_rejection(self):
+        """Antenna font aspect is correctly calibrated (>= 0.58), and peripheral prop highlights are rejected."""
+        from mini_run_pipeline.typography import get_font_char_aspect
+        aspect = get_font_char_aspect("ANTENNA", is_uppercase=False)
+        self.assertGreaterEqual(aspect, 0.58)
+
+        from mini_run_pipeline.policy_check import measure_frame_text_pixel_bounds
+        import numpy as np
+
+        # Create synthetic frame: bright studio prop on left edge (x=0..120), centered caption (x=450..630)
+        frame = np.zeros((1920, 1080, 3), dtype=np.uint8)
+        # Studio prop
+        frame[1100:1300, 0:120] = [255, 255, 255]
+        # Text at center
+        frame[1120:1200, 450:630] = [240, 240, 255]
+
+        # Without expected_x_center, larger prop would be picked
+        res_raw = measure_frame_text_pixel_bounds(frame, expected_y_center=1150)
+        self.assertTrue(res_raw["edgeBleed"])
+
+        # With expected_x_center=540, centered text is selected and passes safe bounds
+        res_guided = measure_frame_text_pixel_bounds(frame, expected_y_center=1150, expected_x_center=540)
+        self.assertFalse(res_guided["edgeBleed"])
+        self.assertEqual(res_guided["status"], "passed")
+        self.assertGreaterEqual(res_guided["leftClearancePx"], 130.0)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1164,7 +1164,7 @@ FONT_CHAR_ASPECT_TABLE: Dict[str, float] = {
     "bebas neue": 0.38,
     "bebas": 0.38,
     "oswald": 0.42,
-    "antenna": 0.42,
+    "antenna": 0.58,
     "senzabella": 0.44,
     "echelon": 0.42,
     # Wide display serifs (Paris Forbel, Foglihten, Playfair class)

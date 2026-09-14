@@ -76,8 +76,8 @@ def measure_frame_text_pixel_bounds(
     safe_margin_x: float = SAFE_MARGIN_X_PX,
     safe_margin_y: float = SAFE_MARGIN_Y_PX,
     width: int = CANVAS_WIDTH_PX,
-    height: int = CANVAS_HEIGHT_PX,
     expected_y_center: Optional[float] = None,
+    expected_x_center: Optional[float] = None,
 ) -> Dict[str, Any]:
     """Measure actual pixel bounding box and safe-margin edge bleed from rendered frame."""
     try:
@@ -135,7 +135,7 @@ def measure_frame_text_pixel_bounds(
             "bbox": None,
         }
 
-    splits = np.where(np.diff(active_cols) > 16)[0]
+    splits = np.where(np.diff(active_cols) > 48)[0]
     segments = np.split(active_cols, splits + 1)
     valid_segs = [s for s in segments if (s.max() - s.min() >= 40 and np.sum(col_counts[s]) >= 250)]
     if not valid_segs:
@@ -148,7 +148,10 @@ def measure_frame_text_pixel_bounds(
             "rightClearancePx": float(w),
             "bbox": None,
         }
-    best_seg = max(valid_segs, key=lambda s: np.sum(col_counts[s]))
+    if expected_x_center is not None:
+        best_seg = min(valid_segs, key=lambda s: abs((s.min() + s.max()) / 2.0 - expected_x_center))
+    else:
+        best_seg = max(valid_segs, key=lambda s: np.sum(col_counts[s]))
     x_min = int(best_seg.min())
     x_max = int(best_seg.max())
 
@@ -261,6 +264,7 @@ def validate_safe_region_bounds_with_frames(
                     matching_chunk = candidates[0][2]
 
             expected_y = None
+            expected_x = None
             if matching_chunk:
                 p = matching_chunk.get("placement") or {}
                 y_str = str(p.get("yPercent", "54%")).replace("%", "")
@@ -268,11 +272,17 @@ def validate_safe_region_bounds_with_frames(
                     expected_y = (float(y_str) / 100.0 if float(y_str) > 1.0 else float(y_str)) * CANVAS_HEIGHT_PX
                 except Exception:
                     expected_y = None
+                x_str = str(p.get("xPercent", "50%")).replace("%", "")
+                try:
+                    expected_x = (float(x_str) / 100.0 if float(x_str) > 1.0 else float(x_str)) * CANVAS_WIDTH_PX
+                except Exception:
+                    expected_x = None
 
             res = measure_frame_text_pixel_bounds(
                 f_path,
                 safe_margin_x=safe_margin_x,
                 expected_y_center=expected_y,
+                expected_x_center=expected_x,
             )
             f_meas = {
                 "timestampSec": ts,
