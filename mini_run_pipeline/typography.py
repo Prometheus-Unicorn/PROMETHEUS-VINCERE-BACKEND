@@ -1915,6 +1915,8 @@ ANIMA_RUNTIME_TREATMENTS: List[Dict[str, Any]] = [
     {"id": "origin_matrix_letter_rain", "styles": {"kinetic", "editorial"}, "energy": 0.75, "tier": "premium_new"},
     {"id": "origin_reveal_wipe", "styles": {"cinematic", "editorial"}, "energy": 0.45, "tier": "premium_new"},
     {"id": "origin_spotlight_reveal", "styles": {"cinematic", "editorial"}, "energy": 0.50, "tier": "premium_new"},
+    {"id": "origin_spiral_in", "styles": {"kinetic", "editorial"}, "energy": 0.65, "tier": "premium_new"},
+    {"id": "origin_cinematic_zoom_blur", "styles": {"cinematic", "editorial"}, "energy": 0.60, "tier": "premium_new"},
 ]
 
 SINGLE_WORD_HERO_PRESETS: set[str] = {
@@ -1997,6 +1999,8 @@ INTRINSIC_ANIMATION_DURATIONS_MS: Dict[str, int] = {
     "origin_matrix_letter_rain": 1200,
     "origin_reveal_wipe": 850,
     "origin_spotlight_reveal": 1100,
+    "origin_spiral_in": 1000,
+    "origin_cinematic_zoom_blur": 1100,
 }
 
 TALL_FONT_RUNTIME_TREATMENTS = (
@@ -2224,6 +2228,8 @@ INTRINSIC_ANIMATION_DURATIONS_MS: Dict[str, int] = {
     "origin_matrix_letter_rain": 1200,
     "origin_reveal_wipe": 850,
     "origin_spotlight_reveal": 1100,
+    "origin_spiral_in": 1000,
+    "origin_cinematic_zoom_blur": 1100,
     "cyber_matrix_text_scramble": 1200,
     "metallic_chrome_countup_hero": 1200,
     "metallic_chrome_counter": 1000,
@@ -2680,10 +2686,13 @@ def _select_primary_treatment(
         "origin_wave_color_sweep",
         "origin_inkdrop_spread",
         "origin_reveal_wipe",
+        "origin_cinematic_zoom_blur",
     }
     POP_FAMILY = {
         "origin_outline_flicker_fill",
         "origin_matrix_letter_rain",
+        "origin_spiral_in",
+        "origin_cinematic_zoom_blur",
         "metallic_chrome_countup_hero", "metallic_chrome_counter",
         "apple_keynote_headline_punch", "kinetic_chromatic_typewriter", "kinetic_impact_snap",
     }
@@ -4456,3 +4465,7 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
         "profileV2CatalogVersion": "typography-profile-v2-catalog-1.0",
     }
     return font_manifest
+
+
+
+
