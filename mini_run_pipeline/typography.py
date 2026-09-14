@@ -33,6 +33,15 @@ OPT_PAIRS_DIR = Path("/opt/prometheus/Yuan Prometheus Screenshots/font pairing a
 V2_CATALOG_FILE = Path(__file__).resolve().parent / "typography_profiles_v2_catalog.json"
 OPT_V2_CATALOG_FILE = Path("/opt/prometheus/mini_run_pipeline/typography_profiles_v2_catalog.json")
 
+# Launch-Rotation & Promotion Policy for New Kinetic Text Presets
+PREMIUM_TIER_PROMOTION_MULTIPLIER = 2.5
+PREMIUM_TIER_LIFETIME_THRESHOLD = 3
+PREMIUM_TIER_PER_VIDEO_QUOTA = 0.25
+
+ANIMA_HOLD_IDLE_TREATMENTS: List[str] = [
+    "origin_ripple_wave",
+]
+
 _V2_CATALOG_CACHE: Optional[Dict[str, Any]] = None
 _V2_LOOKUP_CACHE: Optional[Dict[str, Dict[str, Any]]] = None
 
@@ -1934,6 +1943,46 @@ ANIMA_OVERLAY_TREATMENTS = [
     "refraction_shimmer_mask",
 ]
 
+INTRINSIC_ANIMATION_DURATIONS_MS: Dict[str, int] = {
+    "metallic_chrome_countup_hero": 1200,
+    "metallic_chrome_counter": 1000,
+    "refraction_shimmer_mask": 1100,
+    "kinetic_slot_character_reel": 1100,
+    "dynamic_staggered_character_cascade": 1000,
+    "top_down_staggered_character_drop": 950,
+    "cinematic_distance_convergence": 900,
+    "liquid_gooey_ink_morph": 1100,
+    "kinetic_chromatic_typewriter": 1000,
+    "typewriter_cursor": 900,
+    "typewriter_ghost_cursor": 900,
+    "apple_keynote_headline_punch": 850,
+    "apple_gaussian_chrome": 850,
+    "gaussian_blur_reveal_sweep": 850,
+    "cinematic_viewport_mask_sweep": 850,
+    "cinematic_apple_word_bounce": 800,
+    "chiseled_prism_metallic": 900,
+    "prism_chisel_hard_bevel": 900,
+    "vj_kinetic_typography": 850,
+    "vjkt": 850,
+    "air_frontal_optical_bloom": 850,
+    "see_through_glass_letterform": 800,
+    "hierarchical_asymmetric_lockup": 850,
+    "spatial_push_spring": 800,
+    "blue_lantern_magnetic": 800,
+    "kinetic_impact_snap": 750,
+    "stagger_blur_word_reveal": 800,
+    "multi_word_slide_up_stagger": 850,
+    "multiple_word_slide_up": 850,
+    "cyber_acid_lime_glitch": 900,
+    "cursor_selection_reveal": 800,
+    "vercel_kinetic_highlight_box": 800,
+    "horizontal_gradient_sweep_fade": 800,
+    "quote_glow_reveal": 750,
+    "canva_tall_glyph_stack": 850,
+    "electric_blue_emoji_line_revealer": 850,
+    "dotted_grid_elastic_word_pull": 800,
+}
+
 TALL_FONT_RUNTIME_TREATMENTS = (
     "canva_tall_glyph_stack",
     "kinetic_slot_character_reel",
@@ -2536,6 +2585,38 @@ def _select_primary_treatment(
     if not candidates:
         candidates = [item for item in ANIMA_RUNTIME_TREATMENTS if item["id"] == "apple_keynote_headline_punch"]
 
+    # Hard Limit: No premium preset may appear twice within any 4-chunk window
+    recent_4 = set(recent[-4:]) if recent else set()
+    non_recent_premium = [
+        item for item in candidates
+        if not (item.get("tier") == "premium_new" and item["id"] in recent_4)
+    ]
+    if non_recent_premium:
+        candidates = non_recent_premium
+
+    # Per-video quota check for premium_new treatments (>= 25% quota while eligible candidates exist)
+    total_assigned = sum(usage.values())
+    premium_assigned = sum(
+        usage.get(item["id"], 0) for item in ANIMA_RUNTIME_TREATMENTS if item.get("tier") == "premium_new"
+    )
+    has_premium_items = any(item.get("tier") == "premium_new" for item in ANIMA_RUNTIME_TREATMENTS)
+    if has_premium_items and signal.get("hasNumber", 0.0) == 0:
+        current_premium_ratio = premium_assigned / max(1, total_assigned)
+        if current_premium_ratio < PREMIUM_TIER_PER_VIDEO_QUOTA:
+            premium_candidates = [
+                item for item in candidates
+                if item.get("tier") == "premium_new"
+                and item["id"] not in recent_4
+                and (item["id"] in SINGLE_WORD_HERO_PRESETS if is_single_word else item["id"] not in SINGLE_WORD_HERO_PRESETS)
+            ]
+            if not premium_candidates and is_single_word:
+                premium_candidates = [
+                    item for item in candidates
+                    if item.get("tier") == "premium_new" and item["id"] not in recent_4
+                ]
+            if premium_candidates:
+                candidates = premium_candidates
+
     # Numeric routing override: hasNumber + can_claim_counter hard-binds directly to counter family
     if signal.get("hasNumber", 0.0) > 0:
         counter_candidates = [
@@ -2608,6 +2689,11 @@ def _select_primary_treatment(
             boost *= letter_boost
         if item["id"] in POP_FAMILY:
             boost *= pop_damp
+
+        # Premium Tier Launch-Rotation Multiplier: active until 3 lifetime selections, then decays to normal
+        if item.get("tier") == "premium_new":
+            if usage.get(item["id"], 0) < PREMIUM_TIER_LIFETIME_THRESHOLD:
+                boost *= PREMIUM_TIER_PROMOTION_MULTIPLIER
 
         # Semantic Number Routing (Order 1): Numbers/digits heavily route to metallic chrome counter
         if signal.get("hasNumber", 0.0) > 0:
@@ -2686,6 +2772,19 @@ def _select_overlay(rng: random.Random, policy: Dict[str, Any], signal: Dict[str
     if primary_fx in ANIMA_OVERLAY_TREATMENTS or rng.random() >= probability:
         return None
     return rng.choice(ANIMA_OVERLAY_TREATMENTS)
+
+
+def _select_hold_idle(rng: random.Random, policy: Dict[str, Any], signal: Dict[str, float], primary_fx: str) -> Optional[str]:
+    if not ANIMA_HOLD_IDLE_TREATMENTS:
+        return None
+    probability = {
+        "reserved": 0.0,
+        "balanced": 0.22,
+        "expressive": 0.45,
+    }.get(policy.get("creativity", "balanced"), 0.22) * signal.get("salience", 1.0)
+    if primary_fx in ANIMA_HOLD_IDLE_TREATMENTS or rng.random() >= probability:
+        return None
+    return rng.choice(ANIMA_HOLD_IDLE_TREATMENTS)
 
 
 def _select_difference_chunk_indices(
@@ -3275,6 +3374,7 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
         if len(recent_primary_fx) > 4:
             recent_primary_fx.pop(0)
         overlay_fx = _select_overlay(rng, policy, signal, hero_fx_preset)
+        hold_idle_fx = _select_hold_idle(rng, policy, signal, hero_fx_preset)
 
         # HOOKS feature: the first chunk (index 0) is the attention hook. It
         # receives a cinematic hook plan (dolly zoom + lens blur + directional
@@ -3969,8 +4069,13 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
                     "role": "hero" if is_hero_layer else "companion",
                     "primaryFx": layer_fx,
                     "overlayFx": layer_overlay,
+                    "overlayPreset": layer_overlay,
+                    "holdIdleFx": hold_idle_fx if is_hero_layer else None,
+                    "holdIdlePreset": hold_idle_fx if is_hero_layer else None,
                     "cadenceMs": round(signal["cadenceMs"]),
                 },
+                "overlayPreset": layer_overlay,
+                "holdIdlePreset": hold_idle_fx if is_hero_layer else None,
                 "gradient": style_treatment["gradient"],
                 "glow": "none" if layer_behind_subject else (style_treatment["glow"] if is_hero_layer else "none"),
                 "shadow": "0 2px 6px rgba(0, 0, 0, 0.45)" if layer_behind_subject else style_treatment["shadow"],
@@ -4162,12 +4267,17 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
             "palette": chunk_palette,
             "fxPreset": "air_frontal_optical_bloom" if wants_air_frontal else chunk_fx,
             "frontalTreatment": "air_frontal_optical_bloom" if wants_air_frontal else None,
+            "overlayPreset": overlay_fx,
+            "holdIdlePreset": hold_idle_fx,
             "hookPlan": hook_plan,
             "selection": {
                 "profilePoolSize": len(profiles),
                 "profileCandidateCount": len(candidates_pool),
                 "primaryFx": chunk_fx,
                 "overlayFx": overlay_fx,
+                "overlayPreset": overlay_fx,
+                "holdIdleFx": hold_idle_fx,
+                "holdIdlePreset": hold_idle_fx,
                 "cadenceMs": round(signal["cadenceMs"]),
                 "salience": round(signal["salience"], 3),
             },
