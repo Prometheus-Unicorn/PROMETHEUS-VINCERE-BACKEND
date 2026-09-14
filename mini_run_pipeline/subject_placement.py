@@ -102,7 +102,7 @@ def _clamp_safe_x_percent(
     width = max(0.0, float(est_width_px))
     available_envelope = max_safe_px - min_safe_px
 
-    if width >= available_envelope:
+    if width >= (available_envelope - 80.0):
         clamped_px = canvas_w / 2.0 if anchor == "center" else min_safe_px
     elif anchor == "left":
         clamped_px = max(min_safe_px, min(max_safe_px - width, pos_px))
@@ -620,6 +620,7 @@ def plan_subject_safe_placements(
                 if isinstance(lyr, dict):
                     if lyr.get("behindSubject"):
                         lyr["placement"] = cranial_placement
+                        lyr["marginLeftPx"] = 0
                     else:
                         lyr["placement"] = deck_companion_placement
                         has_companion = True

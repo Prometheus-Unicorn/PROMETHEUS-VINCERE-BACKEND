@@ -409,8 +409,9 @@ def measure_pixel_row_projection_lines(
     lum = 0.299 * r + 0.587 * g + 0.114 * b
 
     bright_text = lum > 115.0
-    colored_text = ((np.maximum(np.maximum(r, g), b) - np.minimum(np.minimum(r, g), b)) > 35) & (lum > 70.0)
-    mask = bright_text | colored_text
+    cyan_text = (b > 125) & (g > 125) & (r < 110)
+    warm_text = (r > 160) & (g > 120) & (b < 80)
+    mask = bright_text | cyan_text | warm_text
 
     row_counts = np.sum(mask, axis=1)
     min_row_px = max(18, int((x1 - x0) * 0.035))

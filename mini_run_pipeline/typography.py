@@ -1158,7 +1158,7 @@ FONT_CHAR_ASPECT_TABLE: Dict[str, float] = {
     "saira extra condensed": 0.34,
     "saira": 0.38,
     "teko": 0.36,
-    "league gothic": 0.38,
+    "league gothic": 0.44,
     # Condensed grotesque / display
     "anton": 0.40,
     "bebas neue": 0.38,
@@ -3841,6 +3841,8 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
                 is_pivot_behind = False
 
             layer_behind_subject = is_pivot_behind
+            if layer_behind_subject:
+                margin_left_px = 0
 
             # Strict Tall-stack contract: canva_tall_glyph_stack (and vertical tower fx)
             # is strictly restricted to single-word layers and behind-subject only.

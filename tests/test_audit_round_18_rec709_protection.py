@@ -127,6 +127,49 @@ class AuditRound18Rec709ProtectionTests(unittest.TestCase):
         )
         self.assertEqual(res["status"], "passed")
 
+    def test_measure_pixel_row_projection_lines_rejects_colored_lighting_noise(self):
+        """measure_pixel_row_projection_lines must reject dim colored studio lighting on shoulder."""
+        from mini_run_pipeline import policy_check
+        # Create synthetic canvas with dim purple lighting on shoulder (lum ~75, B>R>G)
+        synthetic = np.zeros((400, 1000, 3), dtype=np.uint8)
+        synthetic[:, 0:70, 0] = 90  # Blue
+        synthetic[:, 0:70, 1] = 60  # Green
+        synthetic[:, 0:70, 2] = 70  # Red
+        # Add actual bright text in the center
+        synthetic[260:340, 250:750, :] = 255
+        res = policy_check.measure_pixel_row_projection_lines(
+            synthetic,
+            placement={"xPercent": "50%", "yPercent": "80%", "maxWidthPercent": "85%"},
+            layers=[{"fontSizePx": 80, "rawText": "Actual Line"}],
+        )
+        self.assertEqual(res["status"], "passed")
+        self.assertEqual(res["rowCount"], 1)
+
+    def test_cranial_behind_subject_layer_zeroes_margin_left(self):
+        """Behind-subject cranial layers must zero out companion marginLeftPx to prevent margin bleed."""
+        from mini_run_pipeline import typography, subject_placement
+        words = [
+            {"text": "Over", "start_ms": 817, "end_ms": 865},
+            {"text": "the", "start_ms": 865, "end_ms": 945},
+            {"text": "last", "start_ms": 993, "end_ms": 1298},
+            {"text": "12", "start_ms": 1298, "end_ms": 1682},
+            {"text": "months,", "start_ms": 1714, "end_ms": 2035},
+        ]
+        chunk = {
+            "text": "Over the last 12 months,",
+            "words": words,
+            "chunkIndex": 1,
+            "subjectLayering": {"behindSubject": True},
+        }
+        res = typography.generate_font_manifest([chunk], design_override={"motif": "pure_editorial_mono"})
+        placements = subject_placement.plan_subject_safe_placements(res["chunks"], observation={})
+        c0 = res["chunks"][0]
+        behind_lyrs = [l for l in c0["layers"] if l.get("behindSubject")]
+        self.assertTrue(len(behind_lyrs) > 0)
+        for lyr in behind_lyrs:
+            self.assertEqual(lyr["marginLeftPx"], 0)
+            self.assertEqual(lyr["placement"]["xPercent"], "50.0%")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
