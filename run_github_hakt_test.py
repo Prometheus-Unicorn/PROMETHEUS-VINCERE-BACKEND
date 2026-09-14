@@ -30,6 +30,8 @@ CURATED_LOOKS = [
     "urban_desaturated",
 ]
 
+SUPPORTED_LOOKS = ["none", "passthrough", "original", *CURATED_LOOKS]
+
 # Use gh CLI to trigger + poll — no extra deps needed
 REPO       = "italianigris-tech/PROMETHEUS-VINCERE-BACKEND"
 WORKFLOW   = "prometheus-render.yml"
@@ -40,7 +42,7 @@ JOB_ID = f"gha_hakt_30s_pbd_{int(time.time())}"
 
 def build_payload(args=None) -> dict:
     selected_motif = (args.motif if args and args.motif else random.choice(CURATED_MOTIFS))
-    selected_look = (args.look if args and args.look else random.choice(CURATED_LOOKS))
+    selected_look = (args.look if args and args.look else "none")
     selected_source = (args.source if args and getattr(args, "source", None) else "remotion-app/public/source/test-video.mp4")
     
     return {
@@ -233,7 +235,7 @@ def run(custom_args=None):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Trigger 30s HAKT Cloud Render with dynamic or custom styling")
     parser.add_argument("--motif", default=None, choices=CURATED_MOTIFS, help="Brand motif palette")
-    parser.add_argument("--look", default=None, choices=CURATED_LOOKS, help="Cinematic 3D LUT look")
+    parser.add_argument("--look", default="none", choices=SUPPORTED_LOOKS, help="Cinematic 3D LUT look or 'none' for original studio Rec.709 passthrough")
     parser.add_argument("--source", default="remotion-app/public/source/test-video.mp4", help="Path to source video")
     parser.add_argument("--mood", default=None, help="Mood descriptor")
     args = parser.parse_args()
