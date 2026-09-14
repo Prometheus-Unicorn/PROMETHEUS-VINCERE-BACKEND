@@ -1,0 +1,169 @@
+{
+  "jobId": "flow_vid_1789328357130",
+  "treatmentFamily": "animations_curito",
+  "conceptTitle": "Radical Self-Reliance (IPSA SUM MAGNITUDO)",
+  "projectName": "Prometheus_Curito_28357_357130",
+  "accountEmail": "ipsasummagnitudo@gmail.com",
+  "model": "Veo 3.1 - Fast",
+  "durationSec": 6,
+  "aspectRatio": "9:16",
+  "prompt": {
+    "genomeIds": [
+      "curito_vis_whitecheckered_hud",
+      "curito_lit_chiaroscuro_industrial",
+      "curito_cam_35mm_anamorphic_drift",
+      "curito_scene_slapdrop_bounce"
+    ],
+    "genome_ids": [
+      "curito_vis_whitecheckered_hud",
+      "curito_lit_chiaroscuro_industrial",
+      "curito_cam_35mm_anamorphic_drift",
+      "curito_scene_slapdrop_bounce"
+    ],
+    "subjectElement": "Massive granite block pushed uphill, featuring Translucent holographic search box and data cards with glowing status indicators, crisp pure-white embossed typography, dark slate studio backdrop with high-contrast transparent checkerboard backing (.wc-checker-backer) and neon cyan telemetry borders",
+    "subject_element": "Massive granite block pushed uphill, featuring Translucent holographic search box and data cards with glowing status indicators, crisp pure-white embossed typography, dark slate studio backdrop with high-contrast transparent checkerboard backing (.wc-checker-backer) and neon cyan telemetry borders",
+    "actionMovement": "The Slap-Drop asset introduction pushing downward along Z-axis with exponential decrescendo, executing a 2-frame 3% scale squash on impact followed by subtle contact bounce and pendulum settle, timed so that at +3.0s into the sequence the asset achieves locked contact bounce and physical impact synchronously with the cue words 'radical self-reliance'",
+    "action_movement": "The Slap-Drop asset introduction pushing downward along Z-axis with exponential decrescendo, executing a 2-frame 3% scale squash on impact followed by subtle contact bounce and pendulum settle, timed so that at +3.0s into the sequence the asset achieves locked contact bounce and physical impact synchronously with the cue words 'radical self-reliance'",
+    "locationBackground": "Dark minimalist obsidian studio backdrop with subtle transparent checkerboard grid, isolated by background defocus and 15% atmospheric luminance dip",
+    "location_background": "Dark minimalist obsidian studio backdrop with subtle transparent checkerboard grid, isolated by background defocus and 15% atmospheric luminance dip",
+    "contextLighting": "Dramatic chiaroscuro contrast with intense warm 3200K tungsten spotlight, volumetric shafts of light cutting through dusty darkroom air, and razor cool cyan rim backlighting, throwing sharp directional highlights across tactile materials",
+    "context_lighting": "Dramatic chiaroscuro contrast with intense warm 3200K tungsten spotlight, volumetric shafts of light cutting through dusty darkroom air, and razor cool cyan rim backlighting, throwing sharp directional highlights across tactile materials",
+    "composition": "Vertical 9:16 composition captured on 35mm anamorphic lens with shallow depth of field, smooth oval anamorphic bokeh, continuous anti-stagnation sub-pixel drift (scaling 100% to 101.8%), 24fps cadence, and subtle Kodak 5219 film grain, vertical 9:16 framing with dynamic depth layering",
+    "styleCues": "Premium Vox and Iman Gadzhi high-agency editorial documentary motion design, 24fps, crisp vector edges, and subtle 35mm Kodak 5219 film grain",
+    "style_cues": "Premium Vox and Iman Gadzhi high-agency editorial documentary motion design, 24fps, crisp vector edges, and subtle 35mm Kodak 5219 film grain",
+    "wordSync": {
+      "interviewTimestamp": "05:30.000",
+      "interview_timestamp": "05:30.000",
+      "interviewStartSec": 330.0,
+      "interview_start_sec": 330.0,
+      "targetPhrase": "radical self-reliance",
+      "target_phrase": "radical self-reliance",
+      "targetWords": [
+        "radical",
+        "self-reliance"
+      ],
+      "target_words": [
+        "radical",
+        "self-reliance"
+      ],
+      "syncOffsetSec": 3.0,
+      "sync_offset_sec": 3.0,
+      "totalDurationSec": 6,
+      "total_duration_sec": 6,
+      "leadInSec": 1.35,
+      "lead_in_sec": 1.35,
+      "holdSec": 3.0,
+      "hold_sec": 3.0,
+      "timingCue": "Asset entrance commences at +1.4s, accelerating toward definitive physical impact lock precisely at +3.0s synchronized with the spoken phrase 'radical self-reliance', holding firmly with continuous sub-pixel drift for 3.0s.",
+      "timing_cue": "Asset entrance commences at +1.4s, accelerating toward definitive physical impact lock precisely at +3.0s synchronized with the spoken phrase 'radical self-reliance', holding firmly with continuous sub-pixel drift for 3.0s.",
+      "climaxMomentDescription": "Asset locks into place with physical shadow impact as speaker says 'radical self-reliance'",
+      "climax_moment_description": "Asset locks into place with physical shadow impact as speaker says 'radical self-reliance'"
+    },
+    "word_sync": {
+      "interviewTimestamp": "05:30.000",
+      "interview_timestamp": "05:30.000",
+      "interviewStartSec": 330.0,
+      "interview_start_sec": 330.0,
+      "targetPhrase": "radical self-reliance",
+      "target_phrase": "radical self-reliance",
+      "targetWords": [
+        "radical",
+        "self-reliance"
+      ],
+      "target_words": [
+        "radical",
+        "self-reliance"
+      ],
+      "syncOffsetSec": 3.0,
+      "sync_offset_sec": 3.0,
+      "totalDurationSec": 6,
+      "total_duration_sec": 6,
+      "leadInSec": 1.35,
+      "lead_in_sec": 1.35,
+      "holdSec": 3.0,
+      "hold_sec": 3.0,
+      "timingCue": "Asset entrance commences at +1.4s, accelerating toward definitive physical impact lock precisely at +3.0s synchronized with the spoken phrase 'radical self-reliance', holding firmly with continuous sub-pixel drift for 3.0s.",
+      "timing_cue": "Asset entrance commences at +1.4s, accelerating toward definitive physical impact lock precisely at +3.0s synchronized with the spoken phrase 'radical self-reliance', holding firmly with continuous sub-pixel drift for 3.0s.",
+      "climaxMomentDescription": "Asset locks into place with physical shadow impact as speaker says 'radical self-reliance'",
+      "climax_moment_description": "Asset locks into place with physical shadow impact as speaker says 'radical self-reliance'"
+    },
+    "fullPrompt": "Massive granite block pushed uphill, featuring Translucent holographic search box and data cards with glowing status indicators, crisp pure-white embossed typography, dark slate studio backdrop with high-contrast transparent checkerboard backing (.wc-checker-backer) and neon cyan telemetry borders, The Slap-Drop asset introduction pushing downward along Z-axis with exponential decrescendo, executing a 2-frame 3% scale squash on impact followed by subtle contact bounce and pendulum settle, timed so that at +3.0s into the sequence the asset achieves locked contact bounce and physical impact synchronously with the cue words 'radical self-reliance', Dark minimalist obsidian studio backdrop with subtle transparent checkerboard grid, isolated by background defocus and 15% atmospheric luminance dip, Dramatic chiaroscuro contrast with intense warm 3200K tungsten spotlight, volumetric shafts of light cutting through dusty darkroom air, and razor cool cyan rim backlighting, throwing sharp directional highlights across tactile materials, Vertical 9:16 composition captured on 35mm anamorphic lens with shallow depth of field, smooth oval anamorphic bokeh, continuous anti-stagnation sub-pixel drift (scaling 100% to 101.8%), 24fps cadence, and subtle Kodak 5219 film grain, vertical 9:16 framing with dynamic depth layering, Premium Vox and Iman Gadzhi high-agency editorial documentary motion design, 24fps, crisp vector edges, and subtle 35mm Kodak 5219 film grain.",
+    "full_prompt": "Massive granite block pushed uphill, featuring Translucent holographic search box and data cards with glowing status indicators, crisp pure-white embossed typography, dark slate studio backdrop with high-contrast transparent checkerboard backing (.wc-checker-backer) and neon cyan telemetry borders, The Slap-Drop asset introduction pushing downward along Z-axis with exponential decrescendo, executing a 2-frame 3% scale squash on impact followed by subtle contact bounce and pendulum settle, timed so that at +3.0s into the sequence the asset achieves locked contact bounce and physical impact synchronously with the cue words 'radical self-reliance', Dark minimalist obsidian studio backdrop with subtle transparent checkerboard grid, isolated by background defocus and 15% atmospheric luminance dip, Dramatic chiaroscuro contrast with intense warm 3200K tungsten spotlight, volumetric shafts of light cutting through dusty darkroom air, and razor cool cyan rim backlighting, throwing sharp directional highlights across tactile materials, Vertical 9:16 composition captured on 35mm anamorphic lens with shallow depth of field, smooth oval anamorphic bokeh, continuous anti-stagnation sub-pixel drift (scaling 100% to 101.8%), 24fps cadence, and subtle Kodak 5219 film grain, vertical 9:16 framing with dynamic depth layering, Premium Vox and Iman Gadzhi high-agency editorial documentary motion design, 24fps, crisp vector edges, and subtle 35mm Kodak 5219 film grain.",
+    "imperativeFlowPrompt": "Generate immediately a 6s video with the model Veo 3.1 - Fast, in vertical 9:16 format, without asking questions or clarifying. Faithfully adhere to this description including all elements, timing, and details indicated: Description: Massive granite block pushed uphill, featuring Translucent holographic search box and data cards with glowing status indicators, crisp pure-white embossed typography, dark slate studio backdrop with high-contrast transparent checkerboard backing (.wc-checker-backer) and neon cyan telemetry borders, The Slap-Drop asset introduction pushing downward along Z-axis with exponential decrescendo, executing a 2-frame 3% scale squash on impact followed by subtle contact bounce and pendulum settle, timed so that at +3.0s into the sequence the asset achieves locked contact bounce and physical impact synchronously with the cue words 'radical self-reliance', Dark minimalist obsidian studio backdrop with subtle transparent checkerboard grid, isolated by background defocus and 15% atmospheric luminance dip, Dramatic chiaroscuro contrast with intense warm 3200K tungsten spotlight, volumetric shafts of light cutting through dusty darkroom air, and razor cool cyan rim backlighting, throwing sharp directional highlights across tactile materials, Vertical 9:16 composition captured on 35mm anamorphic lens with shallow depth of field, smooth oval anamorphic bokeh, continuous anti-stagnation sub-pixel drift (scaling 100% to 101.8%), 24fps cadence, and subtle Kodak 5219 film grain, vertical 9:16 framing with dynamic depth layering, Premium Vox and Iman Gadzhi high-agency editorial documentary motion design, 24fps, crisp vector edges, and subtle 35mm Kodak 5219 film grain.",
+    "imperative_flow_prompt": "Generate immediately a 6s video with the model Veo 3.1 - Fast, in vertical 9:16 format, without asking questions or clarifying. Faithfully adhere to this description including all elements, timing, and details indicated: Description: Massive granite block pushed uphill, featuring Translucent holographic search box and data cards with glowing status indicators, crisp pure-white embossed typography, dark slate studio backdrop with high-contrast transparent checkerboard backing (.wc-checker-backer) and neon cyan telemetry borders, The Slap-Drop asset introduction pushing downward along Z-axis with exponential decrescendo, executing a 2-frame 3% scale squash on impact followed by subtle contact bounce and pendulum settle, timed so that at +3.0s into the sequence the asset achieves locked contact bounce and physical impact synchronously with the cue words 'radical self-reliance', Dark minimalist obsidian studio backdrop with subtle transparent checkerboard grid, isolated by background defocus and 15% atmospheric luminance dip, Dramatic chiaroscuro contrast with intense warm 3200K tungsten spotlight, volumetric shafts of light cutting through dusty darkroom air, and razor cool cyan rim backlighting, throwing sharp directional highlights across tactile materials, Vertical 9:16 composition captured on 35mm anamorphic lens with shallow depth of field, smooth oval anamorphic bokeh, continuous anti-stagnation sub-pixel drift (scaling 100% to 101.8%), 24fps cadence, and subtle Kodak 5219 film grain, vertical 9:16 framing with dynamic depth layering, Premium Vox and Iman Gadzhi high-agency editorial documentary motion design, 24fps, crisp vector edges, and subtle 35mm Kodak 5219 film grain.",
+    "model": "Veo 3.1 - Fast",
+    "durationSec": 6,
+    "duration_sec": 6,
+    "aspectRatio": "9:16",
+    "aspect_ratio": "9:16"
+  },
+  "wordSync": {
+    "interviewTimestamp": "05:30.000",
+    "interview_timestamp": "05:30.000",
+    "interviewStartSec": 330.0,
+    "interview_start_sec": 330.0,
+    "targetPhrase": "radical self-reliance",
+    "target_phrase": "radical self-reliance",
+    "targetWords": [
+      "radical",
+      "self-reliance"
+    ],
+    "target_words": [
+      "radical",
+      "self-reliance"
+    ],
+    "syncOffsetSec": 3.0,
+    "sync_offset_sec": 3.0,
+    "totalDurationSec": 6,
+    "total_duration_sec": 6,
+    "leadInSec": 1.35,
+    "lead_in_sec": 1.35,
+    "holdSec": 3.0,
+    "hold_sec": 3.0,
+    "timingCue": "Asset entrance commences at +1.4s, accelerating toward definitive physical impact lock precisely at +3.0s synchronized with the spoken phrase 'radical self-reliance', holding firmly with continuous sub-pixel drift for 3.0s.",
+    "timing_cue": "Asset entrance commences at +1.4s, accelerating toward definitive physical impact lock precisely at +3.0s synchronized with the spoken phrase 'radical self-reliance', holding firmly with continuous sub-pixel drift for 3.0s.",
+    "climaxMomentDescription": "Asset locks into place with physical shadow impact as speaker says 'radical self-reliance'",
+    "climax_moment_description": "Asset locks into place with physical shadow impact as speaker says 'radical self-reliance'"
+  },
+  "storyboardBeats": [
+    {
+      "frame_index": 1,
+      "timestamp_sec": 0.0,
+      "beat_label": "Atmospheric Void & Lead-In",
+      "camera_choreography": "35mm Anamorphic 9:16 framing, continuous subtle sub-pixel drift",
+      "asset_state": "Background defocus active; asset begins entering from outer periphery",
+      "lighting_state": "Moody chiaroscuro split, volumetric light shafts through darkroom dust",
+      "description": "Scene opens on dark minimalist obsidian backdrop. Atmosphere establishes tone."
+    },
+    {
+      "frame_index": 2,
+      "timestamp_sec": 1.35,
+      "beat_label": "Spatial Reveal Acceleration",
+      "camera_choreography": "Macro push-in with dynamic parallax trajectory",
+      "asset_state": "Asset accelerates along spatial entry path (3D swing / friction slide)",
+      "lighting_state": "Trailing shadow vector elongates, specular highlights flare on bevels",
+      "description": "Asset accelerates forward into frame approaching focal plane."
+    },
+    {
+      "frame_index": 3,
+      "timestamp_sec": 3.0,
+      "beat_label": "Word-Synchronized Climax Impact",
+      "camera_choreography": "One-frame 3px canvas reaction jolt transferring physical weight",
+      "asset_state": "Impact landing with 3% scale squash synchronously locked to 'radical self-reliance'",
+      "lighting_state": "Double-state cast shadow snaps into 70% contact occlusion at 3px offset",
+      "description": "Asset locks into place with physical shadow impact as speaker says 'radical self-reliance'"
+    },
+    {
+      "frame_index": 4,
+      "timestamp_sec": 6.0,
+      "beat_label": "Sub-Pixel Drift & Settle",
+      "camera_choreography": "Damped pendulum settle (+3\u00b0 -> -1.2\u00b0 -> 0\u00b0), continuous breathing drift",
+      "asset_state": "Asset holds firmly anchored in frame while typography vectors glint",
+      "lighting_state": "Stable dramatic key illumination with cool cyan rim backlighting",
+      "description": "Visual lingers with high-agency authority through remainder of spoken concept."
+    }
+  ],
+  "mp4AssetPath": "docs\\mini_run_studio\\flow_clips\\curito_ipsasum_preview_6s.mp4",
+  "generatedAt": 1789328357.1315439,
+  "status": "DRY_RUN_SYNTHESIZED"
+}

@@ -1,0 +1,771 @@
+{
+  "text": "Performance isn't created, it's engineered. For over 75 years, Porsche has defined pure driving excellence, precision in every curve, power in every detail. Iconic design fused with motorsport DNA, built to dominate the road, crafted to thrill the driver. This isn't just a car, it's a statement. Porsche, there is no substitute.",
+  "segments": [
+    {
+      "id": 0,
+      "seek": 0,
+      "start": 0.0,
+      "end": 2.24,
+      "text": " Performance isn't created, it's engineered.",
+      "tokens": [
+        50364,
+        25047,
+        1943,
+        380,
+        2942,
+        11,
+        309,
+        311,
+        38648,
+        13,
+        50504
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.2278775301846591,
+      "compression_ratio": 1.5022831050228311,
+      "no_speech_prob": 0.11791419982910156,
+      "words": [
+        {
+          "word": " Performance",
+          "start": 0.0,
+          "end": 0.52,
+          "probability": 0.6970997452735901
+        },
+        {
+          "word": " isn't",
+          "start": 0.52,
+          "end": 0.86,
+          "probability": 0.9827373921871185
+        },
+        {
+          "word": " created,",
+          "start": 0.86,
+          "end": 1.24,
+          "probability": 0.994390070438385
+        },
+        {
+          "word": " it's",
+          "start": 1.54,
+          "end": 1.82,
+          "probability": 0.9822440147399902
+        },
+        {
+          "word": " engineered.",
+          "start": 1.82,
+          "end": 2.24,
+          "probability": 0.9924290776252747
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "seek": 0,
+      "start": 2.88,
+      "end": 6.92,
+      "text": " For over 75 years, Porsche has defined pure driving excellence,",
+      "tokens": [
+        50504,
+        1171,
+        670,
+        9562,
+        924,
+        11,
+        31044,
+        575,
+        7642,
+        6075,
+        4840,
+        21268,
+        11,
+        50744
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.2278775301846591,
+      "compression_ratio": 1.5022831050228311,
+      "no_speech_prob": 0.11791419982910156,
+      "words": [
+        {
+          "word": " For",
+          "start": 2.88,
+          "end": 2.94,
+          "probability": 0.9889230728149414
+        },
+        {
+          "word": " over",
+          "start": 2.94,
+          "end": 3.18,
+          "probability": 0.998244047164917
+        },
+        {
+          "word": " 75",
+          "start": 3.18,
+          "end": 3.8,
+          "probability": 0.9275670051574707
+        },
+        {
+          "word": " years,",
+          "start": 3.8,
+          "end": 4.38,
+          "probability": 0.9970327615737915
+        },
+        {
+          "word": " Porsche",
+          "start": 4.82,
+          "end": 4.9,
+          "probability": 0.7485638856887817
+        },
+        {
+          "word": " has",
+          "start": 4.9,
+          "end": 5.2,
+          "probability": 0.9953820109367371
+        },
+        {
+          "word": " defined",
+          "start": 5.2,
+          "end": 5.56,
+          "probability": 0.99552321434021
+        },
+        {
+          "word": " pure",
+          "start": 5.56,
+          "end": 5.92,
+          "probability": 0.9785208702087402
+        },
+        {
+          "word": " driving",
+          "start": 5.92,
+          "end": 6.34,
+          "probability": 0.9688897728919983
+        },
+        {
+          "word": " excellence,",
+          "start": 6.34,
+          "end": 6.92,
+          "probability": 0.9976686835289001
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "seek": 0,
+      "start": 7.6000000000000005,
+      "end": 10.66,
+      "text": " precision in every curve, power in every detail.",
+      "tokens": [
+        50744,
+        18356,
+        294,
+        633,
+        7605,
+        11,
+        1347,
+        294,
+        633,
+        2607,
+        13,
+        50932
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.2278775301846591,
+      "compression_ratio": 1.5022831050228311,
+      "no_speech_prob": 0.11791419982910156,
+      "words": [
+        {
+          "word": " precision",
+          "start": 7.6000000000000005,
+          "end": 8.16,
+          "probability": 0.9969449639320374
+        },
+        {
+          "word": " in",
+          "start": 8.16,
+          "end": 8.32,
+          "probability": 0.9620174169540405
+        },
+        {
+          "word": " every",
+          "start": 8.32,
+          "end": 8.62,
+          "probability": 0.998102605342865
+        },
+        {
+          "word": " curve,",
+          "start": 8.62,
+          "end": 8.94,
+          "probability": 0.9901725053787231
+        },
+        {
+          "word": " power",
+          "start": 9.4,
+          "end": 9.78,
+          "probability": 0.9980012774467468
+        },
+        {
+          "word": " in",
+          "start": 9.78,
+          "end": 9.96,
+          "probability": 0.9473714828491211
+        },
+        {
+          "word": " every",
+          "start": 9.96,
+          "end": 10.22,
+          "probability": 0.9980689883232117
+        },
+        {
+          "word": " detail.",
+          "start": 10.22,
+          "end": 10.66,
+          "probability": 0.9987564086914062
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "seek": 0,
+      "start": 11.4,
+      "end": 13.98,
+      "text": " Iconic design fused with motorsport DNA,",
+      "tokens": [
+        50932,
+        286,
+        1671,
+        299,
+        1715,
+        283,
+        4717,
+        365,
+        25035,
+        2707,
+        8272,
+        11,
+        51096
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.2278775301846591,
+      "compression_ratio": 1.5022831050228311,
+      "no_speech_prob": 0.11791419982910156,
+      "words": [
+        {
+          "word": " Iconic",
+          "start": 11.4,
+          "end": 12.04,
+          "probability": 0.8892583648363749
+        },
+        {
+          "word": " design",
+          "start": 12.04,
+          "end": 12.36,
+          "probability": 0.7298733592033386
+        },
+        {
+          "word": " fused",
+          "start": 12.36,
+          "end": 12.86,
+          "probability": 0.9794486165046692
+        },
+        {
+          "word": " with",
+          "start": 12.86,
+          "end": 13.02,
+          "probability": 0.9975205063819885
+        },
+        {
+          "word": " motorsport",
+          "start": 13.02,
+          "end": 13.52,
+          "probability": 0.6821364015340805
+        },
+        {
+          "word": " DNA,",
+          "start": 13.52,
+          "end": 13.98,
+          "probability": 0.9626021385192871
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "seek": 0,
+      "start": 14.78,
+      "end": 17.82,
+      "text": " built to dominate the road, crafted to thrill the driver.",
+      "tokens": [
+        51096,
+        3094,
+        281,
+        28246,
+        264,
+        3060,
+        11,
+        36213,
+        281,
+        32935,
+        264,
+        6787,
+        13,
+        51292
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.2278775301846591,
+      "compression_ratio": 1.5022831050228311,
+      "no_speech_prob": 0.11791419982910156,
+      "words": [
+        {
+          "word": " built",
+          "start": 14.78,
+          "end": 14.94,
+          "probability": 0.9920748472213745
+        },
+        {
+          "word": " to",
+          "start": 14.94,
+          "end": 15.12,
+          "probability": 0.9989857077598572
+        },
+        {
+          "word": " dominate",
+          "start": 15.12,
+          "end": 15.48,
+          "probability": 0.9968658089637756
+        },
+        {
+          "word": " the",
+          "start": 15.48,
+          "end": 15.7,
+          "probability": 0.9977715611457825
+        },
+        {
+          "word": " road,",
+          "start": 15.7,
+          "end": 15.98,
+          "probability": 0.9977568984031677
+        },
+        {
+          "word": " crafted",
+          "start": 16.56,
+          "end": 16.86,
+          "probability": 0.9875659942626953
+        },
+        {
+          "word": " to",
+          "start": 16.86,
+          "end": 17.06,
+          "probability": 0.9988322854042053
+        },
+        {
+          "word": " thrill",
+          "start": 17.06,
+          "end": 17.32,
+          "probability": 0.9387842416763306
+        },
+        {
+          "word": " the",
+          "start": 17.32,
+          "end": 17.5,
+          "probability": 0.9960850477218628
+        },
+        {
+          "word": " driver.",
+          "start": 17.5,
+          "end": 17.82,
+          "probability": 0.9978237152099609
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "seek": 0,
+      "start": 18.24,
+      "end": 20.8,
+      "text": " This isn't just a car, it's a statement.",
+      "tokens": [
+        51292,
+        639,
+        1943,
+        380,
+        445,
+        257,
+        1032,
+        11,
+        309,
+        311,
+        257,
+        5629,
+        13,
+        51448
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.2278775301846591,
+      "compression_ratio": 1.5022831050228311,
+      "no_speech_prob": 0.11791419982910156,
+      "words": [
+        {
+          "word": " This",
+          "start": 18.24,
+          "end": 18.82,
+          "probability": 0.9803447127342224
+        },
+        {
+          "word": " isn't",
+          "start": 18.82,
+          "end": 19.14,
+          "probability": 0.9988472163677216
+        },
+        {
+          "word": " just",
+          "start": 19.14,
+          "end": 19.3,
+          "probability": 0.9990293979644775
+        },
+        {
+          "word": " a",
+          "start": 19.3,
+          "end": 19.48,
+          "probability": 0.9987344145774841
+        },
+        {
+          "word": " car,",
+          "start": 19.48,
+          "end": 19.74,
+          "probability": 0.9992699027061462
+        },
+        {
+          "word": " it's",
+          "start": 20.1,
+          "end": 20.36,
+          "probability": 0.9886643588542938
+        },
+        {
+          "word": " a",
+          "start": 20.36,
+          "end": 20.4,
+          "probability": 0.9975219368934631
+        },
+        {
+          "word": " statement.",
+          "start": 20.4,
+          "end": 20.8,
+          "probability": 0.9941021800041199
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "seek": 0,
+      "start": 21.7,
+      "end": 23.62,
+      "text": " Porsche, there is no substitute.",
+      "tokens": [
+        51448,
+        31044,
+        11,
+        456,
+        307,
+        572,
+        15802,
+        13,
+        51548
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.2278775301846591,
+      "compression_ratio": 1.5022831050228311,
+      "no_speech_prob": 0.11791419982910156,
+      "words": [
+        {
+          "word": " Porsche,",
+          "start": 21.7,
+          "end": 21.94,
+          "probability": 0.6861605644226074
+        },
+        {
+          "word": " there",
+          "start": 22.26,
+          "end": 22.74,
+          "probability": 0.9961714148521423
+        },
+        {
+          "word": " is",
+          "start": 22.74,
+          "end": 22.92,
+          "probability": 0.9902717471122742
+        },
+        {
+          "word": " no",
+          "start": 22.92,
+          "end": 23.08,
+          "probability": 0.9991470575332642
+        },
+        {
+          "word": " substitute.",
+          "start": 23.08,
+          "end": 23.62,
+          "probability": 0.9913362264633179
+        }
+      ]
+    }
+  ],
+  "words": [
+    {
+      "word": "Performance",
+      "start": 0.0,
+      "end": 0.52
+    },
+    {
+      "word": "isn't",
+      "start": 0.52,
+      "end": 0.86
+    },
+    {
+      "word": "created,",
+      "start": 0.86,
+      "end": 1.24
+    },
+    {
+      "word": "it's",
+      "start": 1.54,
+      "end": 1.82
+    },
+    {
+      "word": "engineered.",
+      "start": 1.82,
+      "end": 2.24
+    },
+    {
+      "word": "For",
+      "start": 2.88,
+      "end": 2.94
+    },
+    {
+      "word": "over",
+      "start": 2.94,
+      "end": 3.18
+    },
+    {
+      "word": "75",
+      "start": 3.18,
+      "end": 3.8
+    },
+    {
+      "word": "years,",
+      "start": 3.8,
+      "end": 4.38
+    },
+    {
+      "word": "Porsche",
+      "start": 4.82,
+      "end": 4.9
+    },
+    {
+      "word": "has",
+      "start": 4.9,
+      "end": 5.2
+    },
+    {
+      "word": "defined",
+      "start": 5.2,
+      "end": 5.56
+    },
+    {
+      "word": "pure",
+      "start": 5.56,
+      "end": 5.92
+    },
+    {
+      "word": "driving",
+      "start": 5.92,
+      "end": 6.34
+    },
+    {
+      "word": "excellence,",
+      "start": 6.34,
+      "end": 6.92
+    },
+    {
+      "word": "precision",
+      "start": 7.6,
+      "end": 8.16
+    },
+    {
+      "word": "in",
+      "start": 8.16,
+      "end": 8.32
+    },
+    {
+      "word": "every",
+      "start": 8.32,
+      "end": 8.62
+    },
+    {
+      "word": "curve,",
+      "start": 8.62,
+      "end": 8.94
+    },
+    {
+      "word": "power",
+      "start": 9.4,
+      "end": 9.78
+    },
+    {
+      "word": "in",
+      "start": 9.78,
+      "end": 9.96
+    },
+    {
+      "word": "every",
+      "start": 9.96,
+      "end": 10.22
+    },
+    {
+      "word": "detail.",
+      "start": 10.22,
+      "end": 10.66
+    },
+    {
+      "word": "Iconic",
+      "start": 11.4,
+      "end": 12.04
+    },
+    {
+      "word": "design",
+      "start": 12.04,
+      "end": 12.36
+    },
+    {
+      "word": "fused",
+      "start": 12.36,
+      "end": 12.86
+    },
+    {
+      "word": "with",
+      "start": 12.86,
+      "end": 13.02
+    },
+    {
+      "word": "motorsport",
+      "start": 13.02,
+      "end": 13.52
+    },
+    {
+      "word": "DNA,",
+      "start": 13.52,
+      "end": 13.98
+    },
+    {
+      "word": "built",
+      "start": 14.78,
+      "end": 14.94
+    },
+    {
+      "word": "to",
+      "start": 14.94,
+      "end": 15.12
+    },
+    {
+      "word": "dominate",
+      "start": 15.12,
+      "end": 15.48
+    },
+    {
+      "word": "the",
+      "start": 15.48,
+      "end": 15.7
+    },
+    {
+      "word": "road,",
+      "start": 15.7,
+      "end": 15.98
+    },
+    {
+      "word": "crafted",
+      "start": 16.56,
+      "end": 16.86
+    },
+    {
+      "word": "to",
+      "start": 16.86,
+      "end": 17.06
+    },
+    {
+      "word": "thrill",
+      "start": 17.06,
+      "end": 17.32
+    },
+    {
+      "word": "the",
+      "start": 17.32,
+      "end": 17.5
+    },
+    {
+      "word": "driver.",
+      "start": 17.5,
+      "end": 17.82
+    },
+    {
+      "word": "This",
+      "start": 18.24,
+      "end": 18.82
+    },
+    {
+      "word": "isn't",
+      "start": 18.82,
+      "end": 19.14
+    },
+    {
+      "word": "just",
+      "start": 19.14,
+      "end": 19.3
+    },
+    {
+      "word": "a",
+      "start": 19.3,
+      "end": 19.48
+    },
+    {
+      "word": "car,",
+      "start": 19.48,
+      "end": 19.74
+    },
+    {
+      "word": "it's",
+      "start": 20.1,
+      "end": 20.36
+    },
+    {
+      "word": "a",
+      "start": 20.36,
+      "end": 20.4
+    },
+    {
+      "word": "statement.",
+      "start": 20.4,
+      "end": 20.8
+    },
+    {
+      "word": "Porsche,",
+      "start": 21.7,
+      "end": 21.94
+    },
+    {
+      "word": "there",
+      "start": 22.26,
+      "end": 22.74
+    },
+    {
+      "word": "is",
+      "start": 22.74,
+      "end": 22.92
+    },
+    {
+      "word": "no",
+      "start": 22.92,
+      "end": 23.08
+    },
+    {
+      "word": "substitute.",
+      "start": 23.08,
+      "end": 23.62
+    }
+  ]
+}

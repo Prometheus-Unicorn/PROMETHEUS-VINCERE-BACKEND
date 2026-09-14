@@ -1,0 +1,17 @@
+{
+  "source_video": "C:\\Users\\HomePC\\Downloads\\PROMETHEUS-VINCERE-BACKEND\\remotion-app\\public\\source\\MALE-BLACK-TALKING-HEAD-PODCAST.mp4",
+  "output_video": "C:\\Users\\HomePC\\Downloads\\PROMETHEUS-VINCERE-BACKEND\\docs\\mini_run_studio\\own_the_outcome_cinematic_animation.mp4",
+  "duration_sec": 37.13,
+  "thematic_arc": "Uncompromising Agency & Relentless Execution for Business Mastery",
+  "operator_archetype": "The Maverick Operator",
+  "inflections_count": 4,
+  "veo_jobs_submitted": 4,
+  "status": "COMPLETED_SUCCESSFULLY",
+  "file_size_mb": 6.12,
+  "timings_sec": {
+    "semantic_extraction": 60.72,
+    "veo_orchestration": 10.01,
+    "video_compositing": 71.96,
+    "total_pipeline": 142.7
+  }
+}

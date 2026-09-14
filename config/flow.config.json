@@ -1,0 +1,15 @@
+{
+  "flowUrl": "https://labs.google/fx/tools/flow",
+  "expectedAccount": "ipsasummagnitudo@gmail.com",
+  "bannedAccounts": ["joshuagreat965@gmail.com", "joshwilsonwill@gmail.com"],
+  "profileDirectory": "Profile 12",
+  "chromeUserDataDir": "C:/Users/HomePC/AppData/Local/Google/Chrome/User Data",
+  "chromePath": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+  "cdpPort": 9222,
+  "headless": true,
+  "videoModel": "Veo 3.1 - Fast",
+  "defaultRatio": "9:16",
+  "videoGenerationTimeoutMs": 600000,
+  "outputDir": "docs/mini_run_studio/flow_clips",
+  "projectPrefix": "Prometheus_Curito"
+}

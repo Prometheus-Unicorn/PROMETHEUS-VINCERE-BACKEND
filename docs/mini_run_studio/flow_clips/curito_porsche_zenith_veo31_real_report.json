@@ -1,0 +1,53 @@
+{
+  "jobId": "flow_veo31_porsche_zenith_real_001",
+  "status": "VERIFIED_RENDER_COMPLETED",
+  "treatmentFamily": "animations_curito",
+  "conceptTitle": "Porsche 911 GT3 RS Zenith Dial Lockup (Real Veo 3.1)",
+  "projectUrl": "https://flow.google.com/project/379a5a1c-4f58-4e14-bc0c-16e55ead68d6",
+  "accountEmail": "ipsasummagnitudo@gmail.com",
+  "model": "Veo 3.1 - Lite",
+  "durationSec": 8.0,
+  "aspectRatio": "9:16",
+  "resolution": {
+    "width": 720,
+    "height": 1280
+  },
+  "fps": 24.0,
+  "frameCount": 192,
+  "fileSizeBytes": 3282922,
+  "mp4AssetPath": "docs/mini_run_studio/flow_clips/curito_porsche_zenith_veo31_real.mp4",
+  "prompt": {
+    "subjectElement": "Top-down orthographic zenith perspective of sculpted white Porsche 911 GT3 RS with carbon fiber dual hood vents and massive rear wing, flanked by radial clock hands and precision compass needles, anchored by deep ambient occlusion floor contact shadows.",
+    "actionMovement": "Headlights ignite with luminous lens glow; radial clock hands tick and the compass needle spins with rotational velocity, volumetric exhaust smoke billowing around the wheels.",
+    "locationBackground": "Industrial dark concrete studio floor with recessed circular mechanical housings for clock and compass dials.",
+    "contextLighting": "Overhead warm 3200K tungsten spotlighting paired with cool cyan atmospheric rim lights and volumetric light rays.",
+    "composition": "Vertical 9:16 orthographic zenith camera framing, 24fps cinema cadence.",
+    "styleCues": "Curito high-agency editorial motion design, tactile mechanical realism."
+  },
+  "storyboardBeats": [
+    {
+      "beatIndex": 1,
+      "timeRange": "0.0s - 2.0s",
+      "frameRange": "0 - 48",
+      "actionDescription": "Top-down orthographic framing of the white Porsche 911 GT3 RS flanked by the dual dials; ambient warehouse lighting and subtle dust motes."
+    },
+    {
+      "beatIndex": 2,
+      "timeRange": "2.0s - 4.0s",
+      "frameRange": "48 - 96",
+      "actionDescription": "Headlights ignite; radial clock hands and compass needle begin precision high-velocity calibration rotation."
+    },
+    {
+      "beatIndex": 3,
+      "timeRange": "4.0s - 6.0s",
+      "frameRange": "96 - 144",
+      "actionDescription": "Volumetric exhaust smoke clouds billow symmetrically across the concrete surface; compass needle accelerates with visible motion blur."
+    },
+    {
+      "beatIndex": 4,
+      "timeRange": "6.0s - 8.0s",
+      "frameRange": "144 - 192",
+      "actionDescription": "High-torque mechanical rotation settles into dynamic stabilization; deep shadow contact and tungsten rim reflections lock into final position."
+    }
+  ]
+}

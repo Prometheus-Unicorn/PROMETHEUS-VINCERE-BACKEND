@@ -970,3 +970,37 @@ describe("Architectural Background Systems (5 Pillars)", () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// Expansion Plan #1 — origin_wave_color_sweep
+// ---------------------------------------------------------------------------
+describe("origin_wave_color_sweep (expansion plan #1)", () => {
+  test("normalizeRuntimePreset passes through origin_wave_color_sweep", () => {
+    expect(normalizeRuntimePreset("origin_wave_color_sweep")).toBe("origin_wave_color_sweep");
+  });
+
+  test("declares a realized visual variant (unsupportedRuntimeTreatments excludes it)", () => {
+    const unsupported = unsupportedRuntimeTreatments();
+    expect(unsupported).not.toContain("origin_wave_color_sweep");
+  });
+
+  test("resolveEntranceDurationFrames respects the 1150ms intrinsic duration", () => {
+    // 1150ms * 0.9 / 1000 * 30fps = 31.05 → clamped at 30 frames
+    const dur = resolveEntranceDurationFrames({
+      fxPreset: "origin_wave_color_sweep",
+      fps: 30,
+      totalFrames: 90,
+    });
+    expect(dur).toBeGreaterThanOrEqual(20);
+    expect(dur).toBeLessThanOrEqual(30);
+  });
+
+  test("resolveEntranceDurationFrames respects hold floor when constrained", () => {
+    // 25 frames total → hold floor 15 → entrance capped at 10
+    const dur = resolveEntranceDurationFrames({
+      fxPreset: "origin_wave_color_sweep",
+      fps: 30,
+      totalFrames: 25,
+    });
+    expect(25 - dur).toBeGreaterThanOrEqual(15); // hold >= 500ms
+  });
+});

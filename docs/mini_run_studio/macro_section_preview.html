@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prometheus Core — Mineral Extraction & Macro Section Gallery</title>
+  <style>
+    :root {
+      --bg: #07090E;
+      --card-bg: #0E131F;
+      --card-border: rgba(56, 189, 248, 0.25);
+      --card-hover: rgba(56, 189, 248, 0.45);
+      --cyan: #38BDF8;
+      --amber: #F59E0B;
+      --gold: #FFE600;
+      --red: #EF4444;
+      --emerald: #10B981;
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+      --font-mono: "Consolas", "Courier New", monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      padding: 32px 24px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      max-width: 1300px;
+      margin: 0 auto 36px auto;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 24px;
+    }
+
+    .badge-bar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-weight: 700;
+    }
+    .pill-cyan { background: rgba(56, 189, 248, 0.15); color: var(--cyan); border: 1px solid var(--cyan); }
+    .pill-amber { background: rgba(245, 158, 11, 0.15); color: var(--amber); border: 1px solid var(--amber); }
+    .pill-emerald { background: rgba(16, 185, 129, 0.15); color: var(--emerald); border: 1px solid var(--emerald); }
+    .pill-red { background: rgba(239, 68, 68, 0.15); color: var(--red); border: 1px solid var(--red); }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #FFF;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 900px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 28px;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: var(--card-hover);
+    }
+
+    .media-container {
+      position: relative;
+      width: 100%;
+      height: 460px;
+      background: #000;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .media-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      transition: transform 0.4s ease;
+    }
+
+    .card:hover .media-container img {
+      transform: scale(1.03);
+    }
+
+    .media-overlay {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      display: flex;
+      gap: 8px;
+      z-index: 2;
+    }
+
+    .ratio-badge {
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #FFF;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .card-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      flex-grow: 1;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #FFF;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .time-tag {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--cyan);
+    }
+
+    .quote-box {
+      background: rgba(0, 0, 0, 0.4);
+      border-left: 3px solid var(--amber);
+      padding: 10px 12px;
+      border-radius: 0 6px 6px 0;
+      font-style: italic;
+      font-size: 13px;
+      color: #CBD5E1;
+    }
+
+    .section-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--cyan);
+      margin-top: 4px;
+      font-weight: 700;
+    }
+
+    .spec-table {
+      width: 100%;
+      font-size: 12px;
+      border-collapse: collapse;
+    }
+
+    .spec-table td {
+      padding: 4px 0;
+      vertical-align: top;
+    }
+
+    .spec-table td:first-child {
+      color: var(--text-muted);
+      width: 120px;
+      font-weight: 600;
+    }
+
+    .spec-table td:last-child {
+      color: #E2E8F0;
+    }
+
+    .prompt-box {
+      background: #05070B;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #94A3B8;
+      max-height: 100px;
+      overflow-y: auto;
+      line-height: 1.4;
+    }
+
+    .footer-bar {
+      margin-top: 40px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge-bar">
+      <span class="pill pill-cyan">PROMETHEUS CORE V8.2</span>
+      <span class="pill pill-emerald">MINERAL & PHYSICAL EXTRACTION</span>
+      <span class="pill pill-amber">MACRO CINEMATOGRAPHY (STRICT 9:16)</span>
+      <span class="pill pill-red">LANDSCAPE PROHIBITED (0% CONTAMINATION)</span>
+      <span class="pill pill-cyan">ENABLING TOOL ADAPTER: ARMED</span>
+    </div>
+    <h1>Mineral Extraction & Macro Section Image Gallery</h1>
+    <p class="subtitle">
+      Complementary bridge designed to buttress the animation lingua agent. Deconstructs monologue concepts into foundational mineral and physical entities, expands them into 35mm anamorphic macro cinematography (strictly vertical 9:16, zero landscape), and binds broadcast-grade requisite image assets ready for Image-to-Video orchestration (Flux 1.1 / Gemini Image 1.1 &rarr; Veo 3.1).
+    </p>
+  </header>
+
+  <main class="grid">
+
+    <!-- CARD 1: I001 Cast Iron Gear -->
+    <article class="card">
+      <div class="media-container">
+        <div class="media-overlay">
+          <span class="ratio-badge">9:16 VERTICAL</span>
+          <span class="pill pill-amber">I001 • 6s VEO</span>
+        </div>
+        <img src="assets/macro_sections/i001_cast_iron_gear_macro.jpg" alt="Weathered Cast Iron Gear Macro">
+      </div>
+      <div class="card-body">
+        <div class="card-title">
+          <span>Radical Self-Reliance</span>
+          <span class="time-tag">00:04 - 00:10</span>
+        </div>
+        <div class="quote-box">
+          "No one’s coming to save you. No mentor, no investor, no viral post. The only person who can move your life forward is you."
+        </div>
+
+        <div class="section-title">Mineral & Material Foundation</div>
+        <table class="spec-table">
+          <tr><td>Domain:</td><td>Ferrous Metallurgy (Density: 7,200 kg/m³)</td></tr>
+          <tr><td>Material:</td><td>Weathered Cast Iron & Brushed Industrial Steel</td></tr>
+          <tr><td>Acoustic Cue:</td><td>Low-frequency metallic clang with dense 120Hz damping</td></tr>
+          <tr><td>Symbolic Role:</td><td>Uncompromising agency, immovable solitude, momentum</td></tr>
+        </table>
+
+        <div class="section-title">Macro Cinematography & Physics</div>
+        <table class="spec-table">
+          <tr><td>Optics:</td><td>35mm Anamorphic Macro Prime, T1.5 shallow DOF</td></tr>
+          <tr><td>Focus Rig:</td><td>Background Defocus Isolation (The Target Spotlight)</td></tr>
+          <tr><td>Container:</td><td>Polarizing Bevel with Double-State Cast Shadow</td></tr>
+        </table>
+
+        <div class="section-title">Veo 3.1 Image-to-Video Directive</div>
+        <div class="prompt-box">
+          Cinematic 9:16 vertical macro shot animating the provided input image. Heavy cast iron gear begins isolated rotational turn on brushed steel. Background deeply defocused, high-angle chiaroscuro spotlight, subtle Kodak 5219 film grain, 24fps.
+        </div>
+      </div>
+    </article>
+
+    <!-- CARD 2: I002 Research Dossier -->
+    <article class="card">
+      <div class="media-container">
+        <div class="media-overlay">
+          <span class="ratio-badge">9:16 VERTICAL</span>
+          <span class="pill pill-cyan">I002 • 8s VEO</span>
+        </div>
+        <img src="assets/macro_sections/i002_research_dossier_macro.jpg" alt="Research Dossier Macro">
+      </div>
+      <div class="card-body">
+        <div class="card-title">
+          <span>The Research Mode Trap</span>
+          <span class="time-tag">00:15 - 00:23</span>
+        </div>
+        <div class="quote-box">
+          "Because information without execution is just entertainment."
+        </div>
+
+        <div class="section-title">Mineral & Material Foundation</div>
+        <table class="spec-table">
+          <tr><td>Domain:</td><td>Cellulose, Quarter-Sawn Oak & Honed Slate</td></tr>
+          <tr><td>Material:</td><td>Aged Research Dossier, Yellowed Parchment, Raw Wood</td></tr>
+          <tr><td>Acoustic Cue:</td><td>Paper friction slide settling into dense desk thud (280Hz)</td></tr>
+          <tr><td>Symbolic Role:</td><td>Shedding knowledge hoard, clean execution slate</td></tr>
+        </table>
+
+        <div class="section-title">Macro Cinematography & Physics</div>
+        <table class="spec-table">
+          <tr><td>Optics:</td><td>35mm Anamorphic Macro, Rack-Focus Dive (50px &rarr; 0px)</td></tr>
+          <tr><td>Physics:</td><td>The Lateral Friction Slide (The Dossier Reveal)</td></tr>
+          <tr><td>Shadow:</td><td>Double-State Cast Shadow (Contact + Directional Key)</td></tr>
+        </table>
+
+        <div class="section-title">Veo 3.1 Image-to-Video Directive</div>
+        <div class="prompt-box">
+          Cinematic 9:16 vertical macro shot. Rack-focus dive shifts from aged paper mathematical graphs as dossier slides aside to reveal raw illuminated wood desk in spotlight. Shallow DOF, 24fps, Kodak 5219.
+        </div>
+      </div>
+    </article>
+
+    <!-- CARD 3: I003 Systematic Gears -->
+    <article class="card">
+      <div class="media-container">
+        <div class="media-overlay">
+          <span class="ratio-badge">9:16 VERTICAL</span>
+          <span class="pill pill-emerald">I003 • 6s VEO</span>
+        </div>
+        <img src="assets/macro_sections/i003_systematic_gears_macro.jpg" alt="Systematic Precision Gears Macro">
+      </div>
+      <div class="card-body">
+        <div class="card-title">
+          <span>The Systematic Edge</span>
+          <span class="time-tag">01:03 - 01:09</span>
+        </div>
+        <div class="quote-box">
+          "The edge is volume with feedback. Do more than everyone else, but do it with a system."
+        </div>
+
+        <div class="section-title">Mineral & Material Foundation</div>
+        <table class="spec-table">
+          <tr><td>Domain:</td><td>Precision Horology & Alloy Metallurgy (8,500 kg/m³)</td></tr>
+          <tr><td>Material:</td><td>Oiled Tempered Steel & Polished Phosphor Bronze / Brass</td></tr>
+          <tr><td>Acoustic Cue:</td><td>Interlocking gear mesh click, harmonic clockwork shimmer</td></tr>
+          <tr><td>Symbolic Role:</td><td>Systematic leverage, continuous feedback loop</td></tr>
+        </table>
+
+        <div class="section-title">Macro Cinematography & Physics</div>
+        <table class="spec-table">
+          <tr><td>Optics:</td><td>65mm Macro, Volumetric light motes cutting through haze</td></tr>
+          <tr><td>Physics:</td><td>Directional Motion-Streak into Slap-Drop Contact Bounce</td></tr>
+          <tr><td>Motion:</td><td>Rotational Damped Oscillation (+2.5° &rarr; -1.0° &rarr; 0°)</td></tr>
+        </table>
+
+        <div class="section-title">Veo 3.1 Image-to-Video Directive</div>
+        <div class="prompt-box">
+          Cinematic 9:16 vertical macro shot. High-speed precision gears interlocking with laser-etched brass markings under golden volumetric rays in misty workshop. 24fps, organic sub-pixel drift.
+        </div>
+      </div>
+    </article>
+
+    <!-- CARD 4: I004 Glowing Test Tube -->
+    <article class="card">
+      <div class="media-container">
+        <div class="media-overlay">
+          <span class="ratio-badge">9:16 VERTICAL</span>
+          <span class="pill pill-cyan">I004 • 8s VEO</span>
+        </div>
+        <img src="assets/macro_sections/i004_experiment_testtube_macro.jpg" alt="Glowing Test Tube Macro">
+      </div>
+      <div class="card-body">
+        <div class="card-title">
+          <span>The 100-Experiment Asymmetry</span>
+          <span class="time-tag">01:31 - 01:39</span>
+        </div>
+        <div class="quote-box">
+          "One offer, one niche, one channel that truly works. But to find that one, you have to be willing to run a hundred small experiments."
+        </div>
+
+        <div class="section-title">Mineral & Material Foundation</div>
+        <table class="spec-table">
+          <tr><td>Domain:</td><td>Vitreous Luminescence & Optical Glass (2,230 kg/m³)</td></tr>
+          <tr><td>Material:</td><td>Annealed Borosilicate Glass & Incandescent Solute Liquid</td></tr>
+          <tr><td>Acoustic Cue:</td><td>High-frequency crystal chime (3,400Hz) with convection hum</td></tr>
+          <tr><td>Symbolic Role:</td><td>Singular high-leverage breakthrough out of 99 failures</td></tr>
+        </table>
+
+        <div class="section-title">Macro Cinematography & Physics</div>
+        <table class="spec-table">
+          <tr><td>Optics:</td><td>Caustic light refraction, razor condensation, optical bokeh</td></tr>
+          <tr><td>Physics:</td><td>Rack-Focus Dive to sharp snap on central glowing tube</td></tr>
+          <tr><td>Container:</td><td>Polarizing forensic bevel, internal warm chiaroscuro</td></tr>
+        </table>
+
+        <div class="section-title">Veo 3.1 Image-to-Video Directive</div>
+        <div class="prompt-box">
+          Cinematic 9:16 vertical macro shot. Dark blurred background test tubes give way to central glowing cyan/amber incandescent liquid in test tube rack on slate. Chiaroscuro lighting, 24fps.
+        </div>
+      </div>
+    </article>
+
+    <!-- CARD 5: MINERAL BEDROCK Marble Column Foundation -->
+    <article class="card">
+      <div class="media-container">
+        <div class="media-overlay">
+          <span class="ratio-badge">9:16 VERTICAL</span>
+          <span class="pill pill-amber">BEDROCK • 8s VEO</span>
+        </div>
+        <img src="assets/macro_sections/mineral_bedrock_column_macro.jpg" alt="Marble Bedrock Column Foundation">
+      </div>
+      <div class="card-body">
+        <div class="card-title">
+          <span>Bedrock Foundation & Ownership</span>
+          <span class="time-tag">03:04 - 03:42</span>
+        </div>
+        <div class="quote-box">
+          "Your reputation is your real asset... Own the outcome. Everything else is commentary."
+        </div>
+
+        <div class="section-title">Mineral & Material Foundation</div>
+        <table class="spec-table">
+          <tr><td>Domain:</td><td>Mineral Architectural & Petrology (2,700 kg/m³)</td></tr>
+          <tr><td>Material:</td><td>Pentelic Carved Marble & Deep Granitic Bedrock Plinth</td></tr>
+          <tr><td>Acoustic Cue:</td><td>Sub-bass monolithic earth resonance (45Hz) with stone friction</td></tr>
+          <tr><td>Symbolic Role:</td><td>Unshakeable standard, ironclad reliability, permanence</td></tr>
+        </table>
+
+        <div class="section-title">Macro Cinematography & Physics</div>
+        <table class="spec-table">
+          <tr><td>Optics:</td><td>Extreme close-up macro, crystalline calcite veining, micro fissures</td></tr>
+          <tr><td>Physics:</td><td>Subtle continuous sub-pixel upward pedestal drift</td></tr>
+          <tr><td>Lighting:</td><td>Dramatic raking side chiaroscuro sculpting deep stone fluting</td></tr>
+        </table>
+
+        <div class="section-title">Veo 3.1 Image-to-Video Directive</div>
+        <div class="prompt-box">
+          Cinematic 9:16 vertical macro shot. Fluted classical carved marble column base grounded firmly on raw dark granite bedrock. Raking side chiaroscuro reveals crystalline mineral fissures. 24fps.
+        </div>
+      </div>
+    </article>
+
+  </main>
+
+  <footer class="footer-bar">
+    <p>Prometheus Core Architecture — Complementary Mineral-Macro Image Bridge • Generated Manifest: <code>docs/mini_run_studio/mineral_macro_manifest.json</code></p>
+  </footer>
+
+</body>
+</html>

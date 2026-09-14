@@ -28,6 +28,8 @@ import {
   MultiImageStrobeTransition,
   GeometricContactSheet,
 } from "./GeometricArt";
+import { renderOriginWaveColorSweep } from "./KineticText/OriginWaveColorSweep";
+import { renderOriginInkdropSpread } from "./KineticText/OriginInkdropSpread";
 
 // Typography Types
 // ---------------------------------------------------------------------------
@@ -467,6 +469,8 @@ export const INTRINSIC_ANIMATION_DURATIONS_MS: Record<string, number> = {
   canva_tall_glyph_stack: 850,
   electric_blue_emoji_line_revealer: 850,
   dotted_grid_elastic_word_pull: 800,
+  origin_wave_color_sweep: 1150,
+  origin_inkdrop_spread: 950,
 };
 
 export const resolveEntranceDurationFrames = ({
@@ -1009,6 +1013,8 @@ export const RUNTIME_TREATMENT_IDS = new Set([
   "cyber_acid_lime_glitch",
   "vj_kinetic_typography",
   "vjkt",
+  "origin_wave_color_sweep",
+  "origin_inkdrop_spread",
   ...ALL_ARCHETYPE_FX_NAMES,
 ]);
 
@@ -1080,6 +1086,8 @@ const REALIZED_RUNTIME_TREATMENTS = new Set([
   "hook_liquid_ink_metaball_reveal", "hook_zora_aperture_mask_bloom", "hook_motion_blur_word",
   "hook_camera_lens_blur_reveal", "hook_directional_blur_sweep", "zora_mask_reveal",
   "blue_lantern_magnetic",
+  "origin_wave_color_sweep",
+  "origin_inkdrop_spread",
   ...EXTENDED_ANIMA_TREATMENTS,
   ...ALL_ARCHETYPE_FX_NAMES,
 ]);
@@ -3826,7 +3834,88 @@ const KineticLayerRenderer: React.FC<{
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Origin Wave Color Sweep — char-level wave-color→base entrance with blur-in
+  // Preset #1 of the Animation Expansion Plan (expansion plan #1)
+  // ---------------------------------------------------------------------------
+  if (fx === "origin_wave_color_sweep") {
+    // localFrame: frames elapsed since this layer's entrance started
+    const layerEntranceFrame = wordEntranceFrames[0] ?? contentStartFrame;
+    const localFrame = Math.max(0, frame - layerEntranceFrame);
+
+    // Determine the wave (accent) color from the layer's accent or a vibrant offset
+    // of the base color. Never hardcoded: if no accentColor field, derive a warm offset.
+    const waveColor = layer.isHero ? "#00F0FF" : "#FFC107";
+
+    // Drop-from-above variant: triggered when the manifest sets dropFromAbove: true on the layer
+    const dropFromAbove = Boolean((layer as any).dropFromAbove);
+
+    const charElements = renderOriginWaveColorSweep({
+      color: textColor,
+      waveColor,
+      text: layer.text,
+      localFrame,
+      fps,
+      totalFrames,
+      wordPaintStyle,
+      staggerSec: 0.04,
+      dropFromAbove,
+      blurRadius: 4,
+      colorSpread: 100,
+    });
+
+    return (
+      <div
+        style={{
+          ...baseTextStyle,
+          display: "inline-flex",
+          flexWrap: "nowrap",
+          whiteSpace: "nowrap",
+          justifyContent: "center",
+          alignItems: "center",
+          textShadow: kineticTextShadow("0 4px 18px rgba(0, 0, 0, 0.90), 0 2px 6px rgba(0, 0, 0, 0.82)"),
+        }}
+      >
+        {charElements}
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Origin Inkdrop Spread
+  // ---------------------------------------------------------------------------
+  if (fx === "origin_inkdrop_spread") {
+    const layerEntranceFrame = wordEntranceFrames[0] ?? contentStartFrame;
+    const localFrame = Math.max(0, frame - layerEntranceFrame);
+    
+    const wordElements = renderOriginInkdropSpread({
+      color: textColor,
+      text: layer.text,
+      localFrame,
+      fps,
+      totalFrames,
+      wordPaintStyle,
+    });
+
+    return (
+      <div
+        style={{
+          ...baseTextStyle,
+          display: "inline-flex",
+          flexWrap: "nowrap",
+          whiteSpace: "nowrap",
+          justifyContent: "center",
+          alignItems: "center",
+          textShadow: kineticTextShadow("0 4px 18px rgba(0, 0, 0, 0.90), 0 2px 6px rgba(0, 0, 0, 0.82)"),
+        }}
+      >
+        {wordElements}
+      </div>
+    );
+  }
+
   // Universal Fallback Return
+
   return (
     <div style={baseTextStyle}>
       {words.map((word, wIdx) => {

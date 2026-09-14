@@ -1,0 +1,363 @@
+{
+  "version": "1.0.0",
+  "engine": "Prometheus Mineral-Macro Orchestration Bridge",
+  "narrativeTheme": "Uncompromising Agency & Relentless Execution for Business Mastery",
+  "speakerArchetype": "The Maverick Operator",
+  "aspectRatioStandard": "9:16",
+  "landscapeProhibited": true,
+  "activeImageToolProvider": "LocalCatalogImageTool",
+  "thematicBeats": [
+    {
+      "timeRange": "00:00-00:23",
+      "beatName": "Radical Self-Reliance & The Execution Imperative",
+      "coreIdea": "No one is coming to save you; information without execution is merely entertainment. Take ownership and act."
+    },
+    {
+      "timeRange": "00:24-01:02",
+      "beatName": "The Utility Mindset & Compounding Effort",
+      "coreIdea": "Shift from 'feeling ready' to 'being useful.' Solve real problems and choose games where effort builds leverage."
+    },
+    {
+      "timeRange": "01:03-01:29",
+      "beatName": "The Systematic Edge & Identity Through Proof",
+      "coreIdea": "The true edge is volume combined with feedback. Your identity as an operator is forged by undeniable results, not declarations."
+    },
+    {
+      "timeRange": "01:30-01:56",
+      "beatName": "The Experimentation Mindset & The Ego Tax",
+      "coreIdea": "Success comes from relentless experimentation and the willingness to be wrong many times. Pay the 'ego tax' early."
+    },
+    {
+      "timeRange": "01:57-02:49",
+      "beatName": "Leadership, Clarity & Strategic Focus",
+      "coreIdea": "Effective leadership removes friction and prioritizes clarity. Focus on removing the single biggest constraint to 10x results."
+    },
+    {
+      "timeRange": "02:50-03:41",
+      "beatName": "Consistency, Reputation & Outcome Ownership",
+      "coreIdea": "The gap to the next level is consistency under boredom. Your reputation is your greatest asset, and only outcomes truly matter."
+    }
+  ],
+  "macroSections": [
+    {
+      "concept_id": "SR001",
+      "concept_name": "Radical Self-Reliance",
+      "timestamp": "00:00",
+      "start_sec": 0.0,
+      "end_sec": 6.0,
+      "duration_sec": 6.0,
+      "veo_duration_seconds": 6,
+      "spoken_phrase": "No one's coming to save you. The only person who can move your life forward is you.",
+      "mineral_entity": {
+        "entity_id": "min_cast_iron",
+        "material_name": "Weathered Cast Iron & Brushed Industrial Steel",
+        "mineral_domain": "ferrous_metallurgy",
+        "tactile_surface_properties": "Pitted granular iron oxide, micro-scratches, cold brushed steel shearing marks, raw machined bevels",
+        "physical_weight_kg_m3": 7200.0,
+        "acoustic_resonance": "Low-frequency metallic clang with dense 120Hz mechanical damping",
+        "symbolic_grounding": "Radical self-reliance, immovable agency, solitary momentum"
+      },
+      "macro_spec": {
+        "aspect_ratio": "9:16",
+        "lens_type": "35mm Anamorphic Macro Prime (1.5x squeeze)",
+        "focal_length": "65mm Macro Equivalent",
+        "aperture": "T1.5 Ultra-Shallow Depth of Field",
+        "focus_behavior": "Background Defocus Isolation (The Target Spotlight)",
+        "optical_blur_px": 30.0,
+        "lighting_style": "Chiaroscuro key from high 45\u00b0 with Rembrandt fill and volumetric mist rim",
+        "film_emulsion": "Kodak Vision3 5219 500T with fine organic silver halide grain",
+        "framing_container": "The Polarizing Bevel / 38.Whitecheckered Card Elevation",
+        "shadow_mechanics": "The Double-State Cast Shadow (Contact 75% @ 3px + Throw 25% @ 45px)",
+        "secondary_motion": [
+          "Rotational Damped Oscillation (Pendulum settle: +2.5\u00b0 -> -1.0\u00b0 -> 0\u00b0)",
+          "Continuous Sub-Pixel Drift (100% -> 101.8% scale over segment duration)"
+        ]
+      },
+      "requisite_image": {
+        "asset_id": "img_sr001",
+        "file_path": "C:\\Users\\HomePC\\Downloads\\PROMETHEUS-VINCERE-BACKEND\\docs\\mini_run_studio\\assets\\macro_sections\\i001_cast_iron_gear_macro.jpg",
+        "relative_path": "assets/macro_sections/i001_cast_iron_gear_macro.jpg",
+        "aspect_ratio": "9:16",
+        "dimensions": [
+          768,
+          1376
+        ],
+        "mime_type": "image/jpeg",
+        "color_palette": [
+          "#0F172A",
+          "#38BDF8",
+          "#F59E0B",
+          "#E2E8F0"
+        ],
+        "has_alpha": false,
+        "base64_preview": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEBLAEsAAD/6xeGSlAAAQAAAAEAABd8anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAF...[truncated]"
+      },
+      "veo_image_to_video_prompt": "Cinematic 9:16 vertical macro shot animating the provided input image. Tactile surface animation: Pitted granular iron oxide, micro-scratches, cold brushed steel shearing marks, raw machined bevels. Camera execution: 35mm Anamorphic Macro Prime (1.5x squeeze), Background Defocus Isolation (The Target Spotlight), T1.5 Ultra-Shallow Depth of Field. Chiaroscuro key from high 45\u00b0 with Rembrandt fill and volumetric mist rim. Natural organic motion, 6s loop cadence, 24fps, Kodak 5219 film grain.",
+      "veo_text_prompt": "A lone, determined figure, seen from a low angle, struggles to push a massive, rough-hewn granite block up a steep, muddy incline. Volumetric shafts of light pierce through a dusty, industrial-style environment, creating dramatic chiaroscuro. The camera, on 35mm anamorphic with shallow depth of field, captures the scene at 24fps with subtle Kodak 5219 film grain. A heavy, metallic text asset 'NO ONE IS COMING' swings in with a 3D off-axis rotation, casting a dynamic elevation shadow, while a 'OWN YOUR OUTCOME' badge with a polarizing bevel elevates into frame, both isolated by background defocus. Subtle continuous sub-pixel drift and a canvas reaction jolt on asset landing.",
+      "headline": "NO ONE IS COMING",
+      "subline": "OWN YOUR OUTCOME",
+      "badges": [
+        "SELF-RELIANCE",
+        "AGENCY",
+        "ACCOUNTABILITY"
+      ],
+      "status": "READY_FOR_ORCHESTRATION"
+    },
+    {
+      "concept_id": "RMT002",
+      "concept_name": "Information Without Execution",
+      "timestamp": "00:12",
+      "start_sec": 18.0,
+      "end_sec": 22.0,
+      "duration_sec": 4.0,
+      "veo_duration_seconds": 4,
+      "spoken_phrase": "Because information without execution is just entertainment.",
+      "mineral_entity": {
+        "entity_id": "min_parchment_slate",
+        "material_name": "Cellulose Parchment, Raw Quarter-Sawn Oak & Honed Slate",
+        "mineral_domain": "lignin_metamorphic_sediment",
+        "tactile_surface_properties": "Dry fibrous parchment edges, deep open-grain oak pores, matte micro-crystalline slate clefts",
+        "physical_weight_kg_m3": 2400.0,
+        "acoustic_resonance": "Dry paper friction slide settling into dense wooden desk thud (280Hz)",
+        "symbolic_grounding": "Shedding information overload, clean execution slate, focused workspace"
+      },
+      "macro_spec": {
+        "aspect_ratio": "9:16",
+        "lens_type": "35mm Anamorphic Macro Prime (1.5x squeeze)",
+        "focal_length": "65mm Macro Equivalent",
+        "aperture": "T1.5 Ultra-Shallow Depth of Field",
+        "focus_behavior": "The Rack-Focus Dive (Macro-Defocus to Sharp Snap)",
+        "optical_blur_px": 30.0,
+        "lighting_style": "Chiaroscuro key from high 45\u00b0 with Rembrandt fill and volumetric mist rim",
+        "film_emulsion": "Kodak Vision3 5219 500T with fine organic silver halide grain",
+        "framing_container": "The Polarizing Bevel / 38.Whitecheckered Card Elevation",
+        "shadow_mechanics": "The Double-State Cast Shadow (Contact 75% @ 3px + Throw 25% @ 45px)",
+        "secondary_motion": [
+          "Rotational Damped Oscillation (Pendulum settle: +2.5\u00b0 -> -1.0\u00b0 -> 0\u00b0)",
+          "Continuous Sub-Pixel Drift (100% -> 101.8% scale over segment duration)"
+        ]
+      },
+      "requisite_image": {
+        "asset_id": "img_rmt002",
+        "file_path": "C:\\Users\\HomePC\\Downloads\\PROMETHEUS-VINCERE-BACKEND\\docs\\mini_run_studio\\assets\\macro_sections\\i002_research_dossier_macro.jpg",
+        "relative_path": "assets/macro_sections/i002_research_dossier_macro.jpg",
+        "aspect_ratio": "9:16",
+        "dimensions": [
+          768,
+          1376
+        ],
+        "mime_type": "image/jpeg",
+        "color_palette": [
+          "#0F172A",
+          "#38BDF8",
+          "#F59E0B",
+          "#E2E8F0"
+        ],
+        "has_alpha": false,
+        "base64_preview": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEBLAEsAAD/6xeGSlAAAQAAAAEAABd8anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAF...[truncated]"
+      },
+      "veo_image_to_video_prompt": "Cinematic 9:16 vertical macro shot animating the provided input image. Tactile surface animation: Dry fibrous parchment edges, deep open-grain oak pores, matte micro-crystalline slate clefts. Camera execution: 35mm Anamorphic Macro Prime (1.5x squeeze), The Rack-Focus Dive (Macro-Defocus to Sharp Snap), T1.5 Ultra-Shallow Depth of Field. Chiaroscuro key from high 45\u00b0 with Rembrandt fill and volumetric mist rim. Natural organic motion, 4s loop cadence, 24fps, Kodak 5219 film grain.",
+      "veo_text_prompt": "A towering, precarious stack of unread books and glowing digital screens, covered in a fine layer of dust, sits in a dimly lit, cluttered study. A harsh spotlight illuminates the dusty pile, creating dramatic chiaroscuro. The camera, on 35mm anamorphic with shallow depth of field, captures the scene at 24fps with subtle Kodak 5219 film grain. A text asset 'RESEARCH MODE' unfurls with an asymmetric crop, while 'JUST ENTERTAINMENT' slap-drops with a contact bounce, both casting double-state cast shadows. A rack-focus dive transitions from the blurry information pile to a sharp 'EXECUTE' text. Subtle rotational damped oscillation on asset landing.",
+      "headline": "RESEARCH MODE TRAP",
+      "subline": "INFORMATION \u2260 EXECUTION",
+      "badges": [
+        "ACTION",
+        "PRODUCTIVITY",
+        "FOCUS"
+      ],
+      "status": "READY_FOR_ORCHESTRATION"
+    },
+    {
+      "concept_id": "SEF003",
+      "concept_name": "Volume With Feedback",
+      "timestamp": "01:03",
+      "start_sec": 103.0,
+      "end_sec": 109.0,
+      "duration_sec": 6.0,
+      "veo_duration_seconds": 6,
+      "spoken_phrase": "The edge is volume with feedback. Do more than everyone else, but do it with a system.",
+      "mineral_entity": {
+        "entity_id": "min_oiled_brass_steel",
+        "material_name": "Tempered Alloy Steel & Polished Phosphor Bronze / Brass",
+        "mineral_domain": "precision_horology_metallurgy",
+        "tactile_surface_properties": "Hydrophobic mineral oil sheen, razor laser-etched vernier calibrations, specular tooth flanks",
+        "physical_weight_kg_m3": 8500.0,
+        "acoustic_resonance": "Crisp interlocking gear mesh clicks, harmonic clockwork shimmer (1800Hz)",
+        "symbolic_grounding": "Systematic edge, volume with feedback, flywheel compounding"
+      },
+      "macro_spec": {
+        "aspect_ratio": "9:16",
+        "lens_type": "35mm Anamorphic Macro Prime (1.5x squeeze)",
+        "focal_length": "65mm Macro Equivalent",
+        "aperture": "T1.5 Ultra-Shallow Depth of Field",
+        "focus_behavior": "Directional Motion-Streak Entrance",
+        "optical_blur_px": 30.0,
+        "lighting_style": "Chiaroscuro key from high 45\u00b0 with Rembrandt fill and volumetric mist rim",
+        "film_emulsion": "Kodak Vision3 5219 500T with fine organic silver halide grain",
+        "framing_container": "The Polarizing Bevel / 38.Whitecheckered Card Elevation",
+        "shadow_mechanics": "The Double-State Cast Shadow (Contact 75% @ 3px + Throw 25% @ 45px)",
+        "secondary_motion": [
+          "Rotational Damped Oscillation (Pendulum settle: +2.5\u00b0 -> -1.0\u00b0 -> 0\u00b0)",
+          "Continuous Sub-Pixel Drift (100% -> 101.8% scale over segment duration)"
+        ]
+      },
+      "requisite_image": {
+        "asset_id": "img_sef003",
+        "file_path": "C:\\Users\\HomePC\\Downloads\\PROMETHEUS-VINCERE-BACKEND\\docs\\mini_run_studio\\assets\\macro_sections\\i003_systematic_gears_macro.jpg",
+        "relative_path": "assets/macro_sections/i003_systematic_gears_macro.jpg",
+        "aspect_ratio": "9:16",
+        "dimensions": [
+          768,
+          1376
+        ],
+        "mime_type": "image/jpeg",
+        "color_palette": [
+          "#0F172A",
+          "#38BDF8",
+          "#F59E0B",
+          "#E2E8F0"
+        ],
+        "has_alpha": false,
+        "base64_preview": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEBLAEsAAD/6xeGSlAAAQAAAAEAABd8anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAF...[truncated]"
+      },
+      "veo_image_to_video_prompt": "Cinematic 9:16 vertical macro shot animating the provided input image. Tactile surface animation: Hydrophobic mineral oil sheen, razor laser-etched vernier calibrations, specular tooth flanks. Camera execution: 35mm Anamorphic Macro Prime (1.5x squeeze), Directional Motion-Streak Entrance, T1.5 Ultra-Shallow Depth of Field. Chiaroscuro key from high 45\u00b0 with Rembrandt fill and volumetric mist rim. Natural organic motion, 6s loop cadence, 24fps, Kodak 5219 film grain.",
+      "veo_text_prompt": "An intricate, interlocking system of oiled steel and brass gears, with a central, rapidly spinning gear driving smaller, interconnected feedback loop gears. The scene is set in a dark, industrial workshop, with focused, dramatic spotlights creating strong highlights and deep chiaroscuro shadows. The camera, on 35mm anamorphic with shallow depth of field, captures the scene at 24fps with subtle Kodak 5219 film grain. A 'SYSTEMATIC EDGE' text asset slides in with lateral friction, leaving a trailing shadow vector, while a 'VOLUME + FEEDBACK' badge mask-slices from a void. A 'FEEDBACK LOOP' text enters with a directional motion-streak. Subtle continuous sub-pixel drift and rotational damped oscillation on asset landing.",
+      "headline": "THE SYSTEMATIC EDGE",
+      "subline": "VOLUME + FEEDBACK",
+      "badges": [
+        "ITERATION",
+        "OPTIMIZATION",
+        "LEVERAGE"
+      ],
+      "status": "READY_FOR_ORCHESTRATION"
+    },
+    {
+      "concept_id": "HEA004",
+      "concept_name": "The 100-Experiment Asymmetry",
+      "timestamp": "01:30",
+      "start_sec": 135.0,
+      "end_sec": 141.0,
+      "duration_sec": 6.0,
+      "veo_duration_seconds": 6,
+      "spoken_phrase": "But to find that one, you have to be willing to run a hundred small experiments and be wrong ninety-nine times.",
+      "mineral_entity": {
+        "entity_id": "min_borosilicate_crystal",
+        "material_name": "Annealed Borosilicate Glass & Incandescent Solute Liquid",
+        "mineral_domain": "vitreous_luminescence",
+        "tactile_surface_properties": "Optical flint glass refraction, caustic light dispersion, condensation beading, mirror-polished wire rack",
+        "physical_weight_kg_m3": 2230.0,
+        "acoustic_resonance": "High-frequency crystal chime (3400Hz) with bubbling thermal convection",
+        "symbolic_grounding": "The 100-experiment asymmetry, singular breakthrough discovery from failures"
+      },
+      "macro_spec": {
+        "aspect_ratio": "9:16",
+        "lens_type": "35mm Anamorphic Macro Prime (1.5x squeeze)",
+        "focal_length": "65mm Macro Equivalent",
+        "aperture": "T1.5 Ultra-Shallow Depth of Field",
+        "focus_behavior": "Background Defocus Isolation (The Target Spotlight)",
+        "optical_blur_px": 30.0,
+        "lighting_style": "Chiaroscuro key from high 45\u00b0 with Rembrandt fill and volumetric mist rim",
+        "film_emulsion": "Kodak Vision3 5219 500T with fine organic silver halide grain",
+        "framing_container": "The Polarizing Bevel / 38.Whitecheckered Card Elevation",
+        "shadow_mechanics": "The Double-State Cast Shadow (Contact 75% @ 3px + Throw 25% @ 45px)",
+        "secondary_motion": [
+          "Rotational Damped Oscillation (Pendulum settle: +2.5\u00b0 -> -1.0\u00b0 -> 0\u00b0)",
+          "Continuous Sub-Pixel Drift (100% -> 101.8% scale over segment duration)"
+        ]
+      },
+      "requisite_image": {
+        "asset_id": "img_hea004",
+        "file_path": "C:\\Users\\HomePC\\Downloads\\PROMETHEUS-VINCERE-BACKEND\\docs\\mini_run_studio\\assets\\macro_sections\\i004_experiment_testtube_macro.jpg",
+        "relative_path": "assets/macro_sections/i004_experiment_testtube_macro.jpg",
+        "aspect_ratio": "9:16",
+        "dimensions": [
+          768,
+          1376
+        ],
+        "mime_type": "image/jpeg",
+        "color_palette": [
+          "#0F172A",
+          "#38BDF8",
+          "#F59E0B",
+          "#E2E8F0"
+        ],
+        "has_alpha": false,
+        "base64_preview": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEBLAEsAAD/6xeGSlAAAQAAAAEAABd8anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAF...[truncated]"
+      },
+      "veo_image_to_video_prompt": "Cinematic 9:16 vertical macro shot animating the provided input image. Tactile surface animation: Optical flint glass refraction, caustic light dispersion, condensation beading, mirror-polished wire rack. Camera execution: 35mm Anamorphic Macro Prime (1.5x squeeze), Background Defocus Isolation (The Target Spotlight), T1.5 Ultra-Shallow Depth of Field. Chiaroscuro key from high 45\u00b0 with Rembrandt fill and volumetric mist rim. Natural organic motion, 6s loop cadence, 24fps, Kodak 5219 film grain.",
+      "veo_text_prompt": "A vast wall covered with hundreds of quickly sketched ideas and failed prototypes on rough paper, charcoal smudges visible, in a dimly lit inventor's workshop. A single, perfectly crafted, glowing solution made of polished chrome and glowing circuitry is centrally highlighted by an intense spotlight, creating dramatic chiaroscuro against the shadowed failures. The camera, on 35mm anamorphic with shallow depth of field, captures the scene at 24fps with subtle Kodak 5219 film grain. A '99 WRONGS' text asset slap-drops with a contact bounce, while a '1 WIN' badge with a polarizing bevel elevates into frame, both casting double-state cast shadows and isolated by background defocus. Subtle rotational damped oscillation and a canvas reaction jolt on asset landing.",
+      "headline": "THE 100-EXPERIMENT RULE",
+      "subline": "99 WRONGS FOR 1 WIN",
+      "badges": [
+        "EXPERIMENTATION",
+        "RESILIENCE",
+        "INNOVATION"
+      ],
+      "status": "READY_FOR_ORCHESTRATION"
+    },
+    {
+      "concept_id": "MINERAL_BEDROCK",
+      "concept_name": "Bedrock Foundation & Monolithic Ownership",
+      "timestamp": "03:04-03:42",
+      "start_sec": 184.0,
+      "end_sec": 222.0,
+      "duration_sec": 38.0,
+      "veo_duration_seconds": 8,
+      "spoken_phrase": "Your reputation is your real asset... Own the outcome. Everything else is commentary.",
+      "mineral_entity": {
+        "entity_id": "min_marble_bedrock",
+        "material_name": "Pentelic Carved Marble & Deep Granitic Bedrock Plinth",
+        "mineral_domain": "mineral_architectural",
+        "tactile_surface_properties": "Crystalline calcite grain, hand-chiseled fluting, weathered structural fissures, raw basalt foundation",
+        "physical_weight_kg_m3": 2700.0,
+        "acoustic_resonance": "Sub-bass monolithic earth resonance (45Hz) with stone friction grinding",
+        "symbolic_grounding": "Unshakeable principles, ironclad reputation, foundational ownership"
+      },
+      "macro_spec": {
+        "aspect_ratio": "9:16",
+        "lens_type": "35mm Anamorphic Macro Prime (1.5x squeeze)",
+        "focal_length": "65mm Macro Equivalent",
+        "aperture": "T1.5 Ultra-Shallow Depth of Field",
+        "focus_behavior": "The Rack-Focus Dive (Macro-Defocus to Sharp Snap)",
+        "optical_blur_px": 30.0,
+        "lighting_style": "Chiaroscuro key from high 45\u00b0 with Rembrandt fill and volumetric mist rim",
+        "film_emulsion": "Kodak Vision3 5219 500T with fine organic silver halide grain",
+        "framing_container": "The Polarizing Bevel / 38.Whitecheckered Card Elevation",
+        "shadow_mechanics": "The Double-State Cast Shadow (Contact 75% @ 3px + Throw 25% @ 45px)",
+        "secondary_motion": [
+          "Rotational Damped Oscillation (Pendulum settle: +2.5\u00b0 -> -1.0\u00b0 -> 0\u00b0)",
+          "Continuous Sub-Pixel Drift (100% -> 101.8% scale over segment duration)"
+        ]
+      },
+      "requisite_image": {
+        "asset_id": "img_mineral_bedrock",
+        "file_path": "C:\\Users\\HomePC\\Downloads\\PROMETHEUS-VINCERE-BACKEND\\docs\\mini_run_studio\\assets\\macro_sections\\mineral_bedrock_column_macro.jpg",
+        "relative_path": "assets/macro_sections/mineral_bedrock_column_macro.jpg",
+        "aspect_ratio": "9:16",
+        "dimensions": [
+          768,
+          1376
+        ],
+        "mime_type": "image/jpeg",
+        "color_palette": [
+          "#0F172A",
+          "#38BDF8",
+          "#F59E0B",
+          "#E2E8F0"
+        ],
+        "has_alpha": false,
+        "base64_preview": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEBLAEsAAD/6xeGSlAAAQAAAAEAABd8anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAF...[truncated]"
+      },
+      "veo_image_to_video_prompt": "Cinematic 9:16 vertical macro shot animating the classical carved marble column base on dark granite bedrock. Camera performs subtle sub-pixel upward pedestal drift while side chiaroscuro lighting reveals mineral veining and stone texture.",
+      "veo_text_prompt": "Cinematic 9:16 vertical macro shot of classical marble column base grounded on granite bedrock foundation.",
+      "headline": "OWN THE OUTCOME",
+      "subline": "Everything Else Is Commentary.",
+      "badges": [
+        "FOUNDATION",
+        "BEDROCK",
+        "REPUTATION"
+      ],
+      "status": "READY_FOR_ORCHESTRATION"
+    }
+  ]
+}

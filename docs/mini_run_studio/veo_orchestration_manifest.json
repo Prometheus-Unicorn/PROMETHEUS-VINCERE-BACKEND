@@ -1,0 +1,85 @@
+{
+  "engine": "Prometheus Core Veo 3.1 Orchestrator",
+  "target_model": "models/veo-3.1-fast-generate-preview",
+  "style_dogma": "Vox / Iman Gadzhi High-Tier Editorial",
+  "timestamp_generated": "2026-09-08 19:37:41",
+  "total_jobs": 4,
+  "jobs": [
+    {
+      "concept_id": "SR001",
+      "concept_name": "Radical Self-Reliance",
+      "veo_duration_seconds": 6,
+      "status": "QUOTA_RESTRICTED",
+      "operation_name": null,
+      "error_message": "HTTP 429 RESOURCE_EXHAUSTED (Standard Key Preview Tier Quota)",
+      "prompt": "A lone, determined figure, seen from a low angle, struggles to push a massive, rough-hewn granite block up a steep, muddy incline. Volumetric shafts of light pierce through a dusty, industrial-style environment, creating dramatic chiaroscuro. The camera, on 35mm anamorphic with shallow depth of field, captures the scene at 24fps with subtle Kodak 5219 film grain. A heavy, metallic text asset 'NO ONE IS COMING' swings in with a 3D off-axis rotation, casting a dynamic elevation shadow, while a 'OWN YOUR OUTCOME' badge with a polarizing bevel elevates into frame, both isolated by background defocus. Subtle continuous sub-pixel drift and a canvas reaction jolt on asset landing.",
+      "treatment": {
+        "optical_blur": "Background Defocus Isolation (The Target Spotlight)",
+        "spatial_physics": "The 3D Off-Axis Swing (Hinged Rotational Entry)",
+        "framed_container": "The Polarizing Bevel / Card Elevation",
+        "shadow_behavior": "Dynamic Elevation Shadow (Z-Distance Tracking)",
+        "secondary_motion": "Continuous Sub-Pixel Drift (Anti-Stagnation), Canvas Reaction Jolt",
+        "metaphor_scene": "A single, heavy, weathered stone block being pushed uphill by a lone, determined figure.",
+        "tactile_materials": "Rough-hewn granite, worn leather, cold steel, damp earth.",
+        "lighting_atmosphere": "Volumetric shafts of light cutting through a dusty, dimly lit, industrial space, high contrast chiaroscuro."
+      }
+    },
+    {
+      "concept_id": "RMT002",
+      "concept_name": "Information Without Execution",
+      "veo_duration_seconds": 4,
+      "status": "QUOTA_RESTRICTED",
+      "operation_name": null,
+      "error_message": "HTTP 429 RESOURCE_EXHAUSTED (Standard Key Preview Tier Quota)",
+      "prompt": "A towering, precarious stack of unread books and glowing digital screens, covered in a fine layer of dust, sits in a dimly lit, cluttered study. A harsh spotlight illuminates the dusty pile, creating dramatic chiaroscuro. The camera, on 35mm anamorphic with shallow depth of field, captures the scene at 24fps with subtle Kodak 5219 film grain. A text asset 'RESEARCH MODE' unfurls with an asymmetric crop, while 'JUST ENTERTAINMENT' slap-drops with a contact bounce, both casting double-state cast shadows. A rack-focus dive transitions from the blurry information pile to a sharp 'EXECUTE' text. Subtle rotational damped oscillation on asset landing.",
+      "treatment": {
+        "optical_blur": "The Rack-Focus Dive (Macro-Defocus to Sharp Snap)",
+        "spatial_physics": "The Slap-Drop with Contact Bounce",
+        "framed_container": "The Asymmetric Crop / Track Matte Unfurl",
+        "shadow_behavior": "The Double-State Cast Shadow (Ambient Occlusion + Directional Key)",
+        "secondary_motion": "Rotational Damped Oscillation (Pendulum Settle)",
+        "metaphor_scene": "A stack of unread books or digital screens with endless content, slowly gathering dust, contrasted with a single, worn, active workbench.",
+        "tactile_materials": "Aged paper, glowing screen pixels, polished wood, cold metal.",
+        "lighting_atmosphere": "A dimly lit, cluttered study, with a single harsh spotlight on a dusty pile of books, contrasting with a brighter, focused light on a workbench."
+      }
+    },
+    {
+      "concept_id": "SEF003",
+      "concept_name": "Volume With Feedback",
+      "veo_duration_seconds": 6,
+      "status": "QUOTA_RESTRICTED",
+      "operation_name": null,
+      "error_message": "HTTP 429 RESOURCE_EXHAUSTED (Standard Key Preview Tier Quota)",
+      "prompt": "An intricate, interlocking system of oiled steel and brass gears, with a central, rapidly spinning gear driving smaller, interconnected feedback loop gears. The scene is set in a dark, industrial workshop, with focused, dramatic spotlights creating strong highlights and deep chiaroscuro shadows. The camera, on 35mm anamorphic with shallow depth of field, captures the scene at 24fps with subtle Kodak 5219 film grain. A 'SYSTEMATIC EDGE' text asset slides in with lateral friction, leaving a trailing shadow vector, while a 'VOLUME + FEEDBACK' badge mask-slices from a void. A 'FEEDBACK LOOP' text enters with a directional motion-streak. Subtle continuous sub-pixel drift and rotational damped oscillation on asset landing.",
+      "treatment": {
+        "optical_blur": "Directional Motion-Streak Entrance",
+        "spatial_physics": "The Lateral Friction Slide (The Dossier Reveal)",
+        "framed_container": "The Mask-Slice Slide (Wipe-from-Void)",
+        "shadow_behavior": "Trailing Shadow Vector",
+        "secondary_motion": "Continuous Sub-Pixel Drift (Anti-Stagnation), Rotational Damped Oscillation (Pendulum Settle)",
+        "metaphor_scene": "A complex, interlocking gear system, with one central gear spinning rapidly, connected to smaller gears that represent feedback loops and optimization.",
+        "tactile_materials": "Oiled steel, brass, precision-machined components, subtle grease sheen.",
+        "lighting_atmosphere": "A dark, industrial workshop, with focused, dramatic spotlights illuminating the intricate gears, creating strong highlights and deep shadows."
+      }
+    },
+    {
+      "concept_id": "HEA004",
+      "concept_name": "The 100-Experiment Asymmetry",
+      "veo_duration_seconds": 6,
+      "status": "QUOTA_RESTRICTED",
+      "operation_name": null,
+      "error_message": "HTTP 429 RESOURCE_EXHAUSTED (Standard Key Preview Tier Quota)",
+      "prompt": "A vast wall covered with hundreds of quickly sketched ideas and failed prototypes on rough paper, charcoal smudges visible, in a dimly lit inventor's workshop. A single, perfectly crafted, glowing solution made of polished chrome and glowing circuitry is centrally highlighted by an intense spotlight, creating dramatic chiaroscuro against the shadowed failures. The camera, on 35mm anamorphic with shallow depth of field, captures the scene at 24fps with subtle Kodak 5219 film grain. A '99 WRONGS' text asset slap-drops with a contact bounce, while a '1 WIN' badge with a polarizing bevel elevates into frame, both casting double-state cast shadows and isolated by background defocus. Subtle rotational damped oscillation and a canvas reaction jolt on asset landing.",
+      "treatment": {
+        "optical_blur": "Background Defocus Isolation (The Target Spotlight)",
+        "spatial_physics": "The Slap-Drop with Contact Bounce",
+        "framed_container": "The Polarizing Bevel / Card Elevation",
+        "shadow_behavior": "The Double-State Cast Shadow (Ambient Occlusion + Directional Key)",
+        "secondary_motion": "Rotational Damped Oscillation (Pendulum Settle), Canvas Reaction Jolt",
+        "metaphor_scene": "A wall covered with hundreds of small, quickly sketched ideas or failed prototypes, with one single, perfectly crafted, glowing solution in the center.",
+        "tactile_materials": "Rough paper, charcoal smudges, polished chrome, glowing circuitry.",
+        "lighting_atmosphere": "A dimly lit, cluttered inventor's workshop, with a single, intense spotlight on the glowing solution, creating dramatic contrast against the shadowed failures."
+      }
+    }
+  ]
+}

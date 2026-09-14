@@ -1,0 +1,169 @@
+{
+  "narrativeTheme": "Uncompromising Agency & Relentless Execution for Business Mastery",
+  "speakerArchetype": "The Maverick Operator",
+  "thematicBeats": [
+    {
+      "timeRange": "00:00-00:23",
+      "beatName": "Radical Self-Reliance & The Execution Imperative",
+      "coreIdea": "No one is coming to save you; information without execution is merely entertainment. Take ownership and act."
+    },
+    {
+      "timeRange": "00:24-01:02",
+      "beatName": "The Utility Mindset & Compounding Effort",
+      "coreIdea": "Shift from 'feeling ready' to 'being useful.' Solve real problems and choose games where effort builds leverage."
+    },
+    {
+      "timeRange": "01:03-01:29",
+      "beatName": "The Systematic Edge & Identity Through Proof",
+      "coreIdea": "The true edge is volume combined with feedback. Your identity as an operator is forged by undeniable results, not declarations."
+    },
+    {
+      "timeRange": "01:30-01:56",
+      "beatName": "The Experimentation Mindset & The Ego Tax",
+      "coreIdea": "Success comes from relentless experimentation and the willingness to be wrong many times. Pay the 'ego tax' early."
+    },
+    {
+      "timeRange": "01:57-02:49",
+      "beatName": "Leadership, Clarity & Strategic Focus",
+      "coreIdea": "Effective leadership removes friction and prioritizes clarity. Focus on removing the single biggest constraint to 10x results."
+    },
+    {
+      "timeRange": "02:50-03:41",
+      "beatName": "Consistency, Reputation & Outcome Ownership",
+      "coreIdea": "The gap to the next level is consistency under boredom. Your reputation is your greatest asset, and only outcomes truly matter."
+    }
+  ],
+  "selectedInflections": [
+    {
+      "conceptId": "SR001",
+      "conceptName": "Radical Self-Reliance",
+      "timestamp": "00:00",
+      "startSec": 0.0,
+      "endSec": 6.0,
+      "durationSec": 6.0,
+      "spokenPhrase": "No one's coming to save you. The only person who can move your life forward is you.",
+      "visualMetaphor": "A single, heavy, weathered stone block being pushed uphill by a lone, determined figure.",
+      "opticalBlur": "Background Defocus Isolation (The Target Spotlight)",
+      "spatialPhysics": "The 3D Off-Axis Swing (Hinged Rotational Entry)",
+      "framedContainer": "The Polarizing Bevel / Card Elevation",
+      "shadowBehavior": "Dynamic Elevation Shadow (Z-Distance Tracking)",
+      "secondaryMotion": [
+        "Continuous Sub-Pixel Drift (Anti-Stagnation)",
+        "Canvas Reaction Jolt"
+      ],
+      "tactileMaterials": "Rough-hewn granite, worn leather, cold steel, damp earth.",
+      "lightingAtmosphere": "Volumetric shafts of light cutting through a dusty, dimly lit, industrial space, high contrast chiaroscuro.",
+      "veoDurationSeconds": 6,
+      "veoPrompt": "A lone, determined figure, seen from a low angle, struggles to push a massive, rough-hewn granite block up a steep, muddy incline. Volumetric shafts of light pierce through a dusty, industrial-style environment, creating dramatic chiaroscuro. The camera, on 35mm anamorphic with shallow depth of field, captures the scene at 24fps with subtle Kodak 5219 film grain. A heavy, metallic text asset 'NO ONE IS COMING' swings in with a 3D off-axis rotation, casting a dynamic elevation shadow, while a 'OWN YOUR OUTCOME' badge with a polarizing bevel elevates into frame, both isolated by background defocus. Subtle continuous sub-pixel drift and a canvas reaction jolt on asset landing.",
+      "headline": "NO ONE IS COMING",
+      "subline": "OWN YOUR OUTCOME",
+      "badges": [
+        "SELF-RELIANCE",
+        "AGENCY",
+        "ACCOUNTABILITY"
+      ],
+      "accentColor": "#E0B040",
+      "archetype": "The Architect",
+      "highlightColor": "#FFD700",
+      "rhetoricalWeight": 0.95
+    },
+    {
+      "conceptId": "RMT002",
+      "conceptName": "Information Without Execution",
+      "timestamp": "00:12",
+      "startSec": 18.0,
+      "endSec": 22.0,
+      "durationSec": 4.0,
+      "spokenPhrase": "Because information without execution is just entertainment.",
+      "visualMetaphor": "A stack of unread books or digital screens with endless content, slowly gathering dust, contrasted with a single, worn, active workbench.",
+      "opticalBlur": "The Rack-Focus Dive (Macro-Defocus to Sharp Snap)",
+      "spatialPhysics": "The Slap-Drop with Contact Bounce",
+      "framedContainer": "The Asymmetric Crop / Track Matte Unfurl",
+      "shadowBehavior": "The Double-State Cast Shadow (Ambient Occlusion + Directional Key)",
+      "secondaryMotion": [
+        "Rotational Damped Oscillation (Pendulum Settle)"
+      ],
+      "tactileMaterials": "Aged paper, glowing screen pixels, polished wood, cold metal.",
+      "lightingAtmosphere": "A dimly lit, cluttered study, with a single harsh spotlight on a dusty pile of books, contrasting with a brighter, focused light on a workbench.",
+      "veoDurationSeconds": 4,
+      "veoPrompt": "A towering, precarious stack of unread books and glowing digital screens, covered in a fine layer of dust, sits in a dimly lit, cluttered study. A harsh spotlight illuminates the dusty pile, creating dramatic chiaroscuro. The camera, on 35mm anamorphic with shallow depth of field, captures the scene at 24fps with subtle Kodak 5219 film grain. A text asset 'RESEARCH MODE' unfurls with an asymmetric crop, while 'JUST ENTERTAINMENT' slap-drops with a contact bounce, both casting double-state cast shadows. A rack-focus dive transitions from the blurry information pile to a sharp 'EXECUTE' text. Subtle rotational damped oscillation on asset landing.",
+      "headline": "RESEARCH MODE TRAP",
+      "subline": "INFORMATION \u2260 EXECUTION",
+      "badges": [
+        "ACTION",
+        "PRODUCTIVITY",
+        "FOCUS"
+      ],
+      "accentColor": "#C0C0C0",
+      "archetype": "The Strategist",
+      "highlightColor": "#ADD8E6",
+      "rhetoricalWeight": 0.9
+    },
+    {
+      "conceptId": "SEF003",
+      "conceptName": "Volume With Feedback",
+      "timestamp": "01:03",
+      "startSec": 103.0,
+      "endSec": 109.0,
+      "durationSec": 6.0,
+      "spokenPhrase": "The edge is volume with feedback. Do more than everyone else, but do it with a system.",
+      "visualMetaphor": "A complex, interlocking gear system, with one central gear spinning rapidly, connected to smaller gears that represent feedback loops and optimization.",
+      "opticalBlur": "Directional Motion-Streak Entrance",
+      "spatialPhysics": "The Lateral Friction Slide (The Dossier Reveal)",
+      "framedContainer": "The Mask-Slice Slide (Wipe-from-Void)",
+      "shadowBehavior": "Trailing Shadow Vector",
+      "secondaryMotion": [
+        "Continuous Sub-Pixel Drift (Anti-Stagnation)",
+        "Rotational Damped Oscillation (Pendulum Settle)"
+      ],
+      "tactileMaterials": "Oiled steel, brass, precision-machined components, subtle grease sheen.",
+      "lightingAtmosphere": "A dark, industrial workshop, with focused, dramatic spotlights illuminating the intricate gears, creating strong highlights and deep shadows.",
+      "veoDurationSeconds": 6,
+      "veoPrompt": "An intricate, interlocking system of oiled steel and brass gears, with a central, rapidly spinning gear driving smaller, interconnected feedback loop gears. The scene is set in a dark, industrial workshop, with focused, dramatic spotlights creating strong highlights and deep chiaroscuro shadows. The camera, on 35mm anamorphic with shallow depth of field, captures the scene at 24fps with subtle Kodak 5219 film grain. A 'SYSTEMATIC EDGE' text asset slides in with lateral friction, leaving a trailing shadow vector, while a 'VOLUME + FEEDBACK' badge mask-slices from a void. A 'FEEDBACK LOOP' text enters with a directional motion-streak. Subtle continuous sub-pixel drift and rotational damped oscillation on asset landing.",
+      "headline": "THE SYSTEMATIC EDGE",
+      "subline": "VOLUME + FEEDBACK",
+      "badges": [
+        "ITERATION",
+        "OPTIMIZATION",
+        "LEVERAGE"
+      ],
+      "accentColor": "#A0522D",
+      "archetype": "The Engineer",
+      "highlightColor": "#FF8C00",
+      "rhetoricalWeight": 0.92
+    },
+    {
+      "conceptId": "HEA004",
+      "conceptName": "The 100-Experiment Asymmetry",
+      "timestamp": "01:30",
+      "startSec": 135.0,
+      "endSec": 141.0,
+      "durationSec": 6.0,
+      "spokenPhrase": "But to find that one, you have to be willing to run a hundred small experiments and be wrong ninety-nine times.",
+      "visualMetaphor": "A wall covered with hundreds of small, quickly sketched ideas or failed prototypes, with one single, perfectly crafted, glowing solution in the center.",
+      "opticalBlur": "Background Defocus Isolation (The Target Spotlight)",
+      "spatialPhysics": "The Slap-Drop with Contact Bounce",
+      "framedContainer": "The Polarizing Bevel / Card Elevation",
+      "shadowBehavior": "The Double-State Cast Shadow (Ambient Occlusion + Directional Key)",
+      "secondaryMotion": [
+        "Rotational Damped Oscillation (Pendulum Settle)",
+        "Canvas Reaction Jolt"
+      ],
+      "tactileMaterials": "Rough paper, charcoal smudges, polished chrome, glowing circuitry.",
+      "lightingAtmosphere": "A dimly lit, cluttered inventor's workshop, with a single, intense spotlight on the glowing solution, creating dramatic contrast against the shadowed failures.",
+      "veoDurationSeconds": 6,
+      "veoPrompt": "A vast wall covered with hundreds of quickly sketched ideas and failed prototypes on rough paper, charcoal smudges visible, in a dimly lit inventor's workshop. A single, perfectly crafted, glowing solution made of polished chrome and glowing circuitry is centrally highlighted by an intense spotlight, creating dramatic chiaroscuro against the shadowed failures. The camera, on 35mm anamorphic with shallow depth of field, captures the scene at 24fps with subtle Kodak 5219 film grain. A '99 WRONGS' text asset slap-drops with a contact bounce, while a '1 WIN' badge with a polarizing bevel elevates into frame, both casting double-state cast shadows and isolated by background defocus. Subtle rotational damped oscillation and a canvas reaction jolt on asset landing.",
+      "headline": "THE 100-EXPERIMENT RULE",
+      "subline": "99 WRONGS FOR 1 WIN",
+      "badges": [
+        "EXPERIMENTATION",
+        "RESILIENCE",
+        "INNOVATION"
+      ],
+      "accentColor": "#8B0000",
+      "archetype": "The Innovator",
+      "highlightColor": "#FF4500",
+      "rhetoricalWeight": 0.98
+    }
+  ]
+}

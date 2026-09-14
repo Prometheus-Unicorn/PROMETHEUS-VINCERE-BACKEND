@@ -1907,6 +1907,10 @@ ANIMA_RUNTIME_TREATMENTS: List[Dict[str, Any]] = [
     {"id": "hook_liquid_ink_metaball_reveal", "styles": {"hook", "cinematic", "shader"}, "energy": 0.55},
     {"id": "hook_zora_aperture_mask_bloom", "styles": {"hook", "cinematic", "shader"}, "energy": 0.50},
     {"id": "hook_motion_blur_word", "styles": {"hook", "cinematic", "shader"}, "energy": 0.50},
+
+    # Origin Kit Preset Expansion (expansion plan #1-15)
+    {"id": "origin_wave_color_sweep", "styles": {"cinematic", "editorial"}, "energy": 0.45, "tier": "premium_new"},
+    {"id": "origin_inkdrop_spread", "styles": {"cinematic", "editorial"}, "energy": 0.40, "tier": "premium_new"},
 ]
 
 SINGLE_WORD_HERO_PRESETS: set[str] = {
@@ -1981,6 +1985,8 @@ INTRINSIC_ANIMATION_DURATIONS_MS: Dict[str, int] = {
     "canva_tall_glyph_stack": 850,
     "electric_blue_emoji_line_revealer": 850,
     "dotted_grid_elastic_word_pull": 800,
+    "origin_wave_color_sweep": 1150,
+    "origin_inkdrop_spread": 950,
 }
 
 TALL_FONT_RUNTIME_TREATMENTS = (
@@ -2201,6 +2207,8 @@ def _is_behind_subject_candidate_profile(profile: Dict[str, Any]) -> bool:
 
 
 INTRINSIC_ANIMATION_DURATIONS_MS: Dict[str, int] = {
+    "origin_wave_color_sweep": 1150,
+    "origin_inkdrop_spread": 950,
     "cyber_matrix_text_scramble": 1200,
     "metallic_chrome_countup_hero": 1200,
     "metallic_chrome_counter": 1000,
@@ -2653,6 +2661,9 @@ def _select_primary_treatment(
         "top_down_staggered_character_drop", "cinematic_viewport_mask_sweep",
         "hierarchical_asymmetric_lockup", "documentary_lockup_captions", "micro_macro_kinetic_type",
         "cinematic_slide_up", "docking_modifier", "spatial_push_spring",
+        # Origin Kit Expansion Plan — FLUID presets
+        "origin_wave_color_sweep",
+        "origin_inkdrop_spread",
     }
     POP_FAMILY = {
         "metallic_chrome_countup_hero", "metallic_chrome_counter",

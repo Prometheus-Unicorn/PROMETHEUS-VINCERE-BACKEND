@@ -147,20 +147,27 @@ class TypographyExpansionInfraTests(unittest.TestCase):
             "tier": "premium_new",
         }
         original_treatments = list(typography.ANIMA_RUNTIME_TREATMENTS)
+        # All real premium_new preset IDs (already in catalog before dummy is added)
+        real_premium_ids = {item["id"] for item in original_treatments if item.get("tier") == "premium_new"}
         try:
             typography.ANIMA_RUNTIME_TREATMENTS = original_treatments + [dummy_premium]
             policy = typography.resolve_typography_policy()
             signal = {"cadenceMs": 350, "salience": 0.5, "hasNumber": 0.0}
 
-            # Simulate total_assigned = 5, premium_assigned = 0 -> ratio = 0.0 < 0.25
+            # Simulate total_assigned = 5, premium_assigned = 0 → ratio = 0.0 < 0.25
             usage = {item["id"]: 1 for item in original_treatments[:5]}
             usage[dummy_premium["id"]] = 0
+            # Also zero-out all real premium presets so the quota can pick any of them
+            for pid in real_premium_ids:
+                usage[pid] = 0
+
+            all_premium_ids = real_premium_ids | {dummy_premium["id"]}
 
             rng = random.Random(99)
             pick = typography._select_primary_treatment(
                 rng, policy, signal, usage, recent=["other_1", "other_2"], is_single_word=False
             )
-            self.assertEqual(pick, dummy_premium["id"], "Quota enforcement should select available premium candidate")
+            self.assertIn(pick, all_premium_ids, "Quota enforcement should select an available premium candidate")
         finally:
             typography.ANIMA_RUNTIME_TREATMENTS = original_treatments
 
