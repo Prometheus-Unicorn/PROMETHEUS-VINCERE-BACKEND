@@ -38,6 +38,7 @@ import { renderOriginSpotlightReveal } from "./KineticText/OriginSpotlightReveal
 import { renderOriginSpiralIn } from "./KineticText/OriginSpiralIn";
 import { renderOriginCinematicZoomBlur } from "./KineticText/OriginCinematicZoomBlur";
 import { renderOriginLiquidMelt } from "./KineticText/OriginLiquidMelt";
+import { renderOriginSplitflapBoard } from "./KineticText/OriginSplitflapBoard";
 
 // Typography Types
 // ---------------------------------------------------------------------------
@@ -487,6 +488,7 @@ export const INTRINSIC_ANIMATION_DURATIONS_MS: Record<string, number> = {
   origin_spiral_in: 1000,
   origin_cinematic_zoom_blur: 1100,
   origin_liquid_melt: 1100,
+  origin_splitflap_board: 1100,
 };
 
 export const resolveEntranceDurationFrames = ({
@@ -1039,6 +1041,7 @@ export const RUNTIME_TREATMENT_IDS = new Set([
   "origin_spiral_in",
   "origin_cinematic_zoom_blur",
   "origin_liquid_melt",
+  "origin_splitflap_board",
   ...ALL_ARCHETYPE_FX_NAMES,
 ]);
 
@@ -1120,6 +1123,7 @@ const REALIZED_RUNTIME_TREATMENTS = new Set([
   "origin_spiral_in",
   "origin_cinematic_zoom_blur",
   "origin_liquid_melt",
+  "origin_splitflap_board",
   ...EXTENDED_ANIMA_TREATMENTS,
   ...ALL_ARCHETYPE_FX_NAMES,
 ]);
@@ -4156,6 +4160,37 @@ const KineticLayerRenderer: React.FC<{
         }}
       >
         {renderOriginLiquidMelt({
+          color: textColor,
+          text: layer.text,
+          localFrame,
+          fps,
+          totalFrames,
+          wordPaintStyle,
+        })}
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Origin Splitflap Board
+  // ---------------------------------------------------------------------------
+  if (fx === "origin_splitflap_board") {
+    const layerEntranceFrame = wordEntranceFrames[0] ?? contentStartFrame;
+    const localFrame = Math.max(0, frame - layerEntranceFrame);
+    
+    return (
+      <div
+        style={{
+          ...baseTextStyle,
+          display: "inline-flex",
+          flexWrap: "nowrap",
+          whiteSpace: "nowrap",
+          justifyContent: "center",
+          alignItems: "center",
+          textShadow: kineticTextShadow("0 4px 18px rgba(0, 0, 0, 0.90), 0 2px 6px rgba(0, 0, 0, 0.82)"),
+        }}
+      >
+        {renderOriginSplitflapBoard({
           color: textColor,
           text: layer.text,
           localFrame,
