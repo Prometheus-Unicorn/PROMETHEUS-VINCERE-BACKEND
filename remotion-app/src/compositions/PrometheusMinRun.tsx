@@ -31,6 +31,7 @@ import {
 import { renderOriginWaveColorSweep } from "./KineticText/OriginWaveColorSweep";
 import { renderOriginInkdropSpread } from "./KineticText/OriginInkdropSpread";
 import { renderOriginFuzzyNoiseOverlay } from "./KineticText/OriginFuzzyNoiseOverlay";
+import { renderOriginOutlineFlickerFill } from "./KineticText/OriginOutlineFlickerFill";
 
 // Typography Types
 // ---------------------------------------------------------------------------
@@ -473,6 +474,7 @@ export const INTRINSIC_ANIMATION_DURATIONS_MS: Record<string, number> = {
   origin_wave_color_sweep: 1150,
   origin_inkdrop_spread: 950,
   origin_fuzzy_noise_overlay: 800,
+  origin_outline_flicker_fill: 1000,
 };
 
 export const resolveEntranceDurationFrames = ({
@@ -1017,6 +1019,7 @@ export const RUNTIME_TREATMENT_IDS = new Set([
   "vjkt",
   "origin_wave_color_sweep",
   "origin_inkdrop_spread",
+  "origin_outline_flicker_fill",
   ...ALL_ARCHETYPE_FX_NAMES,
 ]);
 
@@ -1090,6 +1093,7 @@ const REALIZED_RUNTIME_TREATMENTS = new Set([
   "blue_lantern_magnetic",
   "origin_wave_color_sweep",
   "origin_inkdrop_spread",
+  "origin_outline_flicker_fill",
   ...EXTENDED_ANIMA_TREATMENTS,
   ...ALL_ARCHETYPE_FX_NAMES,
 ]);
@@ -3942,6 +3946,39 @@ const KineticLayerRenderer: React.FC<{
         }}
       >
         {wordElements}
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Origin Outline Flicker Fill
+  // ---------------------------------------------------------------------------
+  if (fx === "origin_outline_flicker_fill") {
+    const layerEntranceFrame = wordEntranceFrames[0] ?? contentStartFrame;
+    const localFrame = Math.max(0, frame - layerEntranceFrame);
+    
+    const charElements = renderOriginOutlineFlickerFill({
+      color: textColor,
+      text: layer.text,
+      localFrame,
+      fps,
+      totalFrames,
+      wordPaintStyle,
+    });
+
+    return (
+      <div
+        style={{
+          ...baseTextStyle,
+          display: "inline-flex",
+          flexWrap: "nowrap",
+          whiteSpace: "nowrap",
+          justifyContent: "center",
+          alignItems: "center",
+          textShadow: kineticTextShadow("0 4px 18px rgba(0, 0, 0, 0.90), 0 2px 6px rgba(0, 0, 0, 0.82)"),
+        }}
+      >
+        {charElements}
       </div>
     );
   }

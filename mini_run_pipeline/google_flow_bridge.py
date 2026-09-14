@@ -5,16 +5,21 @@ Reads one JSON line from stdin: {"command": "...", "args": {...}}
 Writes one JSON result line to stdout.
 
 Supported commands:
-  generate_video  — dispatches Playwright browser automation to Google Flow
-  poll_status     — checks the generation state of a known job
-  download_asset  — downloads the finished MP4 to the output dir
+  generate_video  — launches a detached worker process that drives Playwright to Google Flow
+  poll_status     — checks a job state file written by the worker
+  download_asset  — confirms the MP4 is present and returns its path
+
+Worker pattern (avoids event-loop hang):
+  generate_video spawns `python -m mini_run_pipeline.google_flow_worker <job_file>`
+  detached (no wait). The worker writes a JSON state file under OUTPUT_DIR/.jobs/.
+  poll_status reads that file. This means the bridge process exits immediately.
 """
 
 from __future__ import annotations
 
-import asyncio
 import json
 import os
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -26,12 +31,8 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from mini_run_pipeline.google_flow_automation import GoogleFlowBrowserEngine  # noqa: E402
-
-# In-process job state (lives for the duration of the bridge process; gateway holds jobIds)
-_ACTIVE_JOBS: dict[str, dict] = {}
-
 OUTPUT_DIR = Path("docs/mini_run_studio/flow_clips")
+JOBS_DIR = OUTPUT_DIR / ".jobs"
 
 
 # ---------------------------------------------------------------------------

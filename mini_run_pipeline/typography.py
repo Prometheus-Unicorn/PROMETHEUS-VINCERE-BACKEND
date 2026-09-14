@@ -1911,6 +1911,7 @@ ANIMA_RUNTIME_TREATMENTS: List[Dict[str, Any]] = [
     # Origin Kit Preset Expansion (expansion plan #1-15)
     {"id": "origin_wave_color_sweep", "styles": {"cinematic", "editorial"}, "energy": 0.45, "tier": "premium_new"},
     {"id": "origin_inkdrop_spread", "styles": {"cinematic", "editorial"}, "energy": 0.40, "tier": "premium_new"},
+    {"id": "origin_outline_flicker_fill", "styles": {"kinetic", "editorial"}, "energy": 0.70, "tier": "premium_new"},
 ]
 
 SINGLE_WORD_HERO_PRESETS: set[str] = {
@@ -1989,6 +1990,7 @@ INTRINSIC_ANIMATION_DURATIONS_MS: Dict[str, int] = {
     "origin_wave_color_sweep": 1150,
     "origin_inkdrop_spread": 950,
     "origin_fuzzy_noise_overlay": 800,
+    "origin_outline_flicker_fill": 1000,
 }
 
 TALL_FONT_RUNTIME_TREATMENTS = (
@@ -2212,6 +2214,7 @@ INTRINSIC_ANIMATION_DURATIONS_MS: Dict[str, int] = {
     "origin_wave_color_sweep": 1150,
     "origin_inkdrop_spread": 950,
     "origin_fuzzy_noise_overlay": 800,
+    "origin_outline_flicker_fill": 1000,
     "cyber_matrix_text_scramble": 1200,
     "metallic_chrome_countup_hero": 1200,
     "metallic_chrome_counter": 1000,
@@ -2669,6 +2672,7 @@ def _select_primary_treatment(
         "origin_inkdrop_spread",
     }
     POP_FAMILY = {
+        "origin_outline_flicker_fill",
         "metallic_chrome_countup_hero", "metallic_chrome_counter",
         "apple_keynote_headline_punch", "kinetic_chromatic_typewriter", "kinetic_impact_snap",
     }
