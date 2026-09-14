@@ -1943,6 +1943,7 @@ SIGNATURE_EFFECTS: set[str] = {
 }
 
 ANIMA_OVERLAY_TREATMENTS = [
+    "origin_fuzzy_noise_overlay",
     "cinematic_viewport_mask_sweep",
     "refraction_shimmer_mask",
 ]
@@ -1987,6 +1988,7 @@ INTRINSIC_ANIMATION_DURATIONS_MS: Dict[str, int] = {
     "dotted_grid_elastic_word_pull": 800,
     "origin_wave_color_sweep": 1150,
     "origin_inkdrop_spread": 950,
+    "origin_fuzzy_noise_overlay": 800,
 }
 
 TALL_FONT_RUNTIME_TREATMENTS = (
@@ -2209,6 +2211,7 @@ def _is_behind_subject_candidate_profile(profile: Dict[str, Any]) -> bool:
 INTRINSIC_ANIMATION_DURATIONS_MS: Dict[str, int] = {
     "origin_wave_color_sweep": 1150,
     "origin_inkdrop_spread": 950,
+    "origin_fuzzy_noise_overlay": 800,
     "cyber_matrix_text_scramble": 1200,
     "metallic_chrome_countup_hero": 1200,
     "metallic_chrome_counter": 1000,

@@ -30,6 +30,7 @@ import {
 } from "./GeometricArt";
 import { renderOriginWaveColorSweep } from "./KineticText/OriginWaveColorSweep";
 import { renderOriginInkdropSpread } from "./KineticText/OriginInkdropSpread";
+import { renderOriginFuzzyNoiseOverlay } from "./KineticText/OriginFuzzyNoiseOverlay";
 
 // Typography Types
 // ---------------------------------------------------------------------------
@@ -471,6 +472,7 @@ export const INTRINSIC_ANIMATION_DURATIONS_MS: Record<string, number> = {
   dotted_grid_elastic_word_pull: 800,
   origin_wave_color_sweep: 1150,
   origin_inkdrop_spread: 950,
+  origin_fuzzy_noise_overlay: 800,
 };
 
 export const resolveEntranceDurationFrames = ({
@@ -3894,6 +3896,36 @@ const KineticLayerRenderer: React.FC<{
       localFrame,
       fps,
       totalFrames,
+      wordPaintStyle,
+    });
+
+    return (
+      <div
+        style={{
+          ...baseTextStyle,
+          display: "inline-flex",
+          flexWrap: "nowrap",
+          whiteSpace: "nowrap",
+          justifyContent: "center",
+          alignItems: "center",
+          textShadow: kineticTextShadow("0 4px 18px rgba(0, 0, 0, 0.90), 0 2px 6px rgba(0, 0, 0, 0.82)"),
+        }}
+      >
+        {wordElements}
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Origin Fuzzy Noise Overlay
+  // ---------------------------------------------------------------------------
+  if (fx === "origin_fuzzy_noise_overlay") {
+    // this overlay applies continuously, deterministic by frame
+    const wordElements = renderOriginFuzzyNoiseOverlay({
+      color: textColor,
+      text: layer.text,
+      frame,
+      fps,
       wordPaintStyle,
     });
 

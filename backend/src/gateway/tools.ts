@@ -1,4 +1,6 @@
 import { randomUUID } from "node:crypto";
+import { spawn } from "node:child_process";
+import path from "node:path";
 import type { ToolDefinition, AuthContext } from "./types.js";
 import {
   sanitizeDto,
@@ -7,6 +9,51 @@ import {
   assertSandboxedPath,
   SecurityViolationError
 } from "./security.js";
+
+// ---------------------------------------------------------------------------
+// Google Flow MCP Bridge Utilities
+// ---------------------------------------------------------------------------
+
+/**
+ * Calls the Python Google Flow bridge via stdin/stdout JSON protocol.
+ * The Python bridge is `mini_run_pipeline/google_flow_bridge.py` at repo root.
+ * It reads one JSON line from stdin and writes one JSON result line to stdout.
+ */
+async function callFlowBridge(command: string, args: Record<string, unknown>): Promise<Record<string, unknown>> {
+  return new Promise((resolve, reject) => {
+    const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../../../../");
+    const proc = spawn("python", ["-m", "mini_run_pipeline.google_flow_bridge"], {
+      cwd: repoRoot,
+      stdio: ["pipe", "pipe", "pipe"],
+      env: { ...process.env }
+    });
+
+    const payload = JSON.stringify({ command, args }) + "\n";
+    let stdout = "";
+    let stderr = "";
+
+    proc.stdout.on("data", (chunk: Buffer) => { stdout += chunk.toString(); });
+    proc.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
+
+    proc.on("close", (code: number | null) => {
+      if (code !== 0) {
+        reject(new Error(`Flow bridge exited ${code}: ${stderr.slice(0, 400)}`));
+        return;
+      }
+      try {
+        const lastLine = stdout.trim().split("\n").filter(Boolean).pop() ?? "";
+        const result = JSON.parse(lastLine) as Record<string, unknown>;
+        if (result.error) reject(new Error(String(result.error)));
+        else resolve(result);
+      } catch (e) {
+        reject(new Error(`Failed to parse flow bridge output: ${stdout.slice(0, 200)}`));
+      }
+    });
+
+    proc.stdin.write(payload);
+    proc.stdin.end();
+  });
+}
 
 // In-memory tenant-scoped job store for gateway jobs
 interface JobRecord {
@@ -348,13 +395,148 @@ export const getAssetMetadataTool: ToolDefinition<
   }
 };
 
+// ---------------------------------------------------------------------------
+// Google Flow MCP Tools
+// ---------------------------------------------------------------------------
+
+export const flowGenerateVideoTool: ToolDefinition<
+  {
+    prompt: string;
+    durationSec?: number;
+    aspectRatio?: "9:16" | "16:9";
+    model?: string;
+    outputFilename?: string;
+  },
+  {
+    jobId: string;
+    status: string;
+    prompt: string;
+    durationSec: number;
+    aspectRatio: string;
+    model: string;
+    dispatchedAt: number;
+  }
+> = {
+  name: "flow_generate_video",
+  description:
+    "Dispatches a video generation request to Google Flow using the configured Veo model. Returns a jobId for polling status and downloading the resulting MP4.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      prompt: {
+        type: "string",
+        description: "The imperative visual prompt describing the video to generate (max 1000 chars)."
+      },
+      durationSec: {
+        type: "number",
+        description: "Video duration in seconds (5 or 8). Defaults to 6."
+      },
+      aspectRatio: {
+        type: "string",
+        enum: ["9:16", "16:9"],
+        description: "Aspect ratio of the generated video. Defaults to 9:16 vertical."
+      },
+      model: {
+        type: "string",
+        description: "Veo model variant to use. Defaults to 'Veo 3.1 - Fast'."
+      },
+      outputFilename: {
+        type: "string",
+        description: "Optional filename for the downloaded MP4 (without path)."
+      }
+    },
+    required: ["prompt"]
+  },
+  execute: async (input, ctx: AuthContext) => {
+    const cleanPrompt = sanitizeInputText(input.prompt).slice(0, 1000);
+    if (!cleanPrompt) throw new Error("Validation error: prompt cannot be empty.");
+
+    const result = await callFlowBridge("generate_video", {
+      prompt: cleanPrompt,
+      duration_sec: input.durationSec ?? 6,
+      aspect_ratio: input.aspectRatio ?? "9:16",
+      model: input.model ?? "Veo 3.1 - Fast",
+      output_filename: input.outputFilename ?? `flow_${randomUUID().slice(0, 8)}.mp4`
+    });
+
+    return sanitizeDto(result) as ReturnType<typeof flowGenerateVideoTool.execute> extends Promise<infer R> ? R : never;
+  }
+};
+
+export const flowPollStatusTool: ToolDefinition<
+  { jobId: string },
+  {
+    jobId: string;
+    status: string;
+    progressPercent: number;
+    message?: string;
+    mp4Path?: string;
+  }
+> = {
+  name: "flow_poll_status",
+  description:
+    "Polls the status of an active Google Flow video generation job. Returns progress percentage and the local mp4Path when generation is complete.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      jobId: {
+        type: "string",
+        description: "The jobId returned by flow_generate_video."
+      }
+    },
+    required: ["jobId"]
+  },
+  execute: async (input, ctx: AuthContext) => {
+    const result = await callFlowBridge("poll_status", { job_id: input.jobId });
+    return sanitizeDto(result) as ReturnType<typeof flowPollStatusTool.execute> extends Promise<infer R> ? R : never;
+  }
+};
+
+export const flowDownloadAssetTool: ToolDefinition<
+  { jobId: string; outputFilename?: string },
+  {
+    jobId: string;
+    mp4Path: string;
+    sizeBytes: number;
+    status: string;
+  }
+> = {
+  name: "flow_download_asset",
+  description:
+    "Downloads the completed MP4 from a finished Google Flow generation job into the local repository at docs/mini_run_studio/flow_clips/. Returns the local file path and size.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      jobId: {
+        type: "string",
+        description: "The jobId returned by flow_generate_video."
+      },
+      outputFilename: {
+        type: "string",
+        description: "Optional override for the output filename."
+      }
+    },
+    required: ["jobId"]
+  },
+  execute: async (input, ctx: AuthContext) => {
+    const result = await callFlowBridge("download_asset", {
+      job_id: input.jobId,
+      output_filename: input.outputFilename
+    });
+    return sanitizeDto(result) as ReturnType<typeof flowDownloadAssetTool.execute> extends Promise<infer R> ? R : never;
+  }
+};
+
 // All registered tools
 export const REGISTERED_TOOLS: ToolDefinition<any, any>[] = [
   createEditorialRenderJobTool,
   getRenderJobStatusTool,
   searchAudioCatalogTool,
   planKineticCaptionsTool,
-  getAssetMetadataTool
+  getAssetMetadataTool,
+  flowGenerateVideoTool,
+  flowPollStatusTool,
+  flowDownloadAssetTool,
 ];
 
 // Audit all tool docstrings on startup
