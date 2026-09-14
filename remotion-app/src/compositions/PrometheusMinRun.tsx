@@ -42,6 +42,7 @@ import { renderOriginSplitflapBoard } from "./KineticText/OriginSplitflapBoard";
 import { renderOriginDominoCascade } from "./KineticText/OriginDominoCascade";
 import { renderOriginShinyPill } from "./KineticText/OriginShinyPill";
 import { renderOriginRippleWave } from "./KineticText/OriginRippleWave";
+import { renderPopcornCharBurst } from "./KineticText/PopcornCharBurst";
 
 // Typography Types
 // ---------------------------------------------------------------------------
@@ -495,6 +496,7 @@ export const INTRINSIC_ANIMATION_DURATIONS_MS: Record<string, number> = {
   origin_domino_cascade: 1200,
   origin_shiny_pill: 1100,
   origin_ripple_wave: 2000,
+  popcorn_char_burst: 1200,
 };
 
 export const resolveEntranceDurationFrames = ({
@@ -1050,6 +1052,7 @@ export const RUNTIME_TREATMENT_IDS = new Set([
   "origin_splitflap_board",
   "origin_domino_cascade",
   "origin_shiny_pill",
+  "popcorn_char_burst",
   ...ALL_ARCHETYPE_FX_NAMES,
 ]);
 
@@ -1134,6 +1137,7 @@ const REALIZED_RUNTIME_TREATMENTS = new Set([
   "origin_splitflap_board",
   "origin_domino_cascade",
   "origin_shiny_pill",
+  "popcorn_char_burst",
   ...EXTENDED_ANIMA_TREATMENTS,
   ...ALL_ARCHETYPE_FX_NAMES,
 ]);
@@ -4296,6 +4300,37 @@ const KineticLayerRenderer: React.FC<{
           text: layer.text,
           frame,
           fps,
+          wordPaintStyle,
+        })}
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Popcorn Char Burst
+  // ---------------------------------------------------------------------------
+  if (fx === "popcorn_char_burst") {
+    const layerEntranceFrame = wordEntranceFrames[0] ?? contentStartFrame;
+    const localFrame = Math.max(0, frame - layerEntranceFrame);
+    
+    return (
+      <div
+        style={{
+          ...baseTextStyle,
+          display: "inline-flex",
+          flexWrap: "nowrap",
+          whiteSpace: "nowrap",
+          justifyContent: "center",
+          alignItems: "center",
+          textShadow: kineticTextShadow("0 4px 18px rgba(0, 0, 0, 0.90), 0 2px 6px rgba(0, 0, 0, 0.82)"),
+        }}
+      >
+        {renderPopcornCharBurst({
+          color: textColor,
+          text: layer.text,
+          localFrame,
+          fps,
+          totalFrames,
           wordPaintStyle,
         })}
       </div>

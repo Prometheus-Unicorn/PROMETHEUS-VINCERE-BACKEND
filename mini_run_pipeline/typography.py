@@ -1921,6 +1921,7 @@ ANIMA_RUNTIME_TREATMENTS: List[Dict[str, Any]] = [
     {"id": "origin_splitflap_board", "styles": {"kinetic", "editorial"}, "energy": 0.70, "tier": "premium_new"},
     {"id": "origin_domino_cascade", "styles": {"kinetic", "editorial"}, "energy": 0.70, "tier": "premium_new"},
     {"id": "origin_shiny_pill", "styles": {"editorial", "special_ops"}, "energy": 0.45, "tier": "premium_new"},
+    {"id": "popcorn_char_burst", "styles": {"kinetic", "editorial"}, "energy": 0.68, "tier": "premium_new"},
 ]
 
 SINGLE_WORD_HERO_PRESETS: set[str] = {
@@ -2709,6 +2710,7 @@ def _select_primary_treatment(
         "origin_cinematic_zoom_blur",
         "origin_splitflap_board",
         "origin_domino_cascade",
+        "popcorn_char_burst",
         "metallic_chrome_countup_hero", "metallic_chrome_counter",
         "apple_keynote_headline_punch", "kinetic_chromatic_typewriter", "kinetic_impact_snap",
     }
@@ -4482,6 +4484,10 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
         "profileV2CatalogVersion": "typography-profile-v2-catalog-1.0",
     }
     return font_manifest
+
+
+
+
 
 
 
