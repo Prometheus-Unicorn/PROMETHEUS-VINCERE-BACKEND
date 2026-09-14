@@ -35,6 +35,7 @@ import { renderOriginOutlineFlickerFill } from "./KineticText/OriginOutlineFlick
 import { renderOriginMatrixLetterRain } from "./KineticText/OriginMatrixLetterRain";
 import { renderOriginRevealWipe } from "./KineticText/OriginRevealWipe";
 import { renderOriginSpotlightReveal } from "./KineticText/OriginSpotlightReveal";
+import { renderOriginSpiralIn } from "./KineticText/OriginSpiralIn";
 
 // Typography Types
 // ---------------------------------------------------------------------------
@@ -481,6 +482,7 @@ export const INTRINSIC_ANIMATION_DURATIONS_MS: Record<string, number> = {
   origin_matrix_letter_rain: 1200,
   origin_reveal_wipe: 850,
   origin_spotlight_reveal: 1100,
+  origin_spiral_in: 1000,
 };
 
 export const resolveEntranceDurationFrames = ({
@@ -1025,10 +1027,12 @@ export const RUNTIME_TREATMENT_IDS = new Set([
   "vjkt",
   "origin_wave_color_sweep",
   "origin_inkdrop_spread",
+  "origin_fuzzy_noise_overlay",
   "origin_outline_flicker_fill",
   "origin_matrix_letter_rain",
   "origin_reveal_wipe",
   "origin_spotlight_reveal",
+  "origin_spiral_in",
   ...ALL_ARCHETYPE_FX_NAMES,
 ]);
 
@@ -1107,6 +1111,7 @@ const REALIZED_RUNTIME_TREATMENTS = new Set([
   "origin_matrix_letter_rain",
   "origin_reveal_wipe",
   "origin_spotlight_reveal",
+  "origin_spiral_in",
   ...EXTENDED_ANIMA_TREATMENTS,
   ...ALL_ARCHETYPE_FX_NAMES,
 ]);
@@ -4056,6 +4061,37 @@ const KineticLayerRenderer: React.FC<{
           totalFrames,
           wordPaintStyle,
           children: layer.text,
+        })}
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Origin Spiral In
+  // ---------------------------------------------------------------------------
+  if (fx === "origin_spiral_in") {
+    const layerEntranceFrame = wordEntranceFrames[0] ?? contentStartFrame;
+    const localFrame = Math.max(0, frame - layerEntranceFrame);
+    
+    return (
+      <div
+        style={{
+          ...baseTextStyle,
+          display: "inline-flex",
+          flexWrap: "nowrap",
+          whiteSpace: "nowrap",
+          justifyContent: "center",
+          alignItems: "center",
+          textShadow: kineticTextShadow("0 4px 18px rgba(0, 0, 0, 0.90), 0 2px 6px rgba(0, 0, 0, 0.82)"),
+        }}
+      >
+        {renderOriginSpiralIn({
+          color: textColor,
+          text: layer.text,
+          localFrame,
+          fps,
+          totalFrames,
+          wordPaintStyle,
         })}
       </div>
     );
