@@ -150,5 +150,34 @@ class AuditRound19PlacementFluidityTests(unittest.TestCase):
         )
 
 
+    def test_cranial_behind_subject_satisfies_anti_sequestering_floor(self):
+        """Behind-subject cranial placements must satisfy yPercent >= 15.0% to pass policy check."""
+        for head_top in [0.14, 0.16, 0.18, 0.22, 0.25]:
+            obs = {
+                "frames": [
+                    {
+                        "sourceMs": 500,
+                        "faceBox": {"x": 0.40, "y": head_top, "width": 0.20, "height": 0.28},
+                        "subjectBox": {"x": 0.30, "y": head_top, "width": 0.40, "height": 0.65},
+                    }
+                ]
+            }
+            chunks = [{"text": "RESOLD", "subjectLayering": {"behindSubject": True}}]
+            placements = plan_subject_safe_placements(chunks, obs)
+            p = placements[0]
+            if p.get("dominantZone") == "cranial_crown":
+                y_val = float(p["yPercent"].rstrip("%")) / 100.0
+                self.assertGreaterEqual(
+                    y_val,
+                    0.150,
+                    f"Cranial behind-subject placement must be >= 15.0% at head_top={head_top}; got {y_val}",
+                )
+                self.assertLessEqual(
+                    y_val,
+                    0.220,
+                    f"Cranial behind-subject placement must be <= 22.0% at head_top={head_top}; got {y_val}",
+                )
+
+
 if __name__ == "__main__":
     unittest.main()

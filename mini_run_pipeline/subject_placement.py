@@ -344,7 +344,7 @@ def analyze_cranial_negative_space(
         else:
             text_x = round(max(0.35, min(0.45, head_mid_x - 0.12)), 3)
 
-        center_y = round(max(0.07, min(0.16, actual_head_top - 0.07)), 3)
+        center_y = round(max(0.150, min(0.190, actual_head_top - 0.09)), 3)
 
         return {
             "dominantZone": "cranial_crown",
