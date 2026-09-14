@@ -21,6 +21,7 @@ from typing import Any, Dict, List, Optional
 from .motif import resolve_brand_motif, motif_to_brand_palette
 from . import listicles
 from . import typography_catalog as _catalog
+from .visual_helpers import detect_and_plan_visual_helpers
 
 FONT_JSON_DIR = Path(__file__).resolve().parent.parent / "Yuan Prometheus Screenshots" / "font JSON"
 FONT_PAIRS_DIR = Path(__file__).resolve().parent.parent / "Yuan Prometheus Screenshots" / "font pairing and placement"
@@ -2876,6 +2877,7 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
     # Selection is deterministic when an explicit seed is provided in design_override,
     # otherwise an entropy nonce is generated for dynamic runs.
     design_input = design_override or {}
+    visual_helpers_plan = detect_and_plan_visual_helpers(chunks, design_input)
     explicit_seed = design_input.get("seed")
     if explicit_seed is not None and str(explicit_seed).strip():
         seed_str = str(explicit_seed).strip()
@@ -4217,6 +4219,10 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
             "annotations": v2_prof.get("annotations", []) if v2_prof else [],
             "subjectZone": v2_prof.get("subjectZone", {}) if v2_prof else {},
             "frameTreatment": v2_prof.get("frameTreatment", {}) if v2_prof else {},
+            "visualHelper": visual_helpers_plan.get(idx) or chunk.get("visualHelper"),
+            "photoTreatment": chunk.get("photoTreatment"),
+            "strobeTransition": chunk.get("strobeTransition"),
+            "contactSheet": chunk.get("contactSheet"),
         })
 
     difference_chunk_indices = _select_difference_chunk_indices(
@@ -4298,6 +4304,12 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
             "see_through_glass_letterform",
             "hierarchical_asymmetric_lockup",
         ],
+        "geometricArtCatalog": {
+            "treatments": ["geometric_drafting", "dither_print", "contour_atlas", "spectral_curtain"],
+            "activePhotoTreatments": sum(1 for c in manifest_chunks if c.get("photoTreatment")),
+            "activeStrobeTransitions": sum(1 for c in manifest_chunks if c.get("strobeTransition")),
+            "activeContactSheets": sum(1 for c in manifest_chunks if c.get("contactSheet")),
+        },
         "semanticConceptLedger": concept_ledger.as_dict(),
         "chunks": manifest_chunks,
         "profile": manifest_chunks[0].get("profile") if manifest_chunks else None,

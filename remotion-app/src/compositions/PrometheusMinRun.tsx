@@ -22,6 +22,12 @@ import type {
   TypographyInlineTokenSwap,
   TypographyFrameTreatment,
 } from "@prometheus/shared-types";
+import { VisualHelperStage } from "./VisualHelpers";
+import {
+  GeometricArtStage,
+  MultiImageStrobeTransition,
+  GeometricContactSheet,
+} from "./GeometricArt";
 
 // Typography Types
 // ---------------------------------------------------------------------------
@@ -643,6 +649,10 @@ export type CaptionChunk = {
   annotations?: TypographyAnnotation[];
   subjectZone?: TypographySubjectZone;
   frameTreatment?: TypographyFrameTreatment;
+  visualHelper?: any;
+  photoTreatment?: any;
+  strobeTransition?: any;
+  contactSheet?: any;
 };
 
 export type MiniRunScene = {
@@ -6910,6 +6920,33 @@ const TransitionFXStage: React.FC<{
     }
   }
 
+  // 6. Multi-Image Strobe Transition (Rapid Photo Flash Cut / Shutter Strobe Burst):
+  if (
+    effect === "multi_image_strobe" ||
+    effect === "strobe_burst" ||
+    effect === "multi_image_flash_cut" ||
+    (activeTrans as any).strobeImages
+  ) {
+    const strobeImages = (activeTrans as any).images || (activeTrans as any).strobeImages || [];
+    const elapsedFrames = Math.max(0, Math.round((nowMs - activeTrans.startMs) / (1000 / fps)));
+    const totalFrames = Math.max(1, Math.round(dur / (1000 / fps)));
+    return (
+      <AbsoluteFill style={{ zIndex: 65, pointerEvents: "none" }}>
+        <MultiImageStrobeTransition
+          images={strobeImages}
+          frame={elapsedFrames}
+          fps={fps}
+          durationInFrames={totalFrames}
+          strobeInterval={(activeTrans as any).strobeInterval || 1}
+          enableLensFlash={(activeTrans as any).enableLensFlash !== false}
+          enableChromaticAberration={(activeTrans as any).enableChromaticAberration !== false}
+          enableDraftingHUD={(activeTrans as any).enableDraftingHUD !== false}
+          accentColor={(activeTrans as any).accentColor || "#00F0FF"}
+        />
+      </AbsoluteFill>
+    );
+  }
+
   return null;
 };
 
@@ -7237,6 +7274,98 @@ export const PrometheusMinRun: React.FC<PrometheusMinRunProps> = ({
                 {foregroundChunks.map((chunk, idx) => renderChunkSequence(chunk, idx))}
               </Spatial3DCameraRig>
             )}
+
+            {/* 5. Visual Helpers Stage (Z: 110) — Metric cards, Comparisons, Callout Badges */}
+            {(chunks || []).map((chunk, idx) => {
+              if (!chunk.visualHelper) return null;
+              const startMs = chunk.startMs ?? chunk.outputStartMs ?? 0;
+              const endMs = chunk.endMs ?? chunk.outputEndMs ?? startMs + 1500;
+              const startFrame = Math.round((startMs / 1000) * fps);
+              const durationFrames = Math.max(1, Math.round(((endMs - startMs) / 1000) * fps));
+              return (
+                <Sequence
+                  key={`vh-${idx}-${startMs}`}
+                  from={startFrame}
+                  durationInFrames={durationFrames}
+                >
+                  <VisualHelperStage
+                    helper={chunk.visualHelper}
+                    frame={frame - startFrame}
+                    fps={fps}
+                    durationInFrames={durationFrames}
+                  />
+                </Sequence>
+              );
+            })}
+
+            {/* 6. Geometric Art Photo Treatments & Strobe Frame Stage (Z: 120) */}
+            {(chunks || []).map((chunk, idx) => {
+              const startMs = chunk.startMs ?? chunk.outputStartMs ?? 0;
+              const endMs = chunk.endMs ?? chunk.outputEndMs ?? startMs + 1500;
+              const startFrame = Math.round((startMs / 1000) * fps);
+              const durationFrames = Math.max(1, Math.round(((endMs - startMs) / 1000) * fps));
+
+              if (chunk.strobeTransition) {
+                const strobeDur = chunk.strobeTransition.durationInFrames || 10;
+                return (
+                  <Sequence
+                    key={`strobe-${idx}-${startMs}`}
+                    from={startFrame}
+                    durationInFrames={strobeDur}
+                  >
+                    <MultiImageStrobeTransition
+                      images={chunk.strobeTransition.images}
+                      frame={frame - startFrame}
+                      fps={fps}
+                      durationInFrames={strobeDur}
+                      strobeInterval={chunk.strobeTransition.strobeInterval || 1}
+                      accentColor={chunk.strobeTransition.accentColor || "#00F0FF"}
+                    />
+                  </Sequence>
+                );
+              }
+
+              if (chunk.contactSheet) {
+                const sheetDur = chunk.contactSheet.durationInFrames || durationFrames;
+                return (
+                  <Sequence
+                    key={`contact-${idx}-${startMs}`}
+                    from={startFrame}
+                    durationInFrames={sheetDur}
+                  >
+                    <GeometricContactSheet
+                      images={chunk.contactSheet.images}
+                      layout={chunk.contactSheet.layout}
+                      frame={frame - startFrame}
+                      fps={fps}
+                      durationInFrames={sheetDur}
+                      accentColor={chunk.contactSheet.accentColor || "#00F0FF"}
+                      coordinates={chunk.contactSheet.coordinates}
+                    />
+                  </Sequence>
+                );
+              }
+
+              if (chunk.photoTreatment) {
+                return (
+                  <Sequence
+                    key={`pt-${idx}-${startMs}`}
+                    from={startFrame}
+                    durationInFrames={durationFrames}
+                  >
+                    <GeometricArtStage
+                      treatment={chunk.photoTreatment}
+                      frame={frame - startFrame}
+                      fps={fps}
+                    >
+                      <div style={{ width: "100%", height: "100%" }} />
+                    </GeometricArtStage>
+                  </Sequence>
+                );
+              }
+
+              return null;
+            })}
           </>
         );
       })()}
