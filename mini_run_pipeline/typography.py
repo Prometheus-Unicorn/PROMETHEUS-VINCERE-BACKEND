@@ -2837,6 +2837,31 @@ def select_pivot_layout(chunk: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def _is_inseparable_phrase(words: List[str]) -> bool:
+    """Detect if a word sequence forms an inseparable grammatical phrase or prepositional clause.
+
+    Tearing these phrases across different screen zones (e.g. deck vs behind-subject)
+    orphans the prefix ('in pure', 'sunshine and', 'to this') and makes the chunk illegible.
+    """
+    if not words or len(words) <= 1:
+        return False
+    inseparable_prefixes = {
+        "in", "to", "on", "at", "for", "of", "with", "by", "from", "about",
+        "into", "over", "after", "and", "or", "but", "so", "than", "more",
+        "while", "as", "if", "however", "though", "although", "because",
+        "perfectly", "sometimes", "sounds", "well", "part", "done", "choice"
+    }
+    w0 = words[0].lower().rstrip(".,!?:;\"'")
+    if w0 in inseparable_prefixes:
+        return True
+    connectives = {"in", "to", "on", "at", "for", "of", "with", "by", "from", "and", "or", "but"}
+    for w in words[:-1]:
+        clean = w.lower().rstrip(".,!?:;\"'")
+        if clean in connectives:
+            return True
+    return False
+
+
 def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     aspect_ratio = (design_override or {}).get("aspectRatio", "9:16")
     is_landscape = str(aspect_ratio) in ("16:9", "landscape", "1.777", "1.78")
@@ -2904,11 +2929,30 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
         or str(design_input.get("treatment", "")).lower() in ("hierarchical_asymmetric_lockup", "documentary_lockup_captions", "micro_macro_kinetic_type")
         or str(design_input.get("treatmentSystem", "")).lower() in ("hierarchical_asymmetric_lockup", "documentary_lockup_captions", "micro_macro_kinetic_type")
     )
+    is_special_ops_system = bool(
+        policy.get("specialOps")
+        or design_input.get("typographySystem") in ("special_ops", "special_ops_tier")
+    )
 
     # Select behind-subject depth treatment moments with temporal distribution & variety
     behind_subject_indices = set()
     behind_subject_pivots: Dict[int, str] = {}
     if policy["subjectLayering"] != "disabled":
+        # Honor explicit caller requests (e.g. unit tests or explicit per-chunk overrides)
+        for c_idx, c in enumerate(chunks):
+            if c.get("behindSubject") or (isinstance(c.get("subjectLayering"), dict) and c.get("subjectLayering", {}).get("behindSubject")):
+                behind_subject_indices.add(c_idx)
+                c_words = str(c.get("text", "")).split()
+                pivs = [
+                    w for w in c_words
+                    if _is_substantive(w)
+                    and 2 <= len("".join(ch for ch in w if ch.isalnum())) <= 8
+                    and not any(ch.isdigit() for ch in w)
+                    and "'" not in w
+                ]
+                if pivs:
+                    behind_subject_pivots[c_idx] = pivs[-1]
+
         # Dynamic count based on video length
         if len(chunks) <= 8:
             max_behind_count = 1
@@ -2921,6 +2965,8 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
 
         candidate_scores = []
         for c_idx, c in enumerate(chunks):
+            if c_idx in behind_subject_indices:
+                continue
             c_text = str(c.get("text", "")).strip()
             c_words = c_text.split()
             if not c_words:
@@ -2933,21 +2979,21 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
             word_count = len(c_words)
             has_digits = any(ch.isdigit() for ch in c_text)
 
-            # Behind-subject gating with pivot-word architecture:
-            # 1. Single word <= 8 chars: direct punchy cranial candidate
-            # 2. 2-word phrase <= 10 chars: direct 2-word candidate (unless digits)
-            # 3. Multi-word phrase (3-5 words): admitted via pivot-word architecture
-            #    if it contains a substantive pivot word (2 <= len <= 8 chars) that is not a digit/stopword.
-            #    The pivot word goes behind-subject while companions stay foreground.
+            # Behind-subject gating with atomic phrasing protection (Round 19 fix):
+            # 1. Single word <= 8 chars: direct punchy candidate (e.g. RESOLD, SCALE)
+            # 2. 2-word phrase <= 10 chars without inseparable prepositions: direct 2-word candidate
+            # 3. Inseparable clauses ("in pure profit", "sunshine and rainbows", "to this level", "perfectly transparent")
+            #    must NEVER be torn across two screen zones (orphaning the prefix in the deck while the noun is hidden behind the head).
             pivot_word = None
+            inseparable = _is_inseparable_phrase(c_words)
             if word_count == 1:
                 is_punchy = (2 <= len(c_clean) <= 8)
                 pivot_word = c_words[0]
-            elif word_count == 2:
+            elif word_count == 2 and not inseparable:
                 is_punchy = (4 <= len(c_clean) <= 10) and not has_digits
                 pivot_word = c_words[0] if len(c_words[0]) >= len(c_words[1]) else c_words[1]
-            else:
-                # Multi-word chunk: identify best punchy substantive pivot word
+            elif word_count <= 5 and not inseparable:
+                # Multi-word chunk (3-5 words) with separable independent pivot
                 substantive_pivots = [
                     w for w in c_words
                     if _is_substantive(w)
@@ -2960,6 +3006,8 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
                     is_punchy = True
                 else:
                     is_punchy = False
+            else:
+                is_punchy = False
 
             is_substantive = bool(pivot_word) and any(_is_substantive(w) for w in c_words)
 
@@ -2974,10 +3022,12 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
         candidate_scores.sort(key=lambda item: item[2], reverse=True)
 
         if policy["subjectLayering"] in ("required", "auto") and not candidate_scores and chunks:
-            # Fallback admitting punchy pivot chunks
+            # Fallback admitting punchy pivot chunks that do not tear inseparable phrases
             valid_fallback = []
             for i in range(len(chunks)):
                 c_w_fb = str(chunks[i].get("text", "")).split()
+                if _is_inseparable_phrase(c_w_fb):
+                    continue
                 pivs = [
                     w for w in c_w_fb
                     if _is_substantive(w)

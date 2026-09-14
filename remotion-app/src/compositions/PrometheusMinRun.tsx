@@ -5182,7 +5182,7 @@ const MultiLayerTypographyCard: React.FC<{
     nextChunkStartFrame >= 0;
 
   const exitFrames = 5;
-  const rackFocusStartFrame = hasIncomingCollision ? nextChunkStartFrame : Math.max(0, totalFrames - exitFrames);
+  const rackFocusStartFrame = hasIncomingCollision ? Math.max(0, nextChunkStartFrame - exitFrames) : Math.max(0, totalFrames - exitFrames);
   const rackFocusDuration = exitFrames;
   const isRackFocusExiting = frame >= rackFocusStartFrame;
 
@@ -7036,11 +7036,15 @@ export const PrometheusMinRun: React.FC<PrometheusMinRunProps> = ({
             const foregroundLayers = layers.filter((l) => !Boolean(l.behindSubject));
 
             const cranialPlacement = behindLayers[0]?.placement || c.placement;
+            const fb = (c.placement as any)?.faceBottom ?? (c as any)?.faceBottom;
+            const fallbackDeckY = typeof fb === "number" && fb > 0
+              ? `${Math.round(Math.min(0.72, Math.max(0.48, fb + 0.10)) * 100)}%`
+              : "60%";
             const deckPlacement =
               foregroundLayers[0]?.placement ||
               (c.placement as any)?.companionPlacement || {
                 xPercent: "50%",
-                yPercent: "80%",
+                yPercent: fallbackDeckY,
                 anchor: "center",
                 textAlign: "center",
                 dominantZone: "foreground_lower_deck",
