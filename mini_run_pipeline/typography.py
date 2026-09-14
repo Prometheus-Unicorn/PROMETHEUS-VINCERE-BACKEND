@@ -1920,7 +1920,8 @@ ANIMA_RUNTIME_TREATMENTS: List[Dict[str, Any]] = [
     {"id": "origin_liquid_melt", "styles": {"kinetic", "cinematic"}, "energy": 0.50, "tier": "premium_new"},
     {"id": "origin_splitflap_board", "styles": {"kinetic", "editorial"}, "energy": 0.70, "tier": "premium_new"},
     {"id": "origin_domino_cascade", "styles": {"kinetic", "editorial"}, "energy": 0.70, "tier": "premium_new"},
-    {"id": "origin_shiny_pill", "styles": {"editorial", "special_ops"}, "energy": 0.45, "tier": "premium_new"},
+    {"id": "origin_shiny_pill", "styles": {"editorial", "cinematic", "special_ops"}, "energy": 0.45, "tier": "premium_new"},
+    {"id": "origin_ripple_wave", "styles": {"cinematic", "editorial"}, "energy": 0.50, "tier": "premium_new"},
     {"id": "popcorn_char_burst", "styles": {"kinetic", "editorial"}, "energy": 0.68, "tier": "premium_new"},
 ]
 
@@ -2011,6 +2012,8 @@ INTRINSIC_ANIMATION_DURATIONS_MS: Dict[str, int] = {
     "origin_splitflap_board": 1100,
     "origin_domino_cascade": 1200,
     "origin_shiny_pill": 1100,
+    "origin_ripple_wave": 2000,
+    "popcorn_char_burst": 1200,
 }
 
 TALL_FONT_RUNTIME_TREATMENTS = (
@@ -2244,6 +2247,8 @@ INTRINSIC_ANIMATION_DURATIONS_MS: Dict[str, int] = {
     "origin_splitflap_board": 1100,
     "origin_domino_cascade": 1200,
     "origin_shiny_pill": 1100,
+    "origin_ripple_wave": 2000,
+    "popcorn_char_burst": 1200,
     "cyber_matrix_text_scramble": 1200,
     "metallic_chrome_countup_hero": 1200,
     "metallic_chrome_counter": 1000,
@@ -2736,22 +2741,25 @@ def _select_primary_treatment(
 
         energy_gap = abs(item["energy"] - desired_energy)
         energy_factor = 1.0 / (1.0 + energy_gap * 2.0)
-        if item["id"] in FLUID_FAMILY:
-            # Flatten the energy penalty: fluid motion stays selectable at any cadence.
+        if item["id"] in FLUID_FAMILY or item.get("tier") == "premium_new":
+            # Flatten the energy penalty: fluid motion and launching premium presets stay selectable at any cadence.
             energy_factor = max(energy_factor, 0.85)
         boost = 1.0
         if item["id"] in FLUID_FAMILY:
             boost *= fluid_boost
-        # Letter-by-letter treatments get an extra nudge on top of the fluid boost
-        if item["id"] in ("kinetic_slot_character_reel", "dynamic_staggered_character_cascade", "top_down_staggered_character_drop"):
+        # Letter-by-letter treatments get an extra nudge on top of the fluid boost (excluding cascade to avoid dominance)
+        if item["id"] in ("kinetic_slot_character_reel", "top_down_staggered_character_drop"):
             boost *= letter_boost
-        if item["id"] in POP_FAMILY:
+        if item["id"] in POP_FAMILY and item.get("tier") != "premium_new":
             boost *= pop_damp
 
         # Premium Tier Launch-Rotation Multiplier: active until 3 lifetime selections, then decays to normal
         if item.get("tier") == "premium_new":
-            if usage.get(item["id"], 0) < PREMIUM_TIER_LIFETIME_THRESHOLD:
-                boost *= PREMIUM_TIER_PROMOTION_MULTIPLIER
+            current_uses = usage.get(item["id"], 0)
+            if current_uses == 0:
+                boost *= (PREMIUM_TIER_PROMOTION_MULTIPLIER * 5.0)  # Strong anti-starvation launch boost
+            elif current_uses < PREMIUM_TIER_LIFETIME_THRESHOLD:
+                boost *= (PREMIUM_TIER_PROMOTION_MULTIPLIER * (3.5 - 1.0 * current_uses))
 
         # Semantic Number Routing (Order 1): Numbers/digits heavily route to metallic chrome counter
         if signal.get("hasNumber", 0.0) > 0:
@@ -3407,7 +3415,7 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
                 rng, policy, signal, preset_usage_counts, recent_primary_fx,
                 is_single_word=is_single_word,
             )
-        elif wants_lockup or is_chunk_overlap_candidate:
+        elif wants_lockup or (is_chunk_overlap_candidate and preset_usage_counts.get("hierarchical_asymmetric_lockup", 0) == 0 and rng.random() < 0.40):
             hero_fx_preset = "hierarchical_asymmetric_lockup"
         elif is_special_ops_system and is_single_word and (preset_usage_counts.get("chiseled_prism_metallic", 0) < 1):
             hero_fx_preset = "chiseled_prism_metallic"
@@ -4060,12 +4068,11 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
             if layer_fx == "canva_tall_glyph_stack" and not (layer_behind_subject or len(layer_words) <= 1):
                 layer_fx = "multi_word_slide_up_stagger" if not is_hero_layer else "dynamic_staggered_character_cascade"
 
-            # Long hero routing (Round 15 Commit 5): Long hero lines (>12 chars)
-            # must not pop in as monolithic blocks; route them to per-letter cascade
+            # Anti-Monolith Readability Shield: Hero layers longer than 16 characters
+            # must not pop in as monolithic blocks; redirect monolithic scale punches to per-letter cascade
             clean_hero_text = "".join(ch for ch in raw_layer_text if ch.isalnum() or ch.isspace()).strip()
-            if is_hero_layer and len(clean_hero_text) > 12:
-                # Do not override counter presets when numbers are present, or lockup treatments
-                if not (signal.get("hasNumber", 0.0) > 0 and "counter" in str(layer_fx)) and not is_lockup_treatment:
+            if is_hero_layer and len(clean_hero_text) > 16:
+                if layer_fx in ("apple_keynote_headline_punch", "kinetic_impact_snap"):
                     layer_fx = "dynamic_staggered_character_cascade"
 
             # Strict Companion & Pivot Font Contract:

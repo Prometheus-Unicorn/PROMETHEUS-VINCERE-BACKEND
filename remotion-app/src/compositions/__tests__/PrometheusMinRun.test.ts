@@ -1018,6 +1018,8 @@ describe("origin expansion presets coverage (#2 - #6, #9, #10, #11)", () => {
     "origin_liquid_melt",
     "origin_splitflap_board",
     "origin_domino_cascade",
+    "origin_shiny_pill",
+    "popcorn_char_burst",
   ];
 
   test("normalizeRuntimePreset preserves all newly ported origin presets", () => {
