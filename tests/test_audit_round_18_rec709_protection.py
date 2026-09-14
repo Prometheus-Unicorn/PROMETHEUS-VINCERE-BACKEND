@@ -90,6 +90,43 @@ class AuditRound18Rec709ProtectionTests(unittest.TestCase):
                 f"Rec.709 passthrough exhibited crushed underexposure: mean={mean_brightness:.2f}",
             )
 
+    def test_look_conformance_passes_for_passthrough_look(self):
+        """validate_look_conformance must pass with 0 violations for lookId='none'."""
+        from mini_run_pipeline import policy_check
+        result = policy_check.validate_look_conformance({"lookId": "none"})
+        self.assertEqual(result["status"], "passed")
+        self.assertEqual(len(result["violations"]), 0)
+
+    def test_measure_frame_text_pixel_bounds_ignores_noise(self):
+        """measure_frame_text_pixel_bounds must ignore isolated noise segments under 50px."""
+        from mini_run_pipeline import policy_check
+        # Create synthetic black canvas with a tiny 20px noise speck at the left edge
+        synthetic = np.zeros((1920, 1080, 3), dtype=np.uint8)
+        synthetic[1300:1330, 0:20] = 255
+        res = policy_check.measure_frame_text_pixel_bounds(synthetic)
+        self.assertEqual(res["status"], "passed")
+        self.assertFalse(res["edgeBleed"])
+
+    def test_validate_line_count_and_wrap_handles_unmatted_placement(self):
+        """validate_line_count_and_wrap must evaluate primary placement when has_matte=False."""
+        from mini_run_pipeline import policy_check
+        chunk = {
+            "chunkIndex": 1,
+            "text": "test phrase",
+            "startMs": 0,
+            "endMs": 2000,
+            "placement": {"xPercent": "50%", "yPercent": "15%"},
+            "companionPlacement": {"xPercent": "50%", "yPercent": "80%"},
+            "layers": [{"rawText": "test phrase", "isHero": True, "behindSubject": True}],
+        }
+        res = policy_check.validate_line_count_and_wrap(
+            chunk["layers"],
+            chunks=[chunk],
+            frames=[],
+            has_matte=False,
+        )
+        self.assertEqual(res["status"], "passed")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

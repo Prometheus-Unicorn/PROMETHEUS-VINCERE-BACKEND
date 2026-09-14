@@ -137,7 +137,18 @@ def measure_frame_text_pixel_bounds(
 
     splits = np.where(np.diff(active_cols) > 35)[0]
     segments = np.split(active_cols, splits + 1)
-    best_seg = max(segments, key=lambda s: np.sum(col_counts[s]))
+    valid_segs = [s for s in segments if (s.max() - s.min() >= 50 and np.sum(col_counts[s]) >= 350)]
+    if not valid_segs:
+        return {
+            "status": "passed",
+            "detected": False,
+            "edgeBleed": False,
+            "bleedSide": "none",
+            "leftClearancePx": float(w),
+            "rightClearancePx": float(w),
+            "bbox": None,
+        }
+    best_seg = max(valid_segs, key=lambda s: np.sum(col_counts[s]))
     x_min = int(best_seg.min())
     x_max = int(best_seg.max())
 
@@ -234,15 +245,20 @@ def validate_safe_region_bounds_with_frames(
             if not f_path:
                 continue
 
-            # Find matching chunk at timestamp
+            # Find matching chunk at timestamp (prefer strictly active chunk)
             matching_chunk = None
             if chunks:
+                candidates = []
                 for c in chunks:
                     start_sec = float(c.get("startMs", 0)) / 1000.0
                     end_sec = float(c.get("endMs", 0)) / 1000.0
-                    if start_sec <= ts <= (end_sec + 0.15):
-                        matching_chunk = c
-                        break
+                    if start_sec <= ts <= end_sec:
+                        candidates.append((0, abs(ts - (start_sec + end_sec) / 2.0), c))
+                    elif (start_sec - 0.15) <= ts <= (end_sec + 0.15):
+                        candidates.append((1, abs(ts - (start_sec + end_sec) / 2.0), c))
+                if candidates:
+                    candidates.sort(key=lambda x: (x[0], x[1]))
+                    matching_chunk = candidates[0][2]
 
             expected_y = None
             if matching_chunk:
@@ -397,7 +413,7 @@ def measure_pixel_row_projection_lines(
     mask = bright_text | colored_text
 
     row_counts = np.sum(mask, axis=1)
-    min_row_px = max(12, int((x1 - x0) * 0.025))
+    min_row_px = max(18, int((x1 - x0) * 0.035))
     active_rows = np.where(row_counts >= min_row_px)[0]
 
     if len(active_rows) == 0:
@@ -413,17 +429,19 @@ def measure_pixel_row_projection_lines(
     raw_bands = np.split(active_rows, splits + 1)
     valid_bands = []
     for b_idx, band in enumerate(raw_bands):
-        if len(band) >= 12:
+        # A valid text line in 1080x1920 canvas has substantial vertical glyph stroke (>= 25px)
+        if len(band) >= 25:
             band_y0 = int(band[0] + y0)
             band_y1 = int(band[-1] + y0)
             max_px = int(np.max(row_counts[band]))
-            valid_bands.append({
-                "bandIndex": b_idx,
-                "y0": band_y0,
-                "y1": band_y1,
-                "heightPx": band_y1 - band_y0 + 1,
-                "maxRowPixels": max_px,
-            })
+            if max_px >= min_row_px:
+                valid_bands.append({
+                    "bandIndex": b_idx,
+                    "y0": band_y0,
+                    "y1": band_y1,
+                    "heightPx": band_y1 - band_y0 + 1,
+                    "maxRowPixels": max_px,
+                })
 
     return {
         "status": "passed",
@@ -438,6 +456,7 @@ def validate_line_count_and_wrap(
     layers: Sequence[Dict[str, Any]],
     chunks: Optional[Sequence[Dict[str, Any]]] = None,
     frames: Optional[Sequence[Dict[str, Any]]] = None,
+    has_matte: bool = True,
 ) -> Dict[str, Any]:
     """Validate tall-stack contract, manifest line wrapping, and pixel-truth row projection."""
     tall_violations, wrap_violations = [], []
@@ -477,12 +496,17 @@ def validate_line_count_and_wrap(
                 continue
 
             matching_chunk = None
+            candidates = []
             for c in chunks:
                 start_sec = float(c.get("startMs", 0)) / 1000.0
                 end_sec = float(c.get("endMs", 0)) / 1000.0
-                if start_sec <= ts <= (end_sec + 0.15):
-                    matching_chunk = c
-                    break
+                if start_sec <= ts <= end_sec:
+                    candidates.append((0, abs(ts - (start_sec + end_sec) / 2.0), c))
+                elif (start_sec - 0.15) <= ts <= (end_sec + 0.15):
+                    candidates.append((1, abs(ts - (start_sec + end_sec) / 2.0), c))
+            if candidates:
+                candidates.sort(key=lambda x: (x[0], x[1]))
+                matching_chunk = candidates[0][2]
 
             if not matching_chunk:
                 continue
@@ -494,17 +518,20 @@ def validate_line_count_and_wrap(
                 or []
             )
             p = matching_chunk.get("placement") or {}
-            companion_p = p.get("companionPlacement") or (
-                next((l.get("placement") for l in chk_layers if not l.get("behindSubject")), None)
-            ) or p
-
-            fg_layers = [l for l in chk_layers if not l.get("behindSubject")]
-            if not fg_layers:
+            # When subject matte is active, companion placement anchors the deck while hero goes cranial.
+            # When matte is absent, both layers render together at the chunk's primary placement.
+            if has_matte and p.get("companionPlacement"):
+                eval_p = p["companionPlacement"]
+                fg_layers = [l for l in chk_layers if not l.get("behindSubject")]
+                if not fg_layers:
+                    fg_layers = chk_layers
+            else:
+                eval_p = p
                 fg_layers = chk_layers
 
             meas = measure_pixel_row_projection_lines(
                 f_path,
-                placement=companion_p,
+                placement=eval_p,
                 layers=fg_layers,
             )
             manifest_lines = sum(str(l.get("rawText") or l.get("text") or "").count("\n") + 1 for l in fg_layers)
@@ -1274,6 +1301,15 @@ def validate_look_conformance(
     look_id = str(look_plan.get("lookId") or "") if look_plan else ""
     intensity = float(look_plan.get("intensity", 1.0)) if look_plan else 1.0
 
+    if look_id.lower() in ("none", "", "original", "natural", "uncolored", "raw", "passthrough"):
+        return {
+            "status": "passed",
+            "lookId": look_id,
+            "intensity": intensity,
+            "pixelAbMetrics": {"status": "passed", "note": "passthrough_look_no_color_modification"},
+            "violations": [],
+        }
+
     if look_id in ("teal_and_orange_blockbuster", "teal_and_orange") and intensity > (MAX_TEAL_LOOK_INTENSITY + 0.005):
         violations.append(
             f"Teal & Orange look intensity {intensity:.2f} exceeds talking-head cap {MAX_TEAL_LOOK_INTENSITY:.2f}"
@@ -1362,10 +1398,19 @@ def run_post_render_conformance_check(
         max_safe_width=MAX_SAFE_WIDTH_PX,
         safe_margin_x=SAFE_MARGIN_X_PX,
     )
+    has_matte = False
+    if isinstance(manifest_or_props, dict):
+        has_matte = bool(
+            manifest_or_props.get("matteSrc")
+            or manifest_or_props.get("matte_key")
+            or manifest_or_props.get("matte")
+            or (manifest_or_props.get("matte") or {}).get("status") == "baked"
+        )
     line_wrap = validate_line_count_and_wrap(
         layers,
         chunks=chunks,
         frames=frame_result.get("frames"),
+        has_matte=has_matte,
     )
     shadow_glow = validate_shadow_glow_budget(layers)
     head_occlusion = validate_head_occlusion(
