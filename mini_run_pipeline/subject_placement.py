@@ -333,9 +333,9 @@ def analyze_cranial_negative_space(
         }
 
     # Priority 3: Cranial Headroom Composition Zone (Reposition-First Headroom Solver)
-    # When cranial headroom is available (top_headroom >= 0.14) and flanks are not dominant,
+    # When genuine cranial headroom is available (top_headroom >= 0.22) and flanks are not dominant,
     # place behind-subject text nestled in the cranial crown negative space above the head.
-    if top_headroom >= 0.14:
+    if top_headroom >= 0.22:
         head_mid_x = (head_left + head_right) / 2.0
         if abs(head_mid_x - 0.50) <= 0.05:
             text_x = 0.50
@@ -360,6 +360,49 @@ def analyze_cranial_negative_space(
             "flankRightRatio": round(right_flank, 3),
             "faceBottom": round(face_bottom_y, 3) if face_bottom_y is not None else None,
             "haloGuard": True,
+        }
+
+    # Priority 3b: Tight Headroom Flank Relief Solver (Skull Occlusion Guard)
+    # When cranial headroom is tight (< 0.22, where centered text would be occluded by the skull),
+    # route to whichever lateral flank offers negative space clearance (>= 0.22), avoiding the head entirely.
+    if right_flank >= 0.22 and right_flank >= left_flank:
+        safe_right_margin = 0.94
+        safe_left_bound = min(0.68, max(head_right, x + w) + 0.04)
+        col_x = round((safe_left_bound + safe_right_margin) / 2.0, 3)
+        center_y = round(max(0.22, min(0.34, actual_head_top + 0.08)), 3)
+        return {
+            "dominantZone": "flank_right_column",
+            "zoneId": "flank_right_editorial_pillar",
+            "xPercent": f"{round(col_x * 100, 1)}%",
+            "yPercent": f"{round(center_y * 100, 1)}%",
+            "anchor": "center",
+            "textAlign": "center",
+            "maxWidthPercent": "30%",
+            "fontTreatment": "editorial_column_stack",
+            "headroomRatio": round(top_headroom, 3),
+            "flankLeftRatio": round(left_flank, 3),
+            "flankRightRatio": round(right_flank, 3),
+            "faceBottom": round(face_bottom_y, 3) if face_bottom_y is not None else None,
+        }
+
+    if left_flank >= 0.22 and left_flank > right_flank:
+        safe_left_margin = 0.06
+        safe_right_bound = max(0.32, min(head_left, x) - 0.04)
+        col_x = round((safe_left_margin + safe_right_bound) / 2.0, 3)
+        center_y = round(max(0.22, min(0.34, actual_head_top + 0.08)), 3)
+        return {
+            "dominantZone": "flank_left_column",
+            "zoneId": "flank_left_editorial_pillar",
+            "xPercent": f"{round(col_x * 100, 1)}%",
+            "yPercent": f"{round(center_y * 100, 1)}%",
+            "anchor": "center",
+            "textAlign": "center",
+            "maxWidthPercent": "30%",
+            "fontTreatment": "editorial_column_stack",
+            "headroomRatio": round(top_headroom, 3),
+            "flankLeftRatio": round(left_flank, 3),
+            "flankRightRatio": round(right_flank, 3),
+            "faceBottom": round(face_bottom_y, 3) if face_bottom_y is not None else None,
         }
 
     # Priority 4: Sensible Below-Head Placement (Dynamic Clearance Avoiding Speaker's Head)

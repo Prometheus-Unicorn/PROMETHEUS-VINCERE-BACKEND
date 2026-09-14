@@ -342,17 +342,8 @@ def main():
                 for manifest_chunk, placement in zip(chunks, placements):
                     dom_zone = placement.get("dominantZone")
                     y_raw = placement.get("yPercent", "54%")
-                    try:
-                        y_num = float(str(y_raw).rstrip("%"))
-                    except Exception:
-                        y_num = 54.0
-                    # Microphone & Chest Avoidance:
-                    # In mobile 9:16 talking heads, mic/chest spans 50%-74% Y.
-                    # Lower-third captions MUST sit at 78%-82% Y for pristine clearance.
-                    if dom_zone == "foreground_lower_deck" and y_num < 78.0:
-                        placement["yPercent"] = "80%"
                     manifest_chunk["placement"] = placement
-                print(f"[orchestrate] Applied subject-safe placements with microphone avoidance!", flush=True)
+                print(f"[orchestrate] Applied dynamic subject-safe placements with chin clearance!", flush=True)
     except Exception as obs_err:
         print(f"[orchestrate] Subject observation notice: {obs_err}", flush=True)
 
