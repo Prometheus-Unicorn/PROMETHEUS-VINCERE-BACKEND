@@ -1004,3 +1004,37 @@ describe("origin_wave_color_sweep (expansion plan #1)", () => {
     expect(25 - dur).toBeGreaterThanOrEqual(15); // hold >= 500ms
   });
 });
+
+describe("origin expansion presets coverage (#2 - #6, #9)", () => {
+  const presets = [
+    "origin_inkdrop_spread",
+    "origin_fuzzy_noise_overlay",
+    "origin_outline_flicker_fill",
+    "origin_matrix_letter_rain",
+    "origin_reveal_wipe",
+    "origin_spotlight_reveal",
+  ];
+
+  test("normalizeRuntimePreset preserves all newly ported origin presets", () => {
+    for (const preset of presets) {
+      expect(normalizeRuntimePreset(preset)).toBe(preset);
+    }
+  });
+
+  test("all ported presets are realized runtime treatments", () => {
+    const unsupported = unsupportedRuntimeTreatments();
+    for (const preset of presets) {
+      expect(unsupported).not.toContain(preset);
+    }
+  });
+
+  test("origin_spotlight_reveal respects its 1100ms intrinsic duration", () => {
+    const dur = resolveEntranceDurationFrames({
+      fxPreset: "origin_spotlight_reveal",
+      fps: 30,
+      totalFrames: 90,
+    });
+    expect(dur).toBeGreaterThanOrEqual(20);
+    expect(dur).toBeLessThanOrEqual(30);
+  });
+});
