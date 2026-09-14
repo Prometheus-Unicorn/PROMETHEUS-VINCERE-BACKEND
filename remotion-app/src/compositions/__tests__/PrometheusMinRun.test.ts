@@ -1015,6 +1015,9 @@ describe("origin expansion presets coverage (#2 - #6, #9, #10, #11)", () => {
     "origin_spotlight_reveal",
     "origin_spiral_in",
     "origin_cinematic_zoom_blur",
+    "origin_liquid_melt",
+    "origin_splitflap_board",
+    "origin_domino_cascade",
   ];
 
   test("normalizeRuntimePreset preserves all newly ported origin presets", () => {

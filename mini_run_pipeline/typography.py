@@ -1920,6 +1920,7 @@ ANIMA_RUNTIME_TREATMENTS: List[Dict[str, Any]] = [
     {"id": "origin_liquid_melt", "styles": {"kinetic", "cinematic"}, "energy": 0.50, "tier": "premium_new"},
     {"id": "origin_splitflap_board", "styles": {"kinetic", "editorial"}, "energy": 0.70, "tier": "premium_new"},
     {"id": "origin_domino_cascade", "styles": {"kinetic", "editorial"}, "energy": 0.70, "tier": "premium_new"},
+    {"id": "origin_shiny_pill", "styles": {"editorial", "special_ops"}, "energy": 0.45, "tier": "premium_new"},
 ]
 
 SINGLE_WORD_HERO_PRESETS: set[str] = {
@@ -2007,6 +2008,7 @@ INTRINSIC_ANIMATION_DURATIONS_MS: Dict[str, int] = {
     "origin_liquid_melt": 1100,
     "origin_splitflap_board": 1100,
     "origin_domino_cascade": 1200,
+    "origin_shiny_pill": 1100,
 }
 
 TALL_FONT_RUNTIME_TREATMENTS = (
@@ -2239,6 +2241,7 @@ INTRINSIC_ANIMATION_DURATIONS_MS: Dict[str, int] = {
     "origin_liquid_melt": 1100,
     "origin_splitflap_board": 1100,
     "origin_domino_cascade": 1200,
+    "origin_shiny_pill": 1100,
     "cyber_matrix_text_scramble": 1200,
     "metallic_chrome_countup_hero": 1200,
     "metallic_chrome_counter": 1000,
@@ -2703,11 +2706,14 @@ def _select_primary_treatment(
         "origin_matrix_letter_rain",
         "origin_spiral_in",
         "origin_cinematic_zoom_blur",
+        "origin_splitflap_board",
+        "origin_domino_cascade",
         "metallic_chrome_countup_hero", "metallic_chrome_counter",
         "apple_keynote_headline_punch", "kinetic_chromatic_typewriter", "kinetic_impact_snap",
     }
     SPECIAL_OPS_FAMILY = {
         "origin_spotlight_reveal",
+        "origin_shiny_pill",
         "real_estate_luxury_curve", "real_estate_captions",
         "multi_word_slide_up_stagger", "multiple_word_slide_up",
         "hierarchical_asymmetric_lockup", "documentary_lockup_captions", "micro_macro_kinetic_type",
@@ -4475,6 +4481,10 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
         "profileV2CatalogVersion": "typography-profile-v2-catalog-1.0",
     }
     return font_manifest
+
+
+
+
 
 
 

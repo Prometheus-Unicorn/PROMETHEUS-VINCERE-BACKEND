@@ -40,6 +40,7 @@ import { renderOriginCinematicZoomBlur } from "./KineticText/OriginCinematicZoom
 import { renderOriginLiquidMelt } from "./KineticText/OriginLiquidMelt";
 import { renderOriginSplitflapBoard } from "./KineticText/OriginSplitflapBoard";
 import { renderOriginDominoCascade } from "./KineticText/OriginDominoCascade";
+import { renderOriginShinyPill } from "./KineticText/OriginShinyPill";
 
 // Typography Types
 // ---------------------------------------------------------------------------
@@ -491,6 +492,7 @@ export const INTRINSIC_ANIMATION_DURATIONS_MS: Record<string, number> = {
   origin_liquid_melt: 1100,
   origin_splitflap_board: 1100,
   origin_domino_cascade: 1200,
+  origin_shiny_pill: 1100,
 };
 
 export const resolveEntranceDurationFrames = ({
@@ -1045,6 +1047,7 @@ export const RUNTIME_TREATMENT_IDS = new Set([
   "origin_liquid_melt",
   "origin_splitflap_board",
   "origin_domino_cascade",
+  "origin_shiny_pill",
   ...ALL_ARCHETYPE_FX_NAMES,
 ]);
 
@@ -1128,6 +1131,7 @@ const REALIZED_RUNTIME_TREATMENTS = new Set([
   "origin_liquid_melt",
   "origin_splitflap_board",
   "origin_domino_cascade",
+  "origin_shiny_pill",
   ...EXTENDED_ANIMA_TREATMENTS,
   ...ALL_ARCHETYPE_FX_NAMES,
 ]);
@@ -4226,6 +4230,37 @@ const KineticLayerRenderer: React.FC<{
         }}
       >
         {renderOriginDominoCascade({
+          color: textColor,
+          text: layer.text,
+          localFrame,
+          fps,
+          totalFrames,
+          wordPaintStyle,
+        })}
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Origin Shiny Pill
+  // ---------------------------------------------------------------------------
+  if (fx === "origin_shiny_pill") {
+    const layerEntranceFrame = wordEntranceFrames[0] ?? contentStartFrame;
+    const localFrame = Math.max(0, frame - layerEntranceFrame);
+    
+    return (
+      <div
+        style={{
+          ...baseTextStyle,
+          display: "inline-flex",
+          flexWrap: "nowrap",
+          whiteSpace: "nowrap",
+          justifyContent: "center",
+          alignItems: "center",
+          textShadow: kineticTextShadow("0 4px 18px rgba(0, 0, 0, 0.90), 0 2px 6px rgba(0, 0, 0, 0.82)"),
+        }}
+      >
+        {renderOriginShinyPill({
           color: textColor,
           text: layer.text,
           localFrame,
