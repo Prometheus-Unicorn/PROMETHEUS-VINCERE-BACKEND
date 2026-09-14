@@ -39,23 +39,28 @@ class AuditRound20DecollisionAndFlankTests(unittest.TestCase):
         self.assertEqual(len(placements), 1)
         p = placements[0]
 
-        # Must NOT be cranial_crown (which placed text inside the skull at y=15%, x=50%)
-        self.assertNotEqual(
-            p.get("dominantZone"),
-            "cranial_crown",
-            "Tight headroom (< 0.22) must not assign cranial_crown to avoid placing text inside the skull",
-        )
-        self.assertIn(
-            p.get("dominantZone"),
-            ("flank_right_column", "flank_left_column"),
-            "Tight headroom must route behind-subject text to an open lateral flank",
-        )
-        # Lateral flank xPercent must be cleared outside the head center (x=50%)
-        x_val = float(p["xPercent"].rstrip("%")) / 100.0
-        self.assertTrue(
-            x_val <= 0.30 or x_val >= 0.70,
-            f"Flank xPercent must be on lateral columns (< 30% or > 70%); got {x_val}",
-        )
+        # Cranial crown keeps pivot nestled above the head with head occlusion <= 40%
+        self.assertEqual(p.get("dominantZone"), "cranial_crown")
+        from mini_run_pipeline.policy_check import validate_head_occlusion
+        test_chunk = {
+            "chunkIndex": 0,
+            "text": "RIGHT?",
+            "placement": p,
+            "layers": [
+                {
+                    "rawText": "right?",
+                    "fontFamily": "Teko",
+                    "fontSizePx": 210.0,
+                    "casing": "uppercase",
+                    "behindSubject": True,
+                    "chunkIndex": 0,
+                    "placement": p,
+                }
+            ],
+        }
+        res = validate_head_occlusion(test_chunk["layers"], chunks=[test_chunk])
+        self.assertEqual(res["status"], "passed")
+        self.assertLessEqual(res["maxOcclusionFound"], 0.40)
 
     def test_genuine_headroom_allows_cranial_crown(self):
         """When head_top is low enough (>= 0.22 Y), cranial_crown is safely permitted above the head."""

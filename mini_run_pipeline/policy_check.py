@@ -117,13 +117,13 @@ def measure_frame_text_pixel_bounds(
 
     # Text glyph mask: bright foreground text or vibrant colored text
     # Excludes low-luminance skin tones and dark studio reflections
-    bright_text = lum > 115.0
-    cyan_text = (b > 125) & (g > 125) & (r < 110)
-    warm_text = (r > 160) & (g > 120) & (b < 80)
+    bright_text = lum > 160.0
+    cyan_text = (b > 130) & (g > 130) & (r < 110)
+    warm_text = (r > 175) & (g > 130) & (b < 80)
     mask = bright_text | cyan_text | warm_text
 
     col_counts = np.sum(mask, axis=0)
-    active_cols = np.where(col_counts >= 6)[0]
+    active_cols = np.where(col_counts >= 8)[0]
     if len(active_cols) == 0:
         return {
             "status": "passed",
@@ -135,9 +135,9 @@ def measure_frame_text_pixel_bounds(
             "bbox": None,
         }
 
-    splits = np.where(np.diff(active_cols) > 35)[0]
+    splits = np.where(np.diff(active_cols) > 16)[0]
     segments = np.split(active_cols, splits + 1)
-    valid_segs = [s for s in segments if (s.max() - s.min() >= 50 and np.sum(col_counts[s]) >= 350)]
+    valid_segs = [s for s in segments if (s.max() - s.min() >= 40 and np.sum(col_counts[s]) >= 250)]
     if not valid_segs:
         return {
             "status": "passed",
@@ -1351,7 +1351,7 @@ def extract_conformance_frames(
     if not ffmpeg_bin:
         return {"status": "skipped", "reason": "ffmpeg_not_available", "frames": []}
 
-    out_dir = output_dir or (v_path.parent / f"conformance_frames_{v_path.stem}")
+    out_dir = Path(output_dir) if output_dir else (v_path.parent / f"conformance_frames_{v_path.stem}")
     out_dir.mkdir(parents=True, exist_ok=True)
     extracted: List[Dict[str, Any]] = []
     for t in timestamps_sec:
@@ -1386,6 +1386,23 @@ def run_post_render_conformance_check(
     chunks = []
     if isinstance(manifest_or_props, dict):
         chunks = manifest_or_props.get("chunks") or (manifest_or_props.get("fontManifest") or {}).get("chunks", [])
+
+    if chunks and timestamps_sec == DEFAULT_INSPECTION_TIMESTAMPS:
+        sample_indices = [
+            1 if len(chunks) > 1 else 0,
+            len(chunks) // 4,
+            len(chunks) // 2,
+            int(len(chunks) * 0.75),
+            len(chunks) - 1,
+        ]
+        sample_indices = sorted(list(set(i for i in sample_indices if 0 <= i < len(chunks))))
+        resolved_ts = tuple(
+            round((chunks[i].get("startMs", 0) + chunks[i].get("endMs", 0)) / 2000.0, 2)
+            for i in sample_indices
+            if (chunks[i].get("startMs", 0) + chunks[i].get("endMs", 0)) > 0
+        )
+        if resolved_ts:
+            timestamps_sec = resolved_ts
 
     frame_result: Dict[str, Any]
     if extract_frames and video_path:

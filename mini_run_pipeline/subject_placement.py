@@ -103,7 +103,12 @@ def _clamp_safe_x_percent(
     available_envelope = max_safe_px - min_safe_px
 
     if width >= (available_envelope - 80.0):
-        clamped_px = canvas_w / 2.0 if anchor == "center" else min_safe_px
+        if anchor == "center" and abs(pos_px - canvas_w / 2.0) <= 120.0:
+            clamped_px = canvas_w / 2.0
+        elif pos_px < canvas_w / 2.0:
+            clamped_px = min_safe_px + (width / 2.0 if anchor == "center" else 0.0)
+        else:
+            clamped_px = max_safe_px - (width / 2.0 if anchor == "center" else width)
     elif anchor == "left":
         clamped_px = max(min_safe_px, min(max_safe_px - width, pos_px))
     elif anchor == "right":
@@ -333,9 +338,9 @@ def analyze_cranial_negative_space(
         }
 
     # Priority 3: Cranial Headroom Composition Zone (Reposition-First Headroom Solver)
-    # When genuine cranial headroom is available (top_headroom >= 0.22) and flanks are not dominant,
+    # When genuine cranial headroom is available (top_headroom >= 0.10) and flanks are not dominant,
     # place behind-subject text nestled in the cranial crown negative space above the head.
-    if top_headroom >= 0.22:
+    if top_headroom >= 0.10:
         head_mid_x = (head_left + head_right) / 2.0
         if abs(head_mid_x - 0.50) <= 0.05:
             text_x = 0.50
@@ -617,7 +622,9 @@ def plan_subject_safe_placements(
                 mwp_num = 50
             # Banned width shrinking: maxWidthPercent < 45% strictly forbidden on behind-subject layers
             safe_mwp = raw_mwp if "flank" in dom_zone else f"{max(45, mwp_num)}%"
-            safe_cranial_x = _clamp_safe_x_percent(cranial_analysis["xPercent"], est_width_px=chunk_est_w)
+            behind_layer = next((l for l in chunk_layers if isinstance(l, dict) and l.get("behindSubject")), None)
+            behind_w = float(behind_layer.get("estimatedWidthPx") or behind_layer.get("est_width") or chunk_est_w) if behind_layer else chunk_est_w
+            safe_cranial_x = _clamp_safe_x_percent(cranial_analysis["xPercent"], est_width_px=behind_w)
 
             cranial_placement = {
                 "xPercent": safe_cranial_x,
