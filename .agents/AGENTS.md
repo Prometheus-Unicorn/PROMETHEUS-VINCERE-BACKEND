@@ -64,3 +64,12 @@ When a critique names a count (e.g. "0 behind-subject moments", "too many preset
 ## 🚨 RULE 10: SCOPE WALL
 - Mini-run work (`mini_run_pipeline/`, `modal_mini_run.py`, `mini_run_gateway.py`, `remotion-app/src/compositions/PrometheusMinRun.tsx`) MUST NOT touch macro-section files (`mineral_macro_bridge.py`, `mineral_vision_critic.py`, `docs/mini_run_studio/assets/macro_sections/`) or landscape files (`docs/mini_landscape_runs/`, `*Landscape*`).
 - Cross-domain needs are raised as a separate approved task, never smuggled into a mini-run commit.
+
+## 🚨 RULE 11: HOSTILE-TO-HALLUCINATION OUTPUT CRITIQUE (MANDATORY QUALITY GATE)
+All agents across all sessions must subject rendered video outputs to the automated 4-Pillar Critique Protocol before declaring completion:
+1. **Source Material Color Space Sanity**: Strict verification of Rec.709 vs Log before applying grading. Log-to-Rec709 LUTs are strictly prohibited on Rec.709 ingest.
+2. **Quantitative Luminance & Dynamic Range**: Automated cv2 histogram check ensuring shadow_clipped_pct < 1.0% and zero black crush voids.
+3. **Visual Element Occlusion & Depth Geometry**: Verifying that behind-subject text is actually visible in negative space (not 100% swallowed behind the skull) and that consecutive caption chunks never visually collide across temporal boundaries.
+4. **Audio Stem Separation & Vocal Intelligibility**: Vocal clearance > 4.0:1 ducking ratio over music beds.
+No output may be reported as successful without inline pixel/metric verification artifacts demonstrating compliance.
+
