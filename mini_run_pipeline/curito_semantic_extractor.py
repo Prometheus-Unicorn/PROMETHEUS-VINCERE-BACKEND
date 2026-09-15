@@ -206,6 +206,75 @@ class DiffusionPromptPolicyCritic:
             "score": round(score, 2),
         }
 
+    VALID_BACKGROUND_TREATMENT_IDS = {
+        "halftone_raster_canvas",
+        "luxury_editorial_sunlight_canvas",
+        "newspaper_collage_deconstructed",
+        "modern_swiss_museum_poster",
+    }
+
+    VALID_MOTION_TREATMENT_IDS = {
+        "defocus_blur",
+        "gaussian_blur",
+        "bokeh_blur",
+        "slow_shutter_motion_blur",
+    }
+
+    @classmethod
+    def audit_treatment_ids(cls, response: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate that Gemini returned valid background and motion treatment IDs.
+
+        Args:
+            response: The parsed Gemini response dict.
+
+        Returns:
+            {
+                "passed": bool,
+                "flaws": List[str],
+                "selected_background_treatment_id": str,
+                "selected_motion_treatment_id": str,
+            }
+        """
+        flaws = []
+
+        bg_id = response.get("selected_background_treatment_id", "")
+        mt_id = response.get("selected_motion_treatment_id", "")
+
+        if not bg_id:
+            flaws.append(
+                "VIOLATION (Treatment Registry): 'selected_background_treatment_id' is missing. "
+                "Must be one of: " + ", ".join(sorted(cls.VALID_BACKGROUND_TREATMENT_IDS))
+            )
+            bg_id = "halftone_raster_canvas"  # safe default
+
+        elif bg_id not in cls.VALID_BACKGROUND_TREATMENT_IDS:
+            flaws.append(
+                f"VIOLATION (Treatment Registry): Unknown background treatment ID '{bg_id}'. "
+                "Must be one of: " + ", ".join(sorted(cls.VALID_BACKGROUND_TREATMENT_IDS))
+            )
+            bg_id = "halftone_raster_canvas"
+
+        if not mt_id:
+            flaws.append(
+                "VIOLATION (Treatment Registry): 'selected_motion_treatment_id' is missing. "
+                "Must be one of: " + ", ".join(sorted(cls.VALID_MOTION_TREATMENT_IDS))
+            )
+            mt_id = "defocus_blur"  # safe default
+
+        elif mt_id not in cls.VALID_MOTION_TREATMENT_IDS:
+            flaws.append(
+                f"VIOLATION (Treatment Registry): Unknown motion treatment ID '{mt_id}'. "
+                "Must be one of: " + ", ".join(sorted(cls.VALID_MOTION_TREATMENT_IDS))
+            )
+            mt_id = "defocus_blur"
+
+        return {
+            "passed": len(flaws) == 0,
+            "flaws": flaws,
+            "selected_background_treatment_id": bg_id,
+            "selected_motion_treatment_id": mt_id,
+        }
+
 
 
 # ---------------------------------------------------------------------------
@@ -271,6 +340,22 @@ MANDATORY OPERATING POLICIES:
    - [3. Canvas & Textured Background (Strictly No Table)]: Suspended in spatial-temporal space against a graphic canvas featuring subtle halftone dot patterning, fine 35mm film grain, and explicit negative space reservation (#ECECEC matte paper, neutral void).
    - [4. Lighting & Shadow Physics]: Illumination quality, directional softness, and floating ambient occlusion volume providing spatial depth without furniture contact.
    - [5. Camera & Kinematic Permanence Spec]: Spatially locked fixed-tripod camera (zero orbit), 1-DoF constrained axial rotation, strict rigid-body topological permanence, zero 180-degree yaw flipping, native 24fps cinema cadence.
+
+9. BACKGROUND TREATMENT SELECTION (SELECT BY ID — NEVER HARDCODE):
+   The diffusion prompt MUST specify one of the four canonical background treatments from the BACKGROUND_TREATMENT_REGISTRY. Select the ID that best matches the transcript's semantic tone and the hero artifact's material character. IDs and their appropriate use-cases:
+   - "halftone_raster_canvas" → DEFAULT. High-contrast monochrome or desaturated-brass artifacts, Swiss editorial aesthetic, maximum foreground–background separation. Use when tone is decisive, authoritative, or industrial.
+   - "luxury_editorial_sunlight_canvas" → Warm, aspirational, or premium lifestyle moments. Subjects with polished brass, gold-toned, or ivory finishes. Interview beats expressing achievement, refinement, or aspiration. Diagonal sunlight shadow bands on off-white paper.
+   - "newspaper_collage_deconstructed" → Gritty, counter-cultural, or disruption-themed transcripts. Raw steel, oxidized iron, or industrial finish subjects. Analog / archival documentary aesthetic with microtext, halftone grain, and green-teal signature mark.
+   - "modern_swiss_museum_poster" → Institutional, thought-leadership, or maximum-authority themes. Ultra-sharp geometric subjects (track switches, knife switches, Geneva drives). Dramatic high-contrast raked lighting, micro-stippled grid, near-monochrome palette, 8K clarity.
+   Output the selected ID in the field "selected_background_treatment_id". Then inject the corresponding dna_snippet text into the [3. Canvas & Textured Background] element of the assembled diffusion prompt.
+
+10. MOTION TREATMENT SELECTION (SELECT BY ID — NEVER HARDCODE):
+    The diffusion prompt MUST include one of the four canonical motion / blur treatments from the MOTION_TREATMENT_REGISTRY. Select the ID that best matches the kinetic character of the hero artifact's movement. IDs and appropriate use-cases:
+    - "defocus_blur" → DEFAULT. Optical rack-focus reveal for static-reveal or deliberate-settle kinematics (balance scale tilting to lock, knife switch closing). Asset crystallizes from soft defocus to tack-sharp at the sync hit.
+    - "gaussian_blur" → Soft entry / soft exit for warm, aspirational, or emotionally resonant moments. Subjects with polished or translucent surfaces. Luxury sunlight canvas backgrounds. No hard cuts.
+    - "bokeh_blur" → Background depth-of-field isolation. Use when background texture (newspaper collage, sunlight canvas) risks competing with the hero artifact. Foreground tack-sharp, background dissolved into large bokeh coronas.
+    - "slow_shutter_motion_blur" → Dynamic mechanical kinetics: fast rotation, lever snaps, beam sweeps, Geneva indexing at speed. Directional motion streaks on fast-moving elements, stationary elements remain sharp. Conveys high-torque authority.
+    Output the selected ID in the field "selected_motion_treatment_id". Append the corresponding dna_snippet as an additive optics clause at the end of the assembled diffusion prompt (before any negative prompt separation).
 """
 
 
@@ -349,6 +434,24 @@ _RESPONSE_SCHEMA: Dict[str, Any] = {
         "assembled_diffusion_prompt": {"type": "STRING"},
         "negative_prompt": {"type": "STRING"},
         "veo_duration_seconds": {"type": "INTEGER"},
+        "selected_background_treatment_id": {
+            "type": "STRING",
+            "description": (
+                "ID of the selected canonical background treatment from BACKGROUND_TREATMENT_REGISTRY. "
+                "Must be exactly one of: 'halftone_raster_canvas', 'luxury_editorial_sunlight_canvas', "
+                "'newspaper_collage_deconstructed', 'modern_swiss_museum_poster'. "
+                "Default: 'halftone_raster_canvas'. Select based on transcript tone and artifact material."
+            ),
+        },
+        "selected_motion_treatment_id": {
+            "type": "STRING",
+            "description": (
+                "ID of the selected canonical motion / blur treatment from MOTION_TREATMENT_REGISTRY. "
+                "Must be exactly one of: 'defocus_blur', 'gaussian_blur', 'bokeh_blur', "
+                "'slow_shutter_motion_blur'. "
+                "Default: 'defocus_blur'. Select based on the kinetic class of the hero artifact's movement."
+            ),
+        },
         "downstream_remotion_overlay": {
             "type": "OBJECT",
             "properties": {
@@ -376,6 +479,8 @@ _RESPONSE_SCHEMA: Dict[str, Any] = {
         "assembled_diffusion_prompt",
         "negative_prompt",
         "veo_duration_seconds",
+        "selected_background_treatment_id",
+        "selected_motion_treatment_id",
         "downstream_remotion_overlay",
     ],
 }
@@ -452,12 +557,14 @@ def extract_and_synthesize_curito_prompt(
     "lighting_and_shadow_physics": "illumination quality and floating ambient occlusion volume providing depth",
     "camera_and_rendering_spec": "lens (85mm), spatially locked tripod, 1-DoF constrained axial rotation, rigid-body topological permanence, zero 180-degree yaw flipping, 24fps"
   },
-  "assembled_diffusion_prompt": "Single synthesized prompt paragraph combining the 5 elements with concrete hero artifact, spatial-temporal halftone/grain background (no table), locked tripod camera, and rigid-body permanence",
+  "assembled_diffusion_prompt": "Single synthesized prompt paragraph combining the 5 elements with concrete hero artifact, spatial-temporal halftone/grain background (no table), locked tripod camera, rigid-body permanence, and the selected motion treatment optics clause appended at the end",
   "negative_prompt": "180-degree flip, yaw flip, choppy rotation, perspective inversion, orientation swap, reversing direction, morphing geometry, warping metal, changing teeth, shifting bitting, mutating parts, melting, table, tabletop, desk, furniture, countertop, wooden desk, office room, floorboards, text, words, typography, UI elements, buttons, screen, monitor",
+  "selected_background_treatment_id": "one of: halftone_raster_canvas | luxury_editorial_sunlight_canvas | newspaper_collage_deconstructed | modern_swiss_museum_poster",
+  "selected_motion_treatment_id": "one of: defocus_blur | gaussian_blur | bokeh_blur | slow_shutter_motion_blur",
   "downstream_remotion_overlay": {
     "primary_headline": "UPPERCASE HEADLINE",
     "secondary_italic_subline": "Italic serif phrase",
-    "target_sync_offset_sec": float,
+    "target_sync_offset_sec": 3.0,
     "overlay_placement_zone": "upper third",
     "svg_graphic_elements": ["Figma dashed frame", "corner starbursts"]
   }
@@ -606,5 +713,22 @@ def extract_and_synthesize_curito_prompt(
             break
 
     extracted["policy_critique"] = audit
+
+    # -----------------------------------------------------------------------
+    # Treatment ID Audit (Background + Motion)
+    # -----------------------------------------------------------------------
+    treatment_audit = DiffusionPromptPolicyCritic.audit_treatment_ids(extracted)
+    # Correct the IDs in extracted to the safe-defaulted values if Gemini returned invalid ones
+    extracted["selected_background_treatment_id"] = treatment_audit["selected_background_treatment_id"]
+    extracted["selected_motion_treatment_id"] = treatment_audit["selected_motion_treatment_id"]
+    if not treatment_audit["passed"]:
+        extracted.setdefault("policy_critique", {}).setdefault("flaws", []).extend(treatment_audit["flaws"])
+        print(
+            f"Treatment ID audit found {len(treatment_audit['flaws'])} issue(s); "
+            "defaults applied automatically.",
+            flush=True,
+        )
+    extracted["treatment_audit"] = treatment_audit
+
     return extracted
 
