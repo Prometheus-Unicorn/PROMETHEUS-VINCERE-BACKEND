@@ -177,7 +177,42 @@ class SubjectPlacementTests(unittest.TestCase):
         self.assertEqual(placements[0]["xPercent"], "50.0%")
         self.assertEqual(placements[0]["yPercent"], "16.0%")
 
+    def test_behind_subject_flank_occlusion_guard_fallbacks_to_cranial_crown(self) -> None:
+        """Behind-subject pivot text with headroom routes to cranial_crown to prevent head occlusion > 40%."""
+        from mini_run_pipeline.policy_check import validate_head_occlusion
+
+        observation = {
+            "frames": [
+                {"sourceMs": 17500, "faceBox": {"x": 0.32, "y": 0.15, "width": 0.36, "height": 0.35}},
+            ]
+        }
+        chunk = {
+            "chunkIndex": 11,
+            "startMs": 17098,
+            "endMs": 19021,
+            "text": "The point is,",
+            "subjectLayering": {"behindSubject": True},
+            "layers": [
+                {"role": "companion", "text": "The", "behindSubject": False},
+                {"role": "hero", "text": "POINT", "fontFamily": "Bebas Neue", "fontSizePx": 210.0, "behindSubject": True},
+                {"role": "companion", "text": "is,", "behindSubject": False},
+            ]
+        }
+        placements = plan_subject_safe_placements([chunk], observation)
+        self.assertEqual(len(placements), 1)
+        p = placements[0]
+        self.assertEqual(p["dominantZone"], "cranial_crown")
+        self.assertIn(p["xPercent"], ("50%", "50.0%"))
+
+        # Verify conformance check passes
+        chunk_placed = dict(chunk, placement=p)
+        behind_layer = [l for l in chunk["layers"] if l.get("behindSubject")][0]
+        val = validate_head_occlusion([behind_layer], [chunk_placed])
+        self.assertEqual(val["status"], "passed")
+        self.assertLessEqual(val["maxOcclusionFound"], 0.40)
+
 
 if __name__ == "__main__":
     unittest.main()
+
 
