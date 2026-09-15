@@ -115,12 +115,19 @@ def measure_frame_text_pixel_bounds(
     b = sub[:, :, 2].astype(float)
     lum = 0.299 * r + 0.587 * g + 0.114 * b
 
-    # Text glyph mask: bright foreground text or vibrant colored text
+    # Text glyph mask: adaptive to background canvas polarity (paper/editorial light vs obsidian dark)
     # Excludes low-luminance skin tones and dark studio reflections
-    bright_text = lum > 160.0
+    med_lum = float(np.median(lum)) if lum.size > 0 else 0.0
     cyan_text = (b > 130) & (g > 130) & (r < 110)
     warm_text = (r > 175) & (g > 130) & (b < 80)
-    mask = bright_text | cyan_text | warm_text
+    if med_lum > 140.0:
+        # High-key / paper / editorial canvas: text glyphs are dark contrast strokes against light paper
+        dark_text = lum < (med_lum - 50.0)
+        mask = dark_text | cyan_text | warm_text
+    else:
+        # Low-key / obsidian canvas: text glyphs are bright or vibrant colored strokes
+        bright_text = lum > 160.0
+        mask = bright_text | cyan_text | warm_text
 
     col_counts = np.sum(mask, axis=0)
     active_cols = np.where(col_counts >= 8)[0]
@@ -267,6 +274,14 @@ def validate_safe_region_bounds_with_frames(
             expected_x = None
             if matching_chunk:
                 p = matching_chunk.get("placement") or {}
+                if matching_chunk.get("hasSplitLayerPlacement"):
+                    chk_layers = matching_chunk.get("layers") or []
+                    for l in chk_layers:
+                        l_start = min((float(w.get("start_ms", 0)) / 1000.0 for w in l.get("words", [])), default=float(matching_chunk.get("startMs", 0)) / 1000.0)
+                        l_end = max((float(w.get("end_ms", 0)) / 1000.0 for w in l.get("words", [])), default=float(matching_chunk.get("endMs", 0)) / 1000.0)
+                        if (l_start - 0.15) <= ts <= (l_end + 0.15) and l.get("placement"):
+                            p = l["placement"]
+                            break
                 y_str = str(p.get("yPercent", "54%")).replace("%", "")
                 try:
                     expected_y = (float(y_str) / 100.0 if float(y_str) > 1.0 else float(y_str)) * CANVAS_HEIGHT_PX

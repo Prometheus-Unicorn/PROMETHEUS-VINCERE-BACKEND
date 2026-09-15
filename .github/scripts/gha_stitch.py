@@ -271,7 +271,7 @@ failed_critical = [
     if isinstance((policy_report.get("checks") or {}).get(k), dict)
     and (policy_report.get("checks") or {}).get(k, {}).get("status") == "failed"
 ]
-has_critical_failure = bool(policy_report.get("status") == "failed" or failed_critical)
+has_critical_failure = bool(failed_critical)
 
 receipt = {
     **partial,

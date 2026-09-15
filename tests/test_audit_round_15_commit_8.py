@@ -98,6 +98,26 @@ class TestAuditRound15Commit8(unittest.TestCase):
             self.assertGreaterEqual(res["leftClearancePx"], 130.0)
             self.assertGreaterEqual(res["rightClearancePx"], 130.0)
 
+    def test_measure_frame_text_pixel_bounds_light_paper_canvas_adaptive_polarity(self):
+        """measure_frame_text_pixel_bounds adaptively detects dark text on high-key paper canvas without false edge bleed."""
+        # Synthetic paper canvas frame (RGB 236 = #ECECEC, lum ~ 236)
+        arr = np.full((1920, 1080, 3), 236, dtype=np.uint8)
+        # Add 16px darker border (vignette at 16px from edges)
+        arr[:, :16] = [100, 100, 100]
+        arr[:, 1064:] = [100, 100, 100]
+        # Add dark editorial text at lower third [1450..1550, 220..860] (#111111, lum ~ 17)
+        arr[1450:1550, 220:860] = [17, 17, 17]
+        p_synth = self.scratch_dir / "synth_paper_and_dark_text.png"
+        Image.fromarray(arr).save(p_synth)
+
+        res = measure_frame_text_pixel_bounds(p_synth, safe_margin_x=130.0, expected_y_center=1500.0)
+        self.assertTrue(res["detected"])
+        self.assertFalse(res["edgeBleed"])
+        self.assertGreaterEqual(res["leftClearancePx"], 130.0)
+        self.assertGreaterEqual(res["rightClearancePx"], 130.0)
+        self.assertAlmostEqual(res["leftClearancePx"], 220.0, delta=5.0)
+        self.assertAlmostEqual(res["rightClearancePx"], 220.0, delta=5.0)
+
 
 if __name__ == "__main__":
     unittest.main()
