@@ -2331,7 +2331,16 @@ def schedule_caption_timing(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]
 
         # Soft boundary clamp eliminated when conflicting with floor;
         # permit caption temporal overlap or compress the next chunk's lead rather than truncating this chunk's tail.
-        soft_limit = next_start_ms - 80 if index + 1 < len(scheduled) else desired_hold + 600
+        is_behind = bool(
+            chunk.get("subjectLayering", {}).get("behindSubject")
+            or any(l.get("behindSubject") for l in chunk.get("layers", []))
+        )
+        if is_behind and index + 1 < len(scheduled) and not any(l.get("behindSubject") for l in scheduled[index + 1].get("layers", [])):
+            subordinate_end = int(scheduled[index + 1].get("endMs", scheduled[index + 1].get("outputEndMs", natural_end_ms)))
+            desired_hold = max(desired_hold, min(subordinate_end - 80, natural_end_ms + 1500))
+            soft_limit = max(desired_hold, min(subordinate_end - 80, natural_end_ms + 1800))
+        else:
+            soft_limit = next_start_ms - 80 if index + 1 < len(scheduled) else desired_hold + 600
         max_allowed_end = max(inviolable_floor_end_ms, soft_limit)
         display_end_ms = max(inviolable_floor_end_ms, min(desired_hold, max_allowed_end))
         chunk["acceleratedExit"] = bool(desired_hold > soft_limit if index + 1 < len(scheduled) else False)
