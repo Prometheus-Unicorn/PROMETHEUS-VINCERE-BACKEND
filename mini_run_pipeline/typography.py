@@ -1285,9 +1285,16 @@ def preflight_and_fit_layer_widths(
         layer["legibility_floor"] = legibility_floor
         aspect = get_font_char_aspect(font, is_uppercase=is_upper)
         layer["char_aspect"] = aspect
+        # Perspective depth scaling (1200px perspective camera): foreground layers with positive depthZPx
+        # are projected closer to the camera and magnified by 1200 / (1200 - depthZPx).
+        # Account for this projection factor so preflight calculates the true on-screen canvas width.
+        depth_z = float(layer.get("depthZPx") or (140.0 if (layer.get("isHero") or layer.get("is_hero_layer")) and not is_behind else 0.0))
+        z_scale = 1200.0 / max(1.0, 1200.0 - depth_z) if (depth_z > 0 and not is_behind) else 1.0
+        effective_aspect = round(aspect * z_scale, 4)
+        layer["effective_char_aspect"] = effective_aspect
         current_size = layer.get("font_size_px") or layer.get("fontSizePx", 60)
         layer["font_size_px"] = current_size
-        est_width = len(text) * current_size * aspect
+        est_width = len(text) * current_size * effective_aspect
         layer["est_width"] = est_width
 
     # Largest-first iterative shrink for any layer exceeding max_safe_width
@@ -1301,12 +1308,13 @@ def preflight_and_fit_layer_widths(
         # Sort descending by current font size (largest first)
         overflowing.sort(key=lambda l: l["font_size_px"], reverse=True)
         target = overflowing[0]
+        eff_asp = target.get("effective_char_aspect", target["char_aspect"])
         # Calculate size needed to fit
-        needed_size = int(max_safe_width / (max(1, len(target.get("rawText", ""))) * target["char_aspect"]))
+        needed_size = int(max_safe_width / (max(1, len(target.get("rawText", ""))) * eff_asp))
         target["font_size_px"] = max(target["legibility_floor"], min(target["font_size_px"] - 1, needed_size))
         if "fontSizePx" in target:
             target["fontSizePx"] = target["font_size_px"]
-        target["est_width"] = len(target.get("rawText", "")) * target["font_size_px"] * target["char_aspect"]
+        target["est_width"] = len(target.get("rawText", "")) * target["font_size_px"] * eff_asp
 
     for layer in layers_info:
         est = layer.get("est_width", 0)
@@ -4250,6 +4258,7 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
                 if float(hero_layer_item.get("fontSizePx", 104)) < min_hero_sz:
                     hero_layer_item["fontSizePx"] = min_hero_sz
                     hero_layer_item["font_size_px"] = min_hero_sz
+                preflight_and_fit_layer_widths(rendered_layers, max_safe_width=max_safe_width)
 
         # Resolve inter-layer stacking hierarchy, overlay depth shadows, and underlapping vertical linear gradients
         num_rend = len(rendered_layers)
@@ -4311,14 +4320,19 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
                         prev_layer["hasGradient"] = True
 
         # Authoritative single width estimator: stamp estimatedWidthPx and autoFitScale on all layers
+        # Accounts for perspective depth scaling (1200px perspective camera) on positive depthZPx foreground layers
         for l in rendered_layers:
             l_font = l.get("fontFamily", "Inter")
             l_text = l.get("text") or l.get("rawText", "")
             l_clean = "".join(ch for ch in l_text if ch.isprintable())
             l_upper = l.get("casing") == "uppercase" or l_clean.isupper()
             l_aspect = get_font_char_aspect(l_font, is_uppercase=l_upper)
+            l_behind = bool(l.get("behindSubject", False))
+            l_depth_z = float(l.get("depthZPx") or (140.0 if (l.get("isHero") or l.get("is_hero_layer")) and not l_behind else 0.0))
+            l_z_scale = 1200.0 / max(1.0, 1200.0 - l_depth_z) if (l_depth_z > 0 and not l_behind) else 1.0
+            l_eff_aspect = round(l_aspect * l_z_scale, 4)
             l_sz = float(l.get("fontSizePx", 60))
-            est = len(l_clean) * l_sz * l_aspect
+            est = len(l_clean) * l_sz * l_eff_aspect
             l["estimatedWidthPx"] = int(round(est))
             l["est_width"] = est
             if est > max_safe_width:

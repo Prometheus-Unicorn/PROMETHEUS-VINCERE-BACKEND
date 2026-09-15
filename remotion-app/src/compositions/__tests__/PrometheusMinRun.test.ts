@@ -843,6 +843,28 @@ describe("Architectural Background Systems (5 Pillars)", () => {
       // maxAllowedWidth = 830, estimatedWidth = 1000 -> scale = 830 / 1000 = 0.83
       expect(scale).toBeCloseTo(830 / 1000, 2);
     });
+
+    test("accounts for 3D perspective depth magnification (depthZPx) for foreground layers", () => {
+      // 12 chars at 117px base aspect 0.54 = 12 * 117 * 0.54 = 758.16px <= 830px (scale 1.0 without depth)
+      const scaleNoDepth = resolveAutoFitScale({
+        charLength: 12,
+        fontSizePx: 117,
+        isUppercase: false,
+        depthZPx: 0,
+      });
+      expect(scaleNoDepth).toBe(1.0);
+
+      // With depthZPx = 140, perspective 1200 magnifies by 1200 / 1060 = 1.132075
+      // Projected width: 758.16 * 1.132075 = 858.3px > 830px -> scales down
+      const scaleWithDepth = resolveAutoFitScale({
+        charLength: 12,
+        fontSizePx: 117,
+        isUppercase: false,
+        depthZPx: 140,
+      });
+      expect(scaleWithDepth).toBeLessThan(1.0);
+      expect(scaleWithDepth).toBeCloseTo(830 / (12 * 117 * 0.54 * (1200 / 1060)), 2);
+    });
   });
 
   describe("resolveNumericCountUpValue (Item 6)", () => {

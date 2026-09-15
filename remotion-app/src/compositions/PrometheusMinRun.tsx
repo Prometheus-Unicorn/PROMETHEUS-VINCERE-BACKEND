@@ -1218,6 +1218,7 @@ export interface AutoFitScaleParams {
   behindSubjectScaleX?: number;
   isFlank?: boolean;
   estimatedWidthPx?: number;
+  depthZPx?: number;
 }
 
 export const resolveAutoFitScale = ({
@@ -1232,6 +1233,7 @@ export const resolveAutoFitScale = ({
   behindSubjectScaleX = 1.0,
   isFlank = false,
   estimatedWidthPx: explicitEstimatedWidth,
+  depthZPx = 0,
 }: AutoFitScaleParams): number => {
   const effectiveLen = charLength ?? (text ? text.length : 0);
   const isDisplaySerif = Boolean(
@@ -1241,9 +1243,11 @@ export const resolveAutoFitScale = ({
   const baseAspect = isDisplaySerif ? 0.72 : 0.54;
   const charAspectEstimate = isUppercase ? (isDisplaySerif ? 0.82 : 0.74) : baseAspect;
   const effectiveFontSize = isScript ? Math.max(80, fontSizePx) : fontSizePx;
+  const depthZ = typeof depthZPx === "number" ? depthZPx : 0;
+  const zScale = (!isBehindSubject && depthZ > 0) ? (1200 / Math.max(1, 1200 - depthZ)) : 1.0;
   const estimatedWidthPx = explicitEstimatedWidth && explicitEstimatedWidth > 0
     ? explicitEstimatedWidth * (isBehindSubject ? behindSubjectScaleX : 1.0)
-    : effectiveLen * effectiveFontSize * charAspectEstimate * (isBehindSubject ? behindSubjectScaleX : 1.0);
+    : effectiveLen * effectiveFontSize * charAspectEstimate * (isBehindSubject ? behindSubjectScaleX : 1.0) * zScale;
   if (estimatedWidthPx > maxAllowedWidthPx) {
     return Math.max(0.70, maxAllowedWidthPx / estimatedWidthPx);
   }
@@ -1560,6 +1564,7 @@ const KineticLayerRenderer: React.FC<{
         behindSubjectScaleX,
         isFlank,
         estimatedWidthPx: layer.estimatedWidthPx,
+        depthZPx: (layer as any).depthZPx ?? (layer.isHero ? 140 : 0),
       });
 
   const fitScale = (s: number = 1.0): number => (autoFitScale < 1.0 ? s * autoFitScale : s);
@@ -5448,6 +5453,7 @@ const HierarchicalAsymmetricLockupComposition: React.FC<{
       fontSizePx: heroSize,
       isUppercase: true,
       isBehindSubject: false,
+      depthZPx: 140,
     });
     const modAutoFit = resolveAutoFitScale({
       charLength: modCharLen,
