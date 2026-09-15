@@ -4,7 +4,8 @@ Part of the Mini-Run Pipeline (mini_run_pipeline/).
 
 Implements:
 1. Direct ingestion of timestamped monologue chunks.
-2. Deep semantic extraction via Gemini 3.8 Flash to detect the optimal inflection moment.
+2. Deep semantic extraction via Gemini 2.5 Pro (highest-capability model) to detect
+   the optimal inflection moment and transduce it into a policy-compliant diffusion prompt.
 3. Strict enforcement of the Diffusion Asset Prompting Policy:
    - Anti-Glyph Policy (Zero typography, letters, fonts, audio quotes in prompt)
    - Layer Separation (Zero 2D UI elements, barcodes, Figma boxes in prompt)
@@ -54,7 +55,7 @@ def _get_api_key() -> str:
     raise RuntimeError("GOOGLE_AI_STUDIO_API_KEY / GEMINI_API_KEY is not configured.")
 
 
-DEFAULT_MODEL = os.getenv("GOOGLE_AI_MODEL", "gemini-3.5-flash")
+DEFAULT_MODEL = os.getenv("GOOGLE_AI_MODEL", "gemini-2.5-pro")
 
 # ---------------------------------------------------------------------------
 # Policy Self-Critique Gate (Adversarial Linter)
@@ -586,10 +587,23 @@ def extract_and_synthesize_curito_prompt(
         }
     }
 
-    # Try gemini-3.5-flash first for high stability, then gemini-2.5-flash
-    candidate_models = ["gemini-3.5-flash", "gemini-2.5-flash"]
-    if model_name not in candidate_models:
-        candidate_models.insert(0, model_name)
+    # Model priority: highest capability first, graceful fallback to faster variants.
+    # gemini-2.5-pro is the highest-quality Gemini model available on the API.
+    # gemini-2.5-pro-exp-03-25 / gemini-2.5-pro-preview-06-05 are experimental/preview
+    # variants with the same intelligence tier — useful if stable endpoint is rate-limited.
+    # gemini-2.5-flash is the fast/affordable fallback for when pro is unavailable.
+    PREFERRED_MODELS = [
+        "gemini-2.5-pro",
+        "gemini-2.5-pro-exp-03-25",
+        "gemini-2.5-pro-preview-06-05",
+        "gemini-2.5-flash-preview-05-20",
+        "gemini-2.5-flash",
+    ]
+    if model_name in PREFERRED_MODELS:
+        candidate_models = PREFERRED_MODELS[PREFERRED_MODELS.index(model_name):]
+    else:
+        # Caller passed a custom model name — try it first, then fall through preferred chain
+        candidate_models = [model_name] + PREFERRED_MODELS
     # De-duplicate while preserving order
     candidate_models = list(dict.fromkeys(candidate_models))
 
