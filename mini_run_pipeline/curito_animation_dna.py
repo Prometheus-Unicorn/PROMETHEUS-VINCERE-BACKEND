@@ -703,6 +703,101 @@ CURITO_GENOME_LIBRARY: Dict[str, CuritoGenome] = {
         subfamily=FAMILY_SCENE_BREAKDOWN,
         archetype="editorial_luxury",
     ),
+
+    # -----------------------------------------------------------------------
+    # S-TIER GENOME: Vertical Bottom-Up Emergence + Directional Motion Blur
+    # Registered: 2026-09-15 — per user directive on kinematic entry direction
+    # -----------------------------------------------------------------------
+    "curito_scene_vertical_bottom_emergence_motionblur": CuritoGenome(
+        id="curito_scene_vertical_bottom_emergence_motionblur",
+        category=CATEGORY_SCENE_ASSET_BREAKDOWN,
+        name="Vertical Bottom-Up Emergence with Directional Motion Blur (S-Tier)",
+        dna_snippet=(
+            "The primary hero asset initiates from a fully submerged off-screen position below the lower "
+            "frame boundary (Y: +120% viewport), propelled upward along the vertical axis with a steep "
+            "power4.out cubic deceleration curve, decelerating sharply into its final locked centroid "
+            "position. During the upward travel phase, a directional slow-shutter motion blur is applied "
+            "along the Y-axis: the asset exhibits 28-frame trailing edge smear with 85% opacity falloff "
+            "and directional elongation (scaleY: 1.12 to 1.0) simulating physical inertia. As the asset "
+            "locks into position, the trailing blur resolves to zero and a tight ambient occlusion contact "
+            "shadow expands beneath it from scale(0.4) to scale(1.0). The total entry duration spans "
+            "0.0s to 1.2s with the visual apex locked at 1.0s. Zero horizontal drift during the upward "
+            "travel phase. Camera is locked on a fixed tripod with no compensatory pan."
+        ),
+        tags=[
+            "entrance", "bottom_up", "vertical", "emergence", "motion_blur",
+            "directional_blur", "slow_shutter", "y_axis", "deceleration", "power4",
+            "inertia", "shadow_expand", "s_tier",
+        ],
+        subfamily=FAMILY_SCENE_BREAKDOWN,
+        archetype="high_impact",
+    ),
+
+    # -----------------------------------------------------------------------
+    # S-TIER GENOME: Anamorphic Rack-Focus DoF Stratification
+    # Registered: 2026-09-15 — GSAP cinema lens system, user-specified
+    # -----------------------------------------------------------------------
+    "curito_cam_anamorphic_rackfocus_dof_stratification": CuritoGenome(
+        id="curito_cam_anamorphic_rackfocus_dof_stratification",
+        category=CATEGORY_CAMERA_MOTION_CHOREOGRAPHY,
+        name="Anamorphic Rack-Focus DoF Stratification + Parallax Convergence (S-Tier)",
+        dna_snippet=(
+            "The scene is treated as three-dimensional focal-plane stratified space rendered through an "
+            "ultra-wide aperture anamorphic cinema lens (f/1.2 equivalent). Phase 1 — Optical Strike "
+            "(0.0s–1.0s): the global scene opens overexposed and in total heavy defocus "
+            "(blur: 36px, brightness: 1.6, scale: 1.15), simulating a lens iris wide-open into "
+            "volumetric backlight blowout. The primary focal subject resolves first at 0.2s via a "
+            "power4.out rack-focus pull (blur: 36px → 0px, Y: +35px → 0px), while flanking secondary "
+            "elements remain out-of-focus low-luminance bokeh (brightness: 0.6). "
+            "Phase 2 — Depth-of-Field Pull (0.7s–1.8s): the focal plane racks backward into the scene; "
+            "left and right flanking assets converge inward from peripheral anamorphic distortion positions "
+            "(x: ±45px → 0px) while resolving from bokeh to tack-sharp, mimicking anamorphic lens "
+            "compression and focal-length foreshortening. "
+            "Phase 3 — Breathing Hold (1.8s–4.5s): the composition enters low-frequency out-of-phase "
+            "sine.inOut micro-drift float (scale: 1.02 → 0.98, sine period: 3.2s) preserving cinematic "
+            "presence and preventing visual dead-stops. Contact occlusion shadows tighten and snap to "
+            "ground plane. "
+            "Phase 4 — Defocus Dissolve Outro (4.5s–6.0s): the camera racks focus past the subjects "
+            "into full lens blowout (blur: 0px → 40px); primary subject defocuses first, secondary "
+            "elements follow with a 100ms stagger, collapsing the lockup back into pure optical atmosphere. "
+            "Oval anamorphic bokeh coronas and horizontal lens streak flares are maintained throughout."
+        ),
+        tags=[
+            "rack_focus", "dof", "stratification", "anamorphic", "bokeh", "f1.2",
+            "focal_plane", "parallax_convergence", "lens_blowout", "breathing_hold",
+            "defocus_outro", "sine_drift", "gsap", "cinema_lens", "s_tier",
+        ],
+        subfamily=FAMILY_CAMERA_CHOREOGRAPHY,
+        archetype="editorial_documentary",
+    ),
+
+    # -----------------------------------------------------------------------
+    # S-TIER GENOME: Volumetric Bloom Atmospheric Entry + Grounding Occlusion
+    # Registered: 2026-09-15 — atmospheric blowout to grounded occlusion phase
+    # -----------------------------------------------------------------------
+    "curito_lit_volumetric_bloom_to_grounded_occlusion": CuritoGenome(
+        id="curito_lit_volumetric_bloom_to_grounded_occlusion",
+        category=CATEGORY_LIGHTING_SHADING_PROFILE,
+        name="Volumetric Bloom Blowout → Grounded Ambient Occlusion (S-Tier)",
+        dna_snippet=(
+            "The initial frame features an oversaturated optical volumetric backlight bloom "
+            "(scale: 1.4, opacity: 0.8) simulating an overexposed lens flare incident that "
+            "diffuses all spatial depth cues and ungrounds all assets. As the focal rack resolves, "
+            "the volumetric bloom compresses and settles into a controlled ambient backdrop halo "
+            "(scale: 1.0, opacity: 0.4). Simultaneously, the ground-plane contact shadow scales "
+            "from a diffuse underlit blob (scaleX: 0.4, scaleY: 0.4, blur: 18px stdDeviation) "
+            "to a tight elliptical ambient occlusion shadow (scaleX: 1.0, scaleY: 1.0, "
+            "blur: 6px stdDeviation), physically anchoring the asset to the spatial plane "
+            "with tactile photographic realism. On outro, the bloom re-expands to scale: 1.6 "
+            "and fades to opacity: 0, pulling the scene back into pure optical atmosphere."
+        ),
+        tags=[
+            "bloom", "volumetric", "backlight", "flare", "occlusion", "contact_shadow",
+            "grounding", "atmospheric", "blowout", "elliptical_ao", "s_tier",
+        ],
+        subfamily=FAMILY_KEY_LIGHTING,
+        archetype="cinematic_vox",
+    ),
 }
 
 
