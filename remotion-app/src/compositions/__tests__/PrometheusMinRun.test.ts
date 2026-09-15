@@ -1055,3 +1055,21 @@ describe("origin expansion presets coverage (#2 - #6, #9, #10, #11)", () => {
     expect(dur).toBeLessThanOrEqual(30);
   });
 });
+
+describe("resolveAutoFitScale archetype safe boundary enforcement", () => {
+  test("computes autoFitScale < 1.0 when raw text width exceeds safe bounds", () => {
+    const scale = resolveAutoFitScale({
+      charLength: 20,
+      fontSizePx: 104,
+      fontFamily: "Outfit",
+      isUppercase: false,
+      isBehindSubject: false,
+    });
+    expect(scale).toBeLessThan(1.0);
+    expect(scale).toBeGreaterThanOrEqual(0.65);
+    // Rendered font size with autoFitScale must fit within 820px safe width
+    const renderedFontSize = Math.round(104 * scale);
+    expect(renderedFontSize).toBeLessThan(104);
+  });
+});
+

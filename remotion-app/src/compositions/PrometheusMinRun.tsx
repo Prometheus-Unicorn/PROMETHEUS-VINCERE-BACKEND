@@ -1657,7 +1657,7 @@ const KineticLayerRenderer: React.FC<{
     color: textColor,
     accentColor: layer.isHero ? "#00F0FF" : "#FFC107",
     fontFamily: layer.fontFamily,
-    fontSizePx: isBehindSubject ? behindSubjectFontSize : layer.fontSizePx,
+    fontSizePx: isBehindSubject ? behindSubjectFontSize : renderedFontSizePx,
     fontWeight: layer.fontWeight,
     letterSpacingEm: layer.letterSpacingEm || 0,
     gradient: layer.gradient,
@@ -1840,7 +1840,7 @@ const KineticLayerRenderer: React.FC<{
       easing: Easing.bezier(0.16, 1.0, 0.3, 1.0),
     });
     const blur = interpolate(entranceP, [0, 0.7, 1], [32, 2, 0]);
-    const effectiveSize = isBehindSubject ? (layer.fontSizePx || behindSubjectFontSize) : layer.fontSizePx;
+    const effectiveSize = isBehindSubject ? (layer.fontSizePx || behindSubjectFontSize) : renderedFontSizePx;
     const effScaleY = isBehindSubject ? behindSubjectScaleY : 1.15;
     const effScaleX = isBehindSubject ? behindSubjectScaleX : 1.0;
     return (
@@ -3795,7 +3795,7 @@ const KineticLayerRenderer: React.FC<{
     const multiRiseFrames = clampDur(650);
     const microSqueezeFrames = clampDur(1400);
     const macroSqueezeFrames = clampDur(2200);
-    const glyphEm = Math.max(80, layer.fontSizePx);
+    const glyphEm = Math.max(80, renderedFontSizePx);
 
     const wordWraps = words.map((word, wIdx) => {
       const wordStart = wordEntranceFrames[wIdx] ?? 0;
