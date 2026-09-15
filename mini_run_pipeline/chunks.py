@@ -31,23 +31,8 @@ def _is_numeric(text: str) -> bool:
 def chunk_transcript_words(
     words: List[dict[str, Any]], max_chunk_words: int = MAX_CHUNK_WORDS
 ) -> List[dict[str, Any]]:
-    """Deterministic greedy chunker with 3-4 word guarantee."""
-    if not words:
-        return []
-    normalized = [
-        {
-            "text": str(word.get("text", "")).strip(),
-            "start_ms": int(word.get("start_ms", word.get("start", 0))),
-            "end_ms": max(
-                int(word.get("end_ms", word.get("end", 0))),
-                int(word.get("start_ms", word.get("start", 0))) + 1,
-            ),
-            "confidence": float(word.get("confidence", 1.0)),
-        }
-        for word in words
-        if str(word.get("text", "")).strip()
-    ]
-    return _greedy(normalized, TARGET_CHUNK_WORDS, max_chunk_words)
+    """Deterministic silence- and duration-aware chunker with 3-4 word guarantee."""
+    return smart_chunk_words(words, max_chunk_words=max_chunk_words)
 
 
 def _chunk_from_words(words: List[dict[str, Any]], chunk_index: int) -> dict[str, Any]:
@@ -284,9 +269,23 @@ def _greedy(
         selected = words[index : index + take]
         index += take
         
-        # Merge 1-word dangling chunks with previous chunk ONLY if previous chunk did not end with a sentence terminal
+        # Merge dangling 1-word or short micro-chunks (< 850ms) with previous chunk
+        # ONLY if previous chunk did not end with a sentence terminal and combined words <= max_chunk_words + 1
         prev_has_terminal = chunks and str(chunks[-1]["words"][-1].get("text", "")).strip().endswith((".", "!", "?", "...", "—", ":"))
-        if len(selected) == 1 and chunks and not prev_has_terminal:
+        chunk_duration_ms = int(selected[-1].get("end_ms", 0)) - int(selected[0].get("start_ms", 0))
+        last_word_hold_ms = int(selected[-1].get("end_ms", 0)) - int(selected[-1].get("start_ms", 0))
+        is_micro_chunk = (chunk_duration_ms < 850 or last_word_hold_ms < 420)
+
+        total_combined_ms = int(selected[-1].get("end_ms", 0)) - int(chunks[-1]["words"][0].get("start_ms", 0)) if chunks else 0
+        can_merge_prev = (
+            chunks and not prev_has_terminal and
+            (len(selected) == 1 or (is_micro_chunk and (
+                len(chunks[-1]["words"]) + len(selected) <= max_chunk_words or
+                (len(chunks[-1]["words"]) + len(selected) <= 6 and total_combined_ms <= 2200)
+            )))
+        )
+
+        if can_merge_prev:
             prev = chunks.pop()
             merged_words = prev["words"] + selected
             chunks.append(_chunk_from_words(merged_words, prev["chunkIndex"]))

@@ -4,8 +4,11 @@ import { ComparisonHelper } from "./ComparisonHelper";
 import { ListicleHelper } from "./ListicleHelper";
 import { MotionNumberHelper } from "./MotionNumberHelper";
 import { CalloutBadgeHelper } from "./CalloutBadgeHelper";
+import { OriginCalendarWidget } from "./OriginCalendarWidget";
+import { OriginTimeWidget } from "./OriginTimeWidget";
 import { BlurVignette } from "./BlurVignette";
 import { LiquidImageRipple } from "./LiquidImageRipple";
+import { OpticalRackFocusStage } from "./OpticalRackFocusStage";
 
 export interface VisualHelperStageProps {
   visualHelper?: VisualHelper;
@@ -27,19 +30,19 @@ const resolvePositionStyles = (
     case "flank_left":
       return {
         position: "absolute",
-        left: "40px",
-        top: "42%",
+        left: "24px",
+        top: "26%",
         transform: "translateY(-50%)",
-        width: "min(460px, 45%)",
+        width: "min(390px, 38%)",
         zIndex: 90,
       };
     case "flank_right":
       return {
         position: "absolute",
-        right: "40px",
-        top: "42%",
+        right: "24px",
+        top: "26%",
         transform: "translateY(-50%)",
-        width: "min(460px, 45%)",
+        width: "min(390px, 38%)",
         zIndex: 90,
       };
     case "cranial_top":
@@ -58,6 +61,14 @@ const resolvePositionStyles = (
         left: "50%",
         transform: "translate(-50%, -50%)",
         width: "min(680px, 85%)",
+        zIndex: 90,
+      };
+    case "fullscreen":
+      return {
+        position: "absolute",
+        inset: 0,
+        width: "100%",
+        height: "100%",
         zIndex: 90,
       };
     case "lower_deck":
@@ -83,10 +94,33 @@ export const VisualHelperStage: React.FC<VisualHelperStageProps> = ({
     return null;
   }
 
-  const positionStyle = resolvePositionStyles(visualHelper.position);
+  const defaultPosition = visualHelper.type === "optical_rack_focus" ? "fullscreen" : "lower_deck";
+  const positionStyle = resolvePositionStyles(visualHelper.position || defaultPosition);
 
   const renderActiveHelper = () => {
     switch (visualHelper.type) {
+      case "optical_rack_focus":
+        return (
+          <OpticalRackFocusStage
+            frame={frame}
+            fps={fps}
+            headlineText={visualHelper.headlineText || visualHelper.title}
+            subtitleText={visualHelper.subtitleText || visualHelper.subtitle}
+            bloomColor={visualHelper.bloomColor || palette?.glow}
+            enableBloom={visualHelper.enableBloom ?? true}
+            enableVignette={visualHelper.enableVignette ?? true}
+            enableLetterbox={visualHelper.enableLetterbox ?? false}
+            enableFilmGrain={visualHelper.enableFilmGrain ?? true}
+            enableFloorShadow={visualHelper.enableFloorShadow ?? true}
+            focalPlaneRole={visualHelper.focalPlaneRole || "primary"}
+            staggerDelayFrames={visualHelper.staggerDelayFrames || 0}
+            metalGradeStyle={visualHelper.metalGradeStyle || "desaturated_brass"}
+            enableTactileShadow={visualHelper.enableTactileShadow ?? true}
+            enableHalftoneRaster={visualHelper.enableHalftoneRaster ?? true}
+            assetEntranceDirection={visualHelper.assetEntranceDirection || "up"}
+            canvasColor={visualHelper.canvasColor || "#F4F4F4"}
+          />
+        );
       case "before_after_comparison":
         return (
           <ComparisonHelper
@@ -117,6 +151,26 @@ export const VisualHelperStage: React.FC<VisualHelperStageProps> = ({
       case "callout_badge":
         return (
           <CalloutBadgeHelper
+            helper={visualHelper}
+            frame={frame}
+            fps={fps}
+            palette={palette}
+          />
+        );
+      case "calendar_widget":
+      case "animated_calendar":
+        return (
+          <OriginCalendarWidget
+            helper={visualHelper}
+            frame={frame}
+            fps={fps}
+            palette={palette}
+          />
+        );
+      case "time_widget":
+      case "hourglass_widget":
+        return (
+          <OriginTimeWidget
             helper={visualHelper}
             frame={frame}
             fps={fps}

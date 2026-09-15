@@ -22,7 +22,7 @@ import {
 async function callFlowBridge(command: string, args: Record<string, unknown>): Promise<Record<string, unknown>> {
   return new Promise((resolve, reject) => {
     const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../../../../");
-    const proc = spawn("python", ["-m", "mini_run_pipeline.google_flow_bridge"], {
+    const proc = spawn("python", ["mini_run_pipeline/google_flow_bridge.py"], {
       cwd: repoRoot,
       stdio: ["pipe", "pipe", "pipe"],
       env: { ...process.env }

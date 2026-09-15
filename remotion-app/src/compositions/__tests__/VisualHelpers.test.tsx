@@ -12,6 +12,7 @@ import {
   ListicleHelper,
   MotionNumberHelper,
   CalloutBadgeHelper,
+  OpticalRackFocusStage,
   VisualHelper,
 } from "../VisualHelpers";
 
@@ -150,6 +151,44 @@ describe("VisualHelpers Architecture & Archetypes", () => {
       <VisualHelperStage visualHelper={flankHelper} frame={15} fps={30} />
     );
     expect(flankHtml).toContain("PRO TIP");
-    expect(flankHtml).toContain("right:40px");
+    expect(flankHtml).toContain("right:24px");
+  });
+
+  it("renders OpticalRackFocusStage with physical lens breathing, bloom, and kinetic typography", () => {
+    const html = renderToStaticMarkup(
+      <OpticalRackFocusStage
+        frame={15}
+        fps={30}
+        durationFrames={90}
+        headlineText="COMPETING PRIORITIES"
+        subtitleText="Something has to win"
+        bloomColor="rgba(56, 189, 248, 0.4)"
+        enableBloom={true}
+        enableVignette={true}
+        enableFilmGrain={true}
+        enableFloorShadow={true}
+      >
+        <div id="hero-artifact">Mechanical Gear</div>
+      </OpticalRackFocusStage>
+    );
+    expect(html).toContain("COMPETING PRIORITIES");
+    expect(html).toContain("Something has to win");
+    expect(html).toContain("Mechanical Gear");
+    expect(html).toContain("feTurbulence"); // Film grain SVG filter
+    expect(html).toContain("radial-gradient"); // Bloom / shadow
+  });
+
+  it("renders VisualHelperStage dispatching optical_rack_focus archetype fullscreen", () => {
+    const rackHelper: VisualHelper = {
+      type: "optical_rack_focus",
+      headlineText: "INFLECTION MOMENT",
+      subtitleText: "Zero in on the core goal",
+    };
+    const html = renderToStaticMarkup(
+      <VisualHelperStage visualHelper={rackHelper} frame={15} fps={30} />
+    );
+    expect(html).toContain("INFLECTION MOMENT");
+    expect(html).toContain("Zero in on the core goal");
+    expect(html).toContain("inset:0"); // Fullscreen container
   });
 });

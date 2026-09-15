@@ -5651,15 +5651,16 @@ const MultiLayerTypographyCard: React.FC<{
   endFrame: number;
   subjectMatteAvailable: boolean;
   nextChunkStartFrame?: number;
-}> = ({ chunk, contentStartFrame, endFrame, subjectMatteAvailable, nextChunkStartFrame }) => {
+  nextChunk?: CaptionChunk;
+}> = ({ chunk, contentStartFrame, endFrame, subjectMatteAvailable, nextChunkStartFrame, nextChunk }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
   const totalFrames = endFrame;
   if (totalFrames <= 0) return null;
 
-  const chunkStartMs = chunk.startMs ?? chunk.outputStartMs ?? chunk.displayStartMs ?? 0;
-  const chunkEndMs = chunk.endMs ?? chunk.outputEndMs ?? chunk.displayEndMs ?? chunkStartMs + 1500;
+  const chunkStartMs = chunk.displayStartMs ?? chunk.startMs ?? chunk.outputStartMs ?? 0;
+  const chunkEndMs = chunk.displayEndMs ?? chunk.endMs ?? chunk.outputEndMs ?? chunkStartMs + 1500;
 
   const layers: TypographyLayer[] =
     chunk.layers && chunk.layers.length > 0
@@ -5707,17 +5708,36 @@ const MultiLayerTypographyCard: React.FC<{
   });
 
   // Rack-Focus Exit Gate (Round 12):
-  // Gate: collision > 0 -> blur-exit; gap >= 500ms -> clean hold, no exit.
-  // When chunk N+1 mounts inside chunk N's hold (nextChunkStartFrame < totalFrames),
-  // chunk N executes a 5-frame rack-focus exit: Gaussian blur 0 -> ~20px + opacity fade + scale-down,
-  // completing inside the collision window.
+  // Decoupled Z-Tier & Spatial Isolation:
+  // Behind-subject cranial headlines do NOT collide with foreground / chest deck subtitles!
+  // They hold and breathe across subordinate subtitle lifecycles.
+  const isBehind = behindSubject;
+  const placementAny = (chunk.placement || {}) as any;
+  const nextPlacementAny = ((nextChunk?.placement) || {}) as any;
+
+  const isCranial = Boolean(placementAny.dominantZone?.includes("cranial") || placementAny.placementZone?.includes("cranial") || placementAny.safeRegionId?.includes("head") || placementAny.safeRegionId?.includes("cranial"));
+  const nextIsBehind = nextChunk && resolveChunkBehindSubject(subjectMatteAvailable, nextChunk.layers || [], nextChunk.placement);
+  const nextIsCranial = Boolean(nextPlacementAny.dominantZone?.includes("cranial") || nextPlacementAny.placementZone?.includes("cranial") || nextPlacementAny.safeRegionId?.includes("head") || nextPlacementAny.safeRegionId?.includes("cranial"));
+
+  // Cross-tier isolation: cranial/behind-subject headlines never collide with chest subtitles
+  const isCrossTierCollision = (isBehind !== Boolean(nextIsBehind)) || (isCranial !== nextIsCranial);
+
+  // Minimum word hold floor: never evict a word while its letters are still entering or within 450ms of appearing!
+  const minWordHoldFrames = Math.max(
+    Math.round((600 / 1000) * fps),
+    lastWordStartFrame + Math.round((450 / 1000) * fps)
+  );
+
   const hasIncomingCollision =
+    !isCrossTierCollision &&
     nextChunkStartFrame !== undefined &&
     nextChunkStartFrame < totalFrames &&
-    nextChunkStartFrame >= 0;
+    nextChunkStartFrame >= minWordHoldFrames;
 
   const exitFrames = 5;
-  const rackFocusStartFrame = hasIncomingCollision ? Math.max(0, nextChunkStartFrame - exitFrames) : Math.max(0, totalFrames - exitFrames);
+  const rackFocusStartFrame = hasIncomingCollision
+    ? Math.max(minWordHoldFrames, nextChunkStartFrame - exitFrames)
+    : Math.max(0, totalFrames - exitFrames);
   const rackFocusDuration = exitFrames;
   const isRackFocusExiting = frame >= rackFocusStartFrame;
 
@@ -7703,6 +7723,7 @@ export const PrometheusMinRun: React.FC<PrometheusMinRunProps> = ({
                 endFrame={durationFrames}
                 subjectMatteAvailable={isMatteActive}
                 nextChunkStartFrame={relativeNextChunkStartFrame}
+                nextChunk={nextChunk}
               />
             </Sequence>
           );
@@ -7802,7 +7823,8 @@ export const PrometheusMinRun: React.FC<PrometheusMinRunProps> = ({
               const startMs = chunk.startMs ?? chunk.outputStartMs ?? 0;
               const endMs = chunk.endMs ?? chunk.outputEndMs ?? startMs + 1500;
               const startFrame = Math.round((startMs / 1000) * fps);
-              const durationFrames = Math.max(1, Math.round(((endMs - startMs) / 1000) * fps));
+              const helperDurationMs = chunk.visualHelper.durationMs ?? Math.max(4500, endMs - startMs);
+              const durationFrames = Math.max(1, Math.round((helperDurationMs / 1000) * fps));
               return (
                 <Sequence
                   key={`vh-${idx}-${startMs}`}

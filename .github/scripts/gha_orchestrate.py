@@ -49,6 +49,7 @@ from mini_run_pipeline import (
     song_program,
     subject_placement,
     typography,
+    visual_helpers,
 )
 
 ENDPOINT = os.environ["R2_ENDPOINT"]
@@ -374,6 +375,16 @@ def main():
     pipeline.finalize_manifest_and_exits(chunks, font_manifest=font_manifest)
     print(f"[orchestrate] Stamped exitTreatments onto {len(chunks)} chunks (rack_focus_blur on collisions)", flush=True)
 
+    # 11c. Plan Visual Helpers via Semantic Intelligence
+    try:
+        vh_plans = visual_helpers.detect_and_plan_visual_helpers(chunks, design)
+        for idx, vh in vh_plans.items():
+            if idx < len(chunks):
+                chunks[idx]["visualHelper"] = vh
+                print(f"[orchestrate] Attached visual helper to Chunk {idx}: {vh.get('type')}", flush=True)
+    except Exception as vh_err:
+        print(f"[orchestrate] Visual helper planning notice: {vh_err}", flush=True)
+
     # 12. Orchestration Manifest (Camera moves, waypoints, zooms, timed SFX)
     orchestration_manifest = None
     try:
@@ -452,15 +463,28 @@ def main():
         try:
             from mini_run_pipeline import matting
             matte_out = workdir / f"matte_{job_id}.webm"
-            matting.segment_video_window(
-                source_video_path=active_shot_path,
-                start_ms=0,
-                end_ms=effective_duration_ms,
-                output_webm_path=matte_out,
-                width=source_width,
-                height=source_height,
-                fps=source_fps,
-            )
+            precomputed = None
+            for cand in [
+                REPO_ROOT / f"remotion-app/public/source/{Path(src_str).stem}_matte.webm",
+                REPO_ROOT / "remotion-app/public/source/male_black_matte.webm" if "male" in src_str.lower() else None,
+                REPO_ROOT / "remotion-app/public/source/test_matte.webm" if "test" in src_str.lower() else None,
+            ]:
+                if cand and cand.exists() and cand.stat().st_size > 1000:
+                    precomputed = cand
+                    break
+            if precomputed:
+                print(f"[orchestrate] Using precomputed repo matte: {precomputed}", flush=True)
+                shutil.copyfile(precomputed, matte_out)
+            else:
+                matting.segment_video_window(
+                    source_video_path=active_shot_path,
+                    start_ms=0,
+                    end_ms=effective_duration_ms,
+                    output_webm_path=matte_out,
+                    width=source_width,
+                    height=source_height,
+                    fps=source_fps,
+                )
             if matte_out.exists() and matte_out.stat().st_size > 1000:
                 matte_r2_key = f"gha-renders/{job_id}/matte.webm"
                 s3.upload_file(str(matte_out), PROCESSED_BUCKET, matte_r2_key)

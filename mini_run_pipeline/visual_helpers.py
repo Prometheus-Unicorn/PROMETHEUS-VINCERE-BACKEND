@@ -179,6 +179,24 @@ def _extract_comparison(text: str) -> Optional[Dict[str, Any]]:
             "rippleEffect": True,
         }
 
+    # "Moving / shifting / switching from X to Y"
+    m_shift = re.search(r"\b(?:moving|shifting|switching)\s+(?:now\s+)?(?:from\s+|for\s+)?([^,.;]+?)\s+to\s+([^,.;]+)", text, re.IGNORECASE)
+    if m_shift:
+        old_opt = m_shift.group(1).strip().title()
+        new_opt = m_shift.group(2).strip().title()
+        return {
+            "type": "before_after_comparison",
+            "title": "THE PARADIGM SHIFT",
+            "beforeLabel": "OLD FOCUS",
+            "beforeValue": old_opt[:24],
+            "afterLabel": "NEW FOCUS",
+            "afterValue": new_opt[:24],
+            "texture": "liquid_gradient",
+            "splitRatio": 0.5,
+            "position": "lower_deck",
+            "rippleEffect": True,
+        }
+
     return None
 
 def _extract_callout_badge(text: str) -> Optional[Dict[str, Any]]:
@@ -226,6 +244,65 @@ def _extract_callout_badge(text: str) -> Optional[Dict[str, Any]]:
         }
     return None
 
+def _extract_calendar_widget(text: str) -> Optional[Dict[str, Any]]:
+    """Inspect text for calendar, scheduling, or agenda concepts to trigger Origin UI calendar widget."""
+    text_lower = text.lower()
+    calendar_keywords = ["calendar", "calendars", "schedule", "scheduling", "day planner", "agenda", "timeline"]
+    if any(re.search(rf"\b{k}\b", text_lower) for k in calendar_keywords):
+        return {
+            "type": "calendar_widget",
+            "title": "October 2026",
+            "subtitle": "Packed Calendar ≠ True Progress",
+            "badge": "CALENDAR OVERLOAD",
+            "texture": "liquid_glass",
+            "position": "flank_right",
+            "durationMs": 4800,
+        }
+    return None
+
+def _extract_time_widget(text: str) -> Optional[Dict[str, Any]]:
+    """Inspect text for finite time, time capital, or non-renewable hours to trigger Origin UI time/hourglass widget."""
+    text_lower = text.lower()
+    if re.search(r"\btime\b", text_lower) and any(
+        re.search(rf"\b{k}\b", text_lower)
+        for k in ["managed", "manage", "management", "capital", "finite", "non-renewable", "allocation", "waste"]
+    ):
+        return {
+            "type": "time_widget",
+            "title": "Time Is Non-Renewable",
+            "badge": "FINITE CAPITAL",
+            "subtitle": "Fixed 24h allocation — zero carryover",
+            "texture": "geometric_drafting",
+            "position": "cranial_top",
+            "imageSrc": "showcase-assets/hourglass-sand.png",
+            "durationMs": 5200,
+            "accentColor": "#FBBF24",
+        }
+    return None
+
+def _extract_optical_rack_focus(text: str) -> Optional[Dict[str, Any]]:
+    """Inspect text for cinematic focus, priority inflection, or pivotal decisions."""
+    text_lower = text.lower()
+    if any(re.search(rf"\b{k}\b", text_lower) for k in [
+        "rack focus", "lens breathing", "focal point", "priorities", "competing priorities",
+        "inflection point", "something has to win", "sharp focus"
+    ]):
+        m_pri = re.search(r"\b(competing\s+priorities|something\s+has\s+to\s+win|inflection\s+point|focal\s+point|priorities)\b", text_lower)
+        headline = m_pri.group(1).upper() if m_pri else "CINEMATIC FOCUS"
+        return {
+            "type": "optical_rack_focus",
+            "headlineText": headline,
+            "subtitleText": "PHYSICAL LENS BREATHING & KINETIC COMPRESSION",
+            "position": "fullscreen",
+            "enableBloom": True,
+            "enableVignette": True,
+            "enableLetterbox": False,
+            "enableFilmGrain": True,
+            "enableFloorShadow": True,
+            "focalPlaneRole": "primary",
+        }
+    return None
+
 def detect_and_plan_visual_helpers(
     chunks: List[Dict[str, Any]],
     design: Optional[Dict[str, Any]] = None,
@@ -234,7 +311,7 @@ def detect_and_plan_visual_helpers(
     
     Supports:
     - Manual overrides from design_input or chunk['visualHelper'].
-    - Automatic semantic detection for comparison, metric/number, listicle, and callout badge.
+    - Automatic semantic detection for calendar widget, time widget, comparison, metric/number, listicle, and callout badge.
     - Anti-fatigue cooldown so helpers don't overcrowd the screen (minimum 2 chunks gap).
     """
     design_dict = design if isinstance(design, dict) else {}
@@ -242,6 +319,7 @@ def detect_and_plan_visual_helpers(
 
     plans: Dict[int, Dict[str, Any]] = {}
     last_helper_idx = -999
+    last_type_idx: Dict[str, int] = {}
 
     for idx, chunk in enumerate(chunks):
         raw_text = str(chunk.get("text", "")).strip()
@@ -250,39 +328,76 @@ def detect_and_plan_visual_helpers(
 
         # 1. Manual chunk override
         if chunk.get("visualHelper"):
-            plans[idx] = chunk["visualHelper"]
+            vh = chunk["visualHelper"]
+            plans[idx] = vh
             last_helper_idx = idx
+            if vh.get("type"):
+                last_type_idx[vh["type"]] = idx
             continue
 
         # 2. Manual index override in design
         if idx in explicit_helpers:
-            plans[idx] = explicit_helpers[idx]
+            vh = explicit_helpers[idx]
+            plans[idx] = vh
             last_helper_idx = idx
+            if isinstance(vh, dict) and vh.get("type"):
+                last_type_idx[vh["type"]] = idx
             continue
 
         # Enforce minimum cooldown gap between automated visual helpers (≥ 2 chunks apart)
         if idx - last_helper_idx < 2:
             continue
 
-        # 3. Check for Comparison
-        comp = _extract_comparison(raw_text)
-        if comp:
+        prev_text = str(chunks[idx - 1].get("text", "")).strip() if idx > 0 else ""
+        next_text = str(chunks[idx + 1].get("text", "")).strip() if idx + 1 < len(chunks) else ""
+        context_text = f"{prev_text} {raw_text} {next_text}".strip()
+
+        # 3. Check for Time / Hourglass Widget (physical 3D asset)
+        time_w = _extract_time_widget(raw_text) or _extract_time_widget(context_text)
+        if time_w and idx - last_type_idx.get("time_widget", -999) >= 6:
+            plans[idx] = time_w
+            last_helper_idx = idx
+            last_type_idx["time_widget"] = idx
+            continue
+
+        # 4. Check for Calendar Widget (physical UI component)
+        cal = _extract_calendar_widget(raw_text) or _extract_calendar_widget(context_text)
+        if cal and idx - last_type_idx.get("calendar_widget", -999) >= 6:
+            plans[idx] = cal
+            last_helper_idx = idx
+            last_type_idx["calendar_widget"] = idx
+            continue
+
+        # 5. Check for Comparison (paradigm shift / split card)
+        comp = _extract_comparison(raw_text) or _extract_comparison(context_text)
+        if comp and idx - last_type_idx.get("before_after_comparison", -999) >= 6:
             plans[idx] = comp
             last_helper_idx = idx
+            last_type_idx["before_after_comparison"] = idx
             continue
 
-        # 4. Check for Metric / Motion Number
+        # 6. Check for Optical Rack Focus (Cinematic Inflection / Focus on raw_text only)
+        rack = _extract_optical_rack_focus(raw_text)
+        if rack and idx - last_type_idx.get("optical_rack_focus", -999) >= 6:
+            plans[idx] = rack
+            last_helper_idx = idx
+            last_type_idx["optical_rack_focus"] = idx
+            continue
+
+        # 6. Check for Metric / Motion Number
         metric = _extract_metric_number(raw_text)
-        if metric:
+        if metric and idx - last_type_idx.get("motion_number", -999) >= 6:
             plans[idx] = metric
             last_helper_idx = idx
+            last_type_idx["motion_number"] = idx
             continue
 
-        # 5. Check for Callout Badge
-        callout = _extract_callout_badge(raw_text)
-        if callout:
+        # 7. Check for Callout Badge
+        callout = _extract_callout_badge(raw_text) or _extract_callout_badge(context_text)
+        if callout and idx - last_type_idx.get("callout_badge", -999) >= 6:
             plans[idx] = callout
             last_helper_idx = idx
+            last_type_idx["callout_badge"] = idx
             continue
 
         # 6. Check for Listicle bullet announcement

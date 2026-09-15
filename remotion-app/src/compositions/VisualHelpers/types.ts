@@ -4,7 +4,12 @@ export type VisualHelperType =
   | "before_after_comparison"
   | "listicle"
   | "motion_number"
-  | "callout_badge";
+  | "callout_badge"
+  | "calendar_widget"
+  | "animated_calendar"
+  | "time_widget"
+  | "hourglass_widget"
+  | "optical_rack_focus";
 
 export type VisualHelperTexture =
   | "liquid_glass"
@@ -18,7 +23,8 @@ export type VisualHelperPosition =
   | "flank_right"
   | "lower_deck"
   | "cranial_top"
-  | "center";
+  | "center"
+  | "fullscreen";
 
 export interface ListicleItem {
   id: string;
@@ -65,6 +71,28 @@ export interface VisualHelper {
   // Archetype 4: callout_badge
   icon?: "star" | "zap" | "check" | "alert" | "trending" | "shield" | "flame" | "target";
   calloutStyle?: "minimal" | "pill" | "banner";
+
+  // Archetype 5: optical_rack_focus
+  headlineText?: string;
+  subtitleText?: string;
+  bloomColor?: string;
+  enableBloom?: boolean;
+  enableVignette?: boolean;
+  enableLetterbox?: boolean;
+  enableFilmGrain?: boolean;
+  enableFloorShadow?: boolean;
+  focalPlaneRole?: "primary" | "secondary";
+  staggerDelayFrames?: number;
+  metalGradeStyle?: "desaturated_brass" | "monochrome_crushed" | "raw";
+  enableTactileShadow?: boolean;
+  enableHalftoneRaster?: boolean;
+  assetEntranceDirection?: "up" | "down" | "none";
+  canvasColor?: string;
+
+  // Photographic / Geometric Asset options
+  imageSrc?: string;
+  durationMs?: number;
+  rotationDeg?: number;
 }
 
 export interface VisualHelperComponentProps {

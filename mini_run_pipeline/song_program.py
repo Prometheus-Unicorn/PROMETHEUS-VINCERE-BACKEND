@@ -2688,8 +2688,13 @@ def plan_song_program(
 
         # Narrative-beat handoff trigger: for clips >= 20s, allow a track switch at the
         # strongest storyboard beat boundary (hook -> body or body -> payoff)
+        # only when another approved track with known runway is available to switch to
         handoff_gate = "song_runway_exhausted"
-        if duration_ms >= 20000 and len(events) == 0 and storyboard:
+        other_tracks_available = any(
+            _approved(t) and t.get("id") != track.get("id") and (t.get("durationSec") is not None)
+            for t in entries
+        )
+        if duration_ms >= 20000 and len(events) == 0 and storyboard and other_tracks_available:
             acts = storyboard.get("acts") or []
             act1_end = acts[0].get("endMs", 8000) if len(acts) > 0 else 8000
             act2_end = acts[1].get("endMs", int(duration_ms * 0.70)) if len(acts) > 1 else int(duration_ms * 0.70)

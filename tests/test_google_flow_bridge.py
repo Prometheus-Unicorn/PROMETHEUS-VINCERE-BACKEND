@@ -16,7 +16,7 @@ _REPO = Path(__file__).resolve().parent.parent
 def _call_bridge(payload: dict, timeout: float = 15.0) -> dict:
     raw = json.dumps(payload) + "\n"
     r = subprocess.run(
-        [sys.executable, "-m", "mini_run_pipeline.google_flow_bridge"],
+        [sys.executable, "mini_run_pipeline/google_flow_bridge.py"],
         input=raw,
         capture_output=True,
         text=True,
@@ -36,7 +36,7 @@ class TestGoogleFlowBridge(unittest.TestCase):
 
     def test_empty_input_returns_error(self):
         r = subprocess.run(
-            [sys.executable, "-m", "mini_run_pipeline.google_flow_bridge"],
+            [sys.executable, "mini_run_pipeline/google_flow_bridge.py"],
             input="\n",
             capture_output=True,
             text=True,

@@ -26,6 +26,10 @@ from .curito_animation_dna import (
     CuritoWordSyncCalculator,
     CuritoWordSyncSchema,
 )
+from .curito_semantic_extractor import (
+    DiffusionPromptPolicyCritic,
+    extract_and_synthesize_curito_prompt,
+)
 from .google_flow_client import CuritoAnimationReport, GoogleFlowConfig, GoogleFlowMCPClient
 
 
@@ -264,3 +268,19 @@ class CuritoAnimationOrchestrator:
             last_anim_sec = directive.timeline_end_ms / 1000.0
 
         return directives
+
+    def plan_from_full_transcript(
+        self,
+        transcript_chunks: List[Dict[str, Any]],
+        model_name: str = "gemini-3.5-flash",
+    ) -> Dict[str, Any]:
+        """Runs full-transcript deep semantic extraction, inflection selection,
+        and diffusion prompt policy synthesis with adversarial self-critique.
+        
+        Conforms strictly to the Diffusion Asset Prompting Policy (5-element schema,
+        zero typography, zero 2D UI elements, zero lighting fixtures, explicit floor/shadow).
+        """
+        return extract_and_synthesize_curito_prompt(
+            transcript_chunks=transcript_chunks,
+            model_name=model_name,
+        )

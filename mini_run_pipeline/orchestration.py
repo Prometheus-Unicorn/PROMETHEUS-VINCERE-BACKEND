@@ -799,6 +799,30 @@ def plan_mini_run_orchestration(
         print(f"[orchestration] background planning skipped: {exc}", flush=True)
         backgrounds = []
 
+    ORIGIN_PRESET_SFX_POOLS: Dict[str, List[str]] = {
+        "origin_matrix_letter_rain": ["glitch_digital", "mechanical_click", "click_bupu"],
+        "origin_cinematic_zoom_blur": ["whoosh_fast", "sub_impact_reverb", "impact_deep"],
+        "origin_reveal_wipe": ["whoosh_slow", "slow_whoosh_reverb", "whoosh_fast"],
+        "origin_shiny_pill": ["shutter_snap", "tap_punch_bupu", "click_bupu"],
+        "origin_outline_flicker_fill": ["mechanical_click", "click_bupu", "shutter_snap"],
+        "origin_liquid_melt": ["sub_drop", "sub_impact_reverb", "slow_whoosh_reverb"],
+        "origin_wave_color_sweep": ["slow_whoosh_reverb", "charge_riser_bupu", "whoosh_slow"],
+        "origin_inkdrop_spread": ["pop_text", "tap_bupu", "click_bupu"],
+        "origin_spotlight_reveal": ["whoosh_fast", "impact_sharp", "charge_riser_bupu"],
+        "origin_ripple_wave": ["slow_whoosh_reverb", "pop_text", "tap_bupu"],
+        "origin_spiral_in": ["whoosh_slow", "riser_short", "charge_bupu"],
+        "origin_fuzzy_noise_overlay": ["glitch_digital", "mechanical_click"],
+        "origin_kinetic_editorial_v2": ["camera_shutter_bupu", "shutter_snap", "click_bupu"],
+    }
+
+    VISUAL_HELPER_SFX_POOLS: Dict[str, List[str]] = {
+        "callout_badge": ["shutter_snap", "tap_punch_bupu", "click_bupu"],
+        "before_after_comparison": ["whoosh_fast", "sub_impact_reverb"],
+        "motion_number": ["mechanical_click", "pop_text"],
+        "listicle": ["click_bupu", "mechanical_click"],
+        "image_sticker": ["tap_punch_bupu", "pop_text"],
+    }
+
     # 2. Intelligent Sound Orchestration for Kinetic Typography (Anti-Overfitting Multi-Category Pool)
     # Uses rolling history buffer to guarantee acoustic variety without repeating sounds
     recent_sfx_cues: List[str] = []
@@ -824,13 +848,62 @@ def plan_mini_run_orchestration(
             or any(l.get("fxPreset") in ("hierarchical_asymmetric_lockup", "documentary_lockup_captions", "micro_macro_kinetic_type") for l in layers)
         )
 
+        origin_preset = (
+            chunk.get("fxPreset")
+            or chunk.get("selection", {}).get("primaryFx")
+            or chunk.get("treatmentSystem")
+        )
+        origin_pool = ORIGIN_PRESET_SFX_POOLS.get(str(origin_preset))
+        visual_helper = chunk.get("visualHelper")
+
         c_start = int(chunk.get("startMs", chunk.get("outputStartMs", 0)))
         if c_idx == 0 and not is_hierarchical_lockup:
-            continue  # Covered by opening hook impact
-        if not is_hierarchical_lockup and c_start - last_text_sfx_ms < 650:
+            # Hook opening impact cue
+            hook_cue = "glitch_digital" if "matrix" in str(origin_preset) or "crt" in str(chunk.get("hookPlan", {}).get("hookType", "")) else "impact_deep"
+            sfx.append({
+                "id": "sfx-opening-hook-0",
+                "cue": hook_cue,
+                "variant": 1,
+                "triggerMs": 0,
+                "gainDb": -10.0,
+                "causedByChunkId": str(chunk.get("chunkIndex", 0)),
+                "causedByTreatment": "opening_hook",
+            })
+            last_text_sfx_ms = 0
+            continue
+        if not is_hierarchical_lockup and not visual_helper and not origin_pool and c_start - last_text_sfx_ms < 650:
             continue  # Enforce minimum audio pacing window between speech sounds
 
-        if is_hierarchical_lockup:
+        if visual_helper and isinstance(visual_helper, dict) and c_start - last_text_sfx_ms >= 420:
+            vh_type = str(visual_helper.get("type", "callout_badge"))
+            vh_pool = VISUAL_HELPER_SFX_POOLS.get(vh_type, ["tap_punch_bupu", "shutter_snap", "pop_text"])
+            vh_cue = _pick_diverse_sfx(vh_pool)
+            variant_num = ((len(sfx) + c_idx) % 5) + 1
+            sfx.append({
+                "id": f"sfx-visual-helper-{c_idx}",
+                "cue": vh_cue,
+                "variant": variant_num,
+                "triggerMs": c_start,
+                "gainDb": -13.5,
+                "causedByChunkId": str(chunk.get("chunkIndex", c_idx)),
+                "causedByVisualHelper": vh_type,
+            })
+            last_text_sfx_ms = c_start
+        elif origin_pool and c_start - last_text_sfx_ms >= 440:
+            cue = _pick_diverse_sfx(origin_pool)
+            variant_num = ((len(sfx) + c_idx) % 5) + 1
+            gain = -14.0 if ("reverb" in cue or "drop" in cue or "impact" in cue) else -17.0
+            sfx.append({
+                "id": f"sfx-origin-entrance-{c_idx}",
+                "cue": cue,
+                "variant": variant_num,
+                "triggerMs": c_start,
+                "gainDb": gain,
+                "causedByChunkId": str(chunk.get("chunkIndex", c_idx)),
+                "causedByPreset": str(origin_preset),
+            })
+            last_text_sfx_ms = c_start
+        elif is_hierarchical_lockup:
             # Tactile mechanical UI click / shutter tick / transient snap (-18 dB to -24 dB)
             # Enforce clean acoustic spacing (>= 480ms), tasteful per-chunk density, and dynamic acoustic variance (variants 1-5)
             max_sfx_this_chunk = min(3, max(1, len(words) // 2)) if len(words) >= 4 else 1

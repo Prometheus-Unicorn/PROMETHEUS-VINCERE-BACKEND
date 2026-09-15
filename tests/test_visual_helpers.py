@@ -4,10 +4,28 @@ from mini_run_pipeline.visual_helpers import (
     _extract_comparison,
     _extract_metric_number,
     _extract_callout_badge,
+    _extract_calendar_widget,
+    _extract_time_widget,
+    _extract_optical_rack_focus,
 )
 from mini_run_pipeline.typography import generate_font_manifest
 
 class TestVisualHelpersEngine(unittest.TestCase):
+    def test_calendar_widget_extraction(self):
+        """Phrases referencing calendars, scheduling, or planners trigger calendar_widget."""
+        text_cal = "information of how to manage your calendars and how to spend"
+        res_cal = _extract_calendar_widget(text_cal)
+        self.assertIsNotNone(res_cal)
+        self.assertEqual(res_cal["type"], "calendar_widget")
+        self.assertEqual(res_cal["position"], "flank_right")
+
+    def test_time_widget_extraction(self):
+        """Phrases emphasizing finite time and management trigger time_widget."""
+        text_time = "time doesn't need to be managed your priorities do"
+        res_time = _extract_time_widget(text_time)
+        self.assertIsNotNone(res_time)
+        self.assertEqual(res_time["type"], "time_widget")
+        self.assertEqual(res_time["badge"], "FINITE CAPITAL")
     def test_before_after_comparison_extraction(self):
         """Phrases indicating comparison or transformation trigger before_after_comparison."""
         # Case A: Before and after
@@ -152,6 +170,22 @@ class TestVisualHelpersEngine(unittest.TestCase):
         self.assertIsNotNone(m_chunks[0]["visualHelper"])
         self.assertEqual(m_chunks[0]["visualHelper"]["type"], "callout_badge")
         self.assertEqual(m_chunks[0]["visualHelper"]["title"], "PRO TIP")
+
+    def test_optical_rack_focus_extraction(self):
+        """Phrases referencing priorities, inflection points, or focal pull trigger optical_rack_focus."""
+        text_focus = "competing priorities. At some point, something has to win."
+        res_focus = _extract_optical_rack_focus(text_focus)
+        self.assertIsNotNone(res_focus)
+        self.assertEqual(res_focus["type"], "optical_rack_focus")
+        self.assertEqual(res_focus["position"], "fullscreen")
+        self.assertTrue(res_focus["enableBloom"])
+        self.assertTrue(res_focus["enableFilmGrain"])
+        self.assertEqual(res_focus["focalPlaneRole"], "primary")
+
+        chunks = [{"chunkIndex": 0, "text": text_focus}]
+        plans = detect_and_plan_visual_helpers(chunks)
+        self.assertIn(0, plans)
+        self.assertEqual(plans[0]["type"], "optical_rack_focus")
 
 if __name__ == "__main__":
     unittest.main()

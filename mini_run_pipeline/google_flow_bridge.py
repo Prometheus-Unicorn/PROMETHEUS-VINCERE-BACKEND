@@ -94,7 +94,7 @@ def cmd_generate_video(args: dict) -> dict:
     # Spawn detached worker (no wait — worker updates the job state file)
     import subprocess as _sp
     worker_cmd = [
-        sys.executable, "-m", "mini_run_pipeline.google_flow_worker",
+        sys.executable, str(_REPO_ROOT / "mini_run_pipeline" / "google_flow_worker.py"),
         str(_job_file(job_id))
     ]
     # On Windows: CREATE_NEW_PROCESS_GROUP creates a new console group without

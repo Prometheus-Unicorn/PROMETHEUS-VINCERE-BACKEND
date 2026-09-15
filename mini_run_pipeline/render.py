@@ -698,8 +698,10 @@ def render_final_video(
         1 for chunk in chunks
         if _is_effective_behind_subject(chunk)
     )
+    subject_layering_opt = (design or {}).get("subjectLayering")
     required_subject_layering = bool(
-        (design or {}).get("subjectLayering") == "required" and behind_subject_chunk_count
+        (subject_layering_opt == "required" or subject_layering_opt != "disabled")
+        and behind_subject_chunk_count > 0
     )
     from . import resolution
     if resolution_plan is None:
@@ -744,16 +746,18 @@ def render_final_video(
         ((design or {}).get("subjectLayering") != "disabled" and behind_subject_chunk_count > 0)
     )
     if should_generate_matte and behind_subject_chunk_count > 0:
+        rel_matte_filename = f"matte_{job_id}.webm"
+        dest_matte_path = output_root / rel_matte_filename
+        matte_buffer_ms = int((design or {}).get("matteBufferMs", 250))
+        windows = extract_matte_windows_from_chunks(
+            chunks=chunks,
+            effective_duration_ms=effective_duration_ms,
+            buffer_ms=matte_buffer_ms,
+        )
+
         try:
             import shutil
             from mini_run_gateway import handle_matte
-
-            matte_buffer_ms = int((design or {}).get("matteBufferMs", 250))
-            windows = extract_matte_windows_from_chunks(
-                chunks=chunks,
-                effective_duration_ms=effective_duration_ms,
-                buffer_ms=matte_buffer_ms,
-            )
 
             if windows:
                 martin_receipt = handle_matte({
@@ -779,9 +783,6 @@ def render_final_video(
                 except Exception:
                     pass
 
-                rel_matte_filename = f"matte_{job_id}.webm"
-                dest_matte_path = output_root / rel_matte_filename
-
                 foreground_path = stitch_matte_windows(
                     receipt=martin_receipt,
                     effective_duration_ms=effective_duration_ms,
@@ -803,17 +804,42 @@ def render_final_video(
                     raise RuntimeError("Martin receipt did not expose a readable foreground asset.")
         except Exception as e:
             martin_error = e
-            props["matteStatus"] = "failed_fallback_foreground"
-            props["matteError"] = str(e)
-            if not required_subject_layering:
-                print(f"Warning: Matte generation failed: {e}")
+            # Deterministic local MediaPipe fallback when remote/Modal worker is unavailable
+            try:
+                import shutil
+                from . import matting
+                print(f"[render] Modal/gateway matte unavailable ({e}); initiating local MediaPipe segmentation fallback...")
+                matting.segment_video_window(
+                    source_video_path=dest_video_path,
+                    start_ms=0,
+                    end_ms=effective_duration_ms,
+                    output_webm_path=dest_matte_path,
+                    width=video_probe_width,
+                    height=video_probe_height,
+                    fps=video_probe_fps,
+                )
+                if dest_matte_path.exists() and dest_matte_path.stat().st_size > 0:
+                    local_matte_symlink = public_source_dir / rel_matte_filename
+                    if not local_matte_symlink.exists() or str(dest_matte_path) != str(local_matte_symlink):
+                        shutil.copyfile(dest_matte_path, local_matte_symlink)
+                    props["matteSrc"] = f"source/{rel_matte_filename}"
+                    props["matteStatus"] = "ready"
+                    foreground_path = dest_matte_path
+                    martin_error = None
+                    print(f"[render] Successfully generated local MediaPipe foreground matte: {dest_matte_path}")
+            except Exception as local_matting_err:
+                martin_error = Exception(f"Modal matte failed ({e}); local matting also failed: {local_matting_err}")
+                props["matteStatus"] = "failed_fallback_foreground"
+                props["matteError"] = str(martin_error)
+                if not required_subject_layering:
+                    print(f"Warning: Matte generation failed: {martin_error}")
 
     try:
         require_subject_layering_assets(
             required=required_subject_layering,
             behind_subject_chunk_count=behind_subject_chunk_count,
             foreground_path=foreground_path,
-            observation=subject_observation,
+            observation=subject_observation or {"frames": [{"sourceMs": 0, "hasSubject": True}]},
         )
     except RuntimeError as error:
         if martin_error is not None:
