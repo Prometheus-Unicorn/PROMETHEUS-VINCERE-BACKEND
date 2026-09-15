@@ -44,6 +44,7 @@ def build_payload(args=None) -> dict:
     selected_motif = (args.motif if args and args.motif else random.choice(CURATED_MOTIFS))
     selected_look = (args.look if args and args.look else "none")
     selected_source = (args.source if args and getattr(args, "source", None) else "remotion-app/public/source/test-video.mp4")
+    selected_layering = (args.subject_layering if args and getattr(args, "subject_layering", None) else "auto")
     
     return {
         "jobId": JOB_ID,
@@ -78,7 +79,7 @@ def build_payload(args=None) -> dict:
             "typographyBias": "mixed",
             "visualIntensity": 0.95,
             "motif": selected_motif,
-            "subjectLayering": "auto",
+            "subjectLayering": selected_layering,
             "pipPolicy": "disabled",
         },
         "audio": {"songPolicy": "auto", "sfxEnabled": True, "cueBus": True},
@@ -237,6 +238,7 @@ if __name__ == "__main__":
     parser.add_argument("--motif", default=None, choices=CURATED_MOTIFS, help="Brand motif palette")
     parser.add_argument("--look", default="none", choices=SUPPORTED_LOOKS, help="Cinematic 3D LUT look or 'none' for original studio Rec.709 passthrough")
     parser.add_argument("--source", default="remotion-app/public/source/test-video.mp4", help="Path to source video")
+    parser.add_argument("--subject-layering", default="auto", choices=["auto", "required", "disabled"], help="Subject layering policy")
     parser.add_argument("--mood", default=None, help="Mood descriptor")
     args = parser.parse_args()
     run(args)
