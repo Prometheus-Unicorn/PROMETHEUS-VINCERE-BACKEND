@@ -707,6 +707,316 @@ CURITO_GENOME_LIBRARY: Dict[str, CuritoGenome] = {
 
 
 # ---------------------------------------------------------------------------
+# Background Treatment Registry
+# ---------------------------------------------------------------------------
+# Canonical ontology of selectable background treatments for the diffusion
+# asset plate. Gemini selects a treatment ID from this registry based on
+# semantic context. The stitcher injects the selected snippet into part 3
+# (Location / Background) of the 6-part Google Flow formula.
+#
+# Selection is NEVER hardcoded — always call `select_background_treatment()`.
+# ---------------------------------------------------------------------------
+
+@dataclass
+class BackgroundTreatment:
+    """A canonical background canvas treatment for the diffusion asset plate."""
+    id: str
+    name: str
+    dna_snippet: str                  # Verbatim text injected into Location/Background
+    tags: List[str] = field(default_factory=list)
+    use_cases: List[str] = field(default_factory=list)
+    archetype: str = "editorial"
+
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+
+BACKGROUND_TREATMENT_REGISTRY: Dict[str, "BackgroundTreatment"] = {
+
+    # ── BG-01 ─────────────────────────────────────────────────────────────────
+    # Pre-existing canonical. Tactile newsprint / halftone dot raster screen.
+    "halftone_raster_canvas": BackgroundTreatment(
+        id="halftone_raster_canvas",
+        name="Standalone Halftone Dot Raster Screen",
+        dna_snippet=(
+            "Pristine matte off-white (#ECECEC) tactile paper canvas with a subtle repeating "
+            "micro-halftone dot raster screen (4–6 pt dot pitch, 85 lpi), fine 35mm film grain "
+            "overlay (Multiply blend, opacity 5–8%), clean geometric negative space reserving "
+            "upper 45% as uncluttered margin for downstream typography"
+        ),
+        tags=["halftone", "raster", "newsprint", "editorial", "paper", "monochrome", "swiss"],
+        use_cases=[
+            "High-contrast monochrome mechanical artifacts",
+            "Desaturated brass or carbon steel subjects",
+            "Swiss editorial newsprint and tactile dot pattern",
+            "Any scene requiring maximum foreground–background contrast separation",
+            "Default when no other treatment is strongly indicated",
+        ],
+        archetype="editorial_swiss",
+    ),
+
+    # ── BG-02 ─────────────────────────────────────────────────────────────────
+    "luxury_editorial_sunlight_canvas": BackgroundTreatment(
+        id="luxury_editorial_sunlight_canvas",
+        name="Luxury Editorial Sunlight Canvas",
+        dna_snippet=(
+            "Clean off-white textured paper with subtle fibrous grain and soft diagonal sunlight "
+            "shadows falling across the entire canvas at a 25–35 degree rake, casting warm luminous "
+            "bands of diffuse amber-ivory light separated by cooler shadow troughs, creating a luxury "
+            "magazine editorial aesthetic with spacious negative space and a refined monochrome "
+            "palette — generous breathing room, no furniture, no hard edges"
+        ),
+        tags=["luxury", "editorial", "sunlight", "shadows", "magazine", "warm", "paper", "grain"],
+        use_cases=[
+            "Warm, aspirational, or premium lifestyle transcripts",
+            "Subjects with polished brass, gold-toned, or ivory material finishes",
+            "Interview moments expressing achievement, aspiration, or refinement",
+            "Scenes requiring warm atmospheric quality rather than cold Swiss neutrality",
+        ],
+        archetype="editorial_luxury",
+    ),
+
+    # ── BG-03 ─────────────────────────────────────────────────────────────────
+    "newspaper_collage_deconstructed": BackgroundTreatment(
+        id="newspaper_collage_deconstructed",
+        name="Newspaper Collage / Deconstructed Print",
+        dna_snippet=(
+            "Low-contrast newspaper collage in empty areas — old scares, paper grunge print texture, "
+            "coarse halftone grain, rough torn edges, microtext spread randomly across the negative "
+            "space, vertical typographic columns suggesting deconstructed broadsheet layout, abstract "
+            "unreadable green-teal inked signature mark at the lower edge, overall patina of archival "
+            "documentary rawness and analog imperfection"
+        ),
+        tags=["newspaper", "collage", "grunge", "deconstructed", "microtext", "analog", "teal", "raw"],
+        use_cases=[
+            "Gritty, counter-cultural, or anti-establishment transcript themes",
+            "Subjects with raw steel, oxidized iron, or industrial finish",
+            "Moments of disruption, deconstruction, or systemic challenge",
+            "Analog / archival documentary aesthetic",
+        ],
+        archetype="documentary_raw",
+    ),
+
+    # ── BG-04 ─────────────────────────────────────────────────────────────────
+    "modern_swiss_museum_poster": BackgroundTreatment(
+        id="modern_swiss_museum_poster",
+        name="Modern Swiss Editorial / Museum Poster",
+        dna_snippet=(
+            "Modern Swiss editorial design backdrop — luxury museum poster aesthetic, dramatic high-key "
+            "directional lighting raking the canvas from the upper-left at 45 degrees, deep shadow zones "
+            "creating architectural contrast, ultra-sharp micro-stippled grid texture on the canvas "
+            "surface, vertical 9:16 compositional discipline with a dominant center axis, maximum "
+            "chromatic restraint (near-monochrome palette, single accent hue), 8K perceptual clarity"
+        ),
+        tags=["swiss", "museum", "poster", "dramatic", "high_contrast", "grid", "monochrome", "editorial"],
+        use_cases=[
+            "Institutional, authoritative, or thought-leadership transcript themes",
+            "Subjects with ultra-sharp geometric geometry (track switches, knife switches, Geneva drives)",
+            "Maximum visual authority and precision — no warmth, no softness",
+            "Vertical compositions demanding architectural graphic hierarchy",
+        ],
+        archetype="editorial_institutional",
+    ),
+}
+
+
+def select_background_treatment(
+    use_case_hint: str = "",
+    tags: Optional[List[str]] = None,
+    registry: Optional[Dict[str, "BackgroundTreatment"]] = None,
+) -> "BackgroundTreatment":
+    """Select the most contextually appropriate background treatment.
+
+    Args:
+        use_case_hint: Free-text description of the scene / transcript theme.
+        tags: Optional list of semantic tags to match against registry entries.
+        registry: Optional registry override; defaults to BACKGROUND_TREATMENT_REGISTRY.
+
+    Returns:
+        The best-matching BackgroundTreatment, defaulting to halftone_raster_canvas.
+    """
+    reg = registry or BACKGROUND_TREATMENT_REGISTRY
+    if not use_case_hint and not tags:
+        return reg["halftone_raster_canvas"]
+
+    hint_tokens = set(re.findall(r"\w+", use_case_hint.lower()))
+    tag_tokens = {t.lower() for t in (tags or [])}
+    query = hint_tokens | tag_tokens
+
+    best_id = "halftone_raster_canvas"
+    best_score = -1
+
+    for entry in reg.values():
+        entry_tokens = {t.lower() for t in entry.tags}
+        entry_tokens |= set(re.findall(r"\w+", entry.name.lower()))
+        entry_tokens |= set(re.findall(r"\w+", entry.id.lower()))
+        for uc in entry.use_cases:
+            entry_tokens |= set(re.findall(r"\w+", uc.lower()))
+        overlap = len(query & entry_tokens)
+        if overlap > best_score:
+            best_score = overlap
+            best_id = entry.id
+
+    return reg[best_id]
+
+
+# ---------------------------------------------------------------------------
+# Motion Treatment Registry
+# ---------------------------------------------------------------------------
+# Canonical ontology of asset-level motion blur / soft-entry optic treatments.
+# Selected contingent on the kinetic class of the hero artifact and movement type.
+# Injected into the assembled diffusion prompt as an additive motion-optics clause.
+#
+# Selection is NEVER hardcoded — always call `select_motion_treatment()`.
+# ---------------------------------------------------------------------------
+
+@dataclass
+class MotionTreatment:
+    """A canonical motion blur / soft-entry optic treatment for the diffusion asset."""
+    id: str
+    name: str
+    dna_snippet: str                  # Additive clause appended to the assembled prompt
+    tags: List[str] = field(default_factory=list)
+    kinetic_classes: List[str] = field(default_factory=list)
+    use_cases: List[str] = field(default_factory=list)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+
+MOTION_TREATMENT_REGISTRY: Dict[str, "MotionTreatment"] = {
+
+    # ── MT-01 ─────────────────────────────────────────────────────────────────
+    "defocus_blur": MotionTreatment(
+        id="defocus_blur",
+        name="Defocus Blur — Optical Rack-Focus Reveal",
+        dna_snippet=(
+            "Asset enters frame through a deliberate optical rack-focus transition: begins in soft "
+            "lens defocus (circular bokeh coronas on specular highlights, f/1.4 equivalent depth), "
+            "progressively sharpening to tack-sharp clinical focus precisely at the sync hit, "
+            "simulating a mechanical lens-breathing pull-focus gesture on a prime cinema lens"
+        ),
+        tags=["defocus", "rack_focus", "lens_breathing", "reveal", "soft_entry", "prime", "focus"],
+        kinetic_classes=["static_reveal", "rack_focus", "scale_tilt", "deliberate_settle"],
+        use_cases=[
+            "Hero artifact reveals where the asset appears to crystallize into sharpness",
+            "Inflection moments of clarity, decision, or definitive selection",
+            "Balance scale or knife switch settling into locked position",
+            "Any reveal requiring cinematic prestige and deliberate pacing",
+        ],
+    ),
+
+    # ── MT-02 ─────────────────────────────────────────────────────────────────
+    "gaussian_blur": MotionTreatment(
+        id="gaussian_blur",
+        name="Gaussian Blur — Soft Entry / Soft Exit",
+        dna_snippet=(
+            "Asset transitions into and out of the frame through a silky Gaussian soft-fade: "
+            "appearing from a luminous diffuse haze (uniform Gaussian softness, 18px radius equivalent) "
+            "and resolving to full material sharpness across a 0.8s easing window, then dissolving "
+            "out symmetrically — a dreamlike floating materialization with no hard cuts"
+        ),
+        tags=["gaussian", "soft_entry", "soft_exit", "fade", "haze", "ethereal", "smooth"],
+        kinetic_classes=["fade_in", "gentle_float", "ambient_reveal", "aspirational"],
+        use_cases=[
+            "Warm, aspirational, or emotionally resonant transcript moments",
+            "Luxury editorial sunlight canvas backgrounds",
+            "Subjects with polished or translucent material surfaces",
+            "Scenes where a mechanical reveal would break tonal warmth",
+        ],
+    ),
+
+    # ── MT-03 ─────────────────────────────────────────────────────────────────
+    "bokeh_blur": MotionTreatment(
+        id="bokeh_blur",
+        name="Bokeh Blur — Background Separation / Depth-of-Field Isolation",
+        dna_snippet=(
+            "Background canvas rendered with smooth spherical bokeh (f/1.2 equivalent aperture) — "
+            "specular highlights in the negative-space background dissolve into large circular bokeh "
+            "coronas (60–120px diameter), creating a cinematic depth plane that isolates the hero "
+            "artifact on a tack-sharp focal plane floating against the diffuse luminous background void; "
+            "foreground subject has zero motion blur, background has maximum separation softness"
+        ),
+        tags=["bokeh", "depth_of_field", "dof", "isolation", "background_separation", "aperture"],
+        kinetic_classes=["static_hero", "floating_hold", "macro_close_up", "prestige_isolation"],
+        use_cases=[
+            "Maximum foreground-to-background separation for prestige product aesthetic",
+            "Scenes where background texture risks competing with the hero artifact",
+            "Subjects with intricate surface detail requiring full focal attention",
+            "Newspaper collage or sunlight canvas backgrounds needing depth isolation",
+        ],
+    ),
+
+    # ── MT-04 ─────────────────────────────────────────────────────────────────
+    "slow_shutter_motion_blur": MotionTreatment(
+        id="slow_shutter_motion_blur",
+        name="Slow Shutter — Dynamic Motion Blur (Kinetic Streak)",
+        dna_snippet=(
+            "Dynamic mechanical kinetics captured with simulated slow-shutter motion blur: "
+            "fast-moving elements (rotating shafts, sweeping beams, snapping levers) trail "
+            "directional motion streaks (10–20px equivalent at 1/30s shutter simulation) "
+            "in the axis of their primary velocity vector, while stationary structural elements "
+            "remain tack-sharp — conveying authoritative mechanical energy and high-torque "
+            "kinetic momentum without geometric melting or temporal ambiguity"
+        ),
+        tags=["motion_blur", "slow_shutter", "kinetic", "streak", "dynamic", "torque", "velocity"],
+        kinetic_classes=["high_speed_rotation", "lever_snap", "beam_sweep", "mechanical_strike"],
+        use_cases=[
+            "High-torque mechanical snap events (knife switch clamping, balance beam tilting)",
+            "Geneva drive indexing at speed",
+            "Subjects with a fast rotational or linear kinematic component",
+            "Moments of decisive mechanical authority requiring visceral energy",
+        ],
+    ),
+}
+
+
+def select_motion_treatment(
+    use_case_hint: str = "",
+    kinetic_class: str = "",
+    tags: Optional[List[str]] = None,
+    registry: Optional[Dict[str, "MotionTreatment"]] = None,
+) -> "MotionTreatment":
+    """Select the most contextually appropriate motion treatment.
+
+    Args:
+        use_case_hint: Free-text description of the scene / transcript theme.
+        kinetic_class: The asset's movement class (e.g. 'rack_focus', 'high_speed_rotation').
+        tags: Optional semantic tags to match.
+        registry: Optional registry override; defaults to MOTION_TREATMENT_REGISTRY.
+
+    Returns:
+        The best-matching MotionTreatment, defaulting to defocus_blur.
+    """
+    reg = registry or MOTION_TREATMENT_REGISTRY
+    if not use_case_hint and not kinetic_class and not tags:
+        return reg["defocus_blur"]
+
+    hint_tokens = set(re.findall(r"\w+", use_case_hint.lower()))
+    kinetic_tokens = set(re.findall(r"\w+", kinetic_class.lower()))
+    tag_tokens = {t.lower() for t in (tags or [])}
+    query = hint_tokens | kinetic_tokens | tag_tokens
+
+    best_id = "defocus_blur"
+    best_score = -1
+
+    for entry in reg.values():
+        entry_tokens = {t.lower() for t in entry.tags}
+        entry_tokens |= set(re.findall(r"\w+", entry.name.lower()))
+        entry_tokens |= set(re.findall(r"\w+", entry.id.lower()))
+        for kc in entry.kinetic_classes:
+            entry_tokens |= set(re.findall(r"\w+", kc.lower()))
+        for uc in entry.use_cases:
+            entry_tokens |= set(re.findall(r"\w+", uc.lower()))
+        overlap = len(query & entry_tokens)
+        if overlap > best_score:
+            best_score = overlap
+            best_id = entry.id
+
+    return reg[best_id]
+
+
+# ---------------------------------------------------------------------------
 # Mathematical Timestamp & Word-Sync Calculator
 # ---------------------------------------------------------------------------
 
