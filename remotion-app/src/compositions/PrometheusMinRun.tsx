@@ -5735,9 +5735,7 @@ const MultiLayerTypographyCard: React.FC<{
     nextChunkStartFrame >= minWordHoldFrames;
 
   const exitFrames = 5;
-  const rackFocusStartFrame = hasIncomingCollision
-    ? Math.max(minWordHoldFrames, nextChunkStartFrame - exitFrames)
-    : Math.max(0, totalFrames - exitFrames);
+  const rackFocusStartFrame = hasIncomingCollision ? Math.max(0, nextChunkStartFrame - exitFrames) : Math.max(0, totalFrames - exitFrames);
   const rackFocusDuration = exitFrames;
   const isRackFocusExiting = frame >= rackFocusStartFrame;
 
