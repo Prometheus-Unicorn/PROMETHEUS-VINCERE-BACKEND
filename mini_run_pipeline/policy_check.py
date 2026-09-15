@@ -125,9 +125,12 @@ def measure_frame_text_pixel_bounds(
         dark_text = lum < (med_lum - 50.0)
         mask = dark_text | cyan_text | warm_text
     else:
-        # Low-key / obsidian canvas: text glyphs are bright or vibrant colored strokes
-        bright_text = lum > 160.0
+        # Low-key / obsidian canvas: text glyphs are bright or vibrant colored strokes.
+        # Exclude human skin chromaticity (e.g. gesturing hands, fingers) where r > g > b, (r - b) > 30, lum < 210.
+        is_skin = (r > g) & (g > b) & ((r - b) > 30) & ((r - g) > 15) & (lum < 210.0)
+        bright_text = (lum > 160.0) & (~is_skin)
         mask = bright_text | cyan_text | warm_text
+
 
     col_counts = np.sum(mask, axis=0)
     active_cols = np.where(col_counts >= 8)[0]

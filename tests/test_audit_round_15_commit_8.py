@@ -118,6 +118,25 @@ class TestAuditRound15Commit8(unittest.TestCase):
         self.assertAlmostEqual(res["leftClearancePx"], 220.0, delta=5.0)
         self.assertAlmostEqual(res["rightClearancePx"], 220.0, delta=5.0)
 
+    def test_measure_frame_text_pixel_bounds_excludes_gesturing_hand_skin_tones(self):
+        """measure_frame_text_pixel_bounds filters out human skin chromaticity so gesturing hands do not cause false edge bleed."""
+        # Synthetic low-key dark canvas frame (RGB 20)
+        arr = np.full((1920, 1080, 3), 20, dtype=np.uint8)
+        # Add legitimate white text at [1450..1550, 200..880] (left clearance 200px > 130px safe margin)
+        arr[1450:1550, 200:880] = [255, 255, 255]
+        # Add gesturing hand/fingers at [1420..1520, 115..128] with lit skin tone (RGB 229, 168, 136; lum = 182.6)
+        arr[1420:1520, 115:128] = [229, 168, 136]
+        p_synth = self.scratch_dir / "synth_hand_and_text.png"
+        Image.fromarray(arr).save(p_synth)
+
+        res = measure_frame_text_pixel_bounds(p_synth, safe_margin_x=130.0, expected_y_center=1500.0)
+        self.assertTrue(res["detected"])
+        self.assertFalse(res["edgeBleed"])
+        self.assertGreaterEqual(res["leftClearancePx"], 130.0)
+        self.assertGreaterEqual(res["rightClearancePx"], 130.0)
+        self.assertAlmostEqual(res["leftClearancePx"], 200.0, delta=5.0)
+
 
 if __name__ == "__main__":
     unittest.main()
+
