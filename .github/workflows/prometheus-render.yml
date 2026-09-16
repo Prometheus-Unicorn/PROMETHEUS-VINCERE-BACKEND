@@ -105,9 +105,7 @@ jobs:
           if [ -d "/opt/prebuilt/store/root-node_modules" ]; then
             cp -an /opt/prebuilt/store/root-node_modules/. node_modules/ 2>/dev/null || true
           fi
-          if [ ! -d "node_modules/@prometheus" ]; then
-            npm install --legacy-peer-deps --prefer-offline --no-audit --no-fund
-          fi
+          npm install --legacy-peer-deps --prefer-offline --no-audit --no-fund
           npm --workspace @prometheus/shared-types run build
 
           # ── Step 2: remotion-app node_modules ────────────────────────────────

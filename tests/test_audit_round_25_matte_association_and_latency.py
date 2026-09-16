@@ -86,8 +86,8 @@ class TestAuditRound25MatteAndLatency(unittest.TestCase):
         for s in slices_matches:
             self.assertLessEqual(int(s), 10, f"PARALLEL_SLICES={s} exceeds 10")
 
-        # npm install fast path: must check whether node_modules already exists
-        self.assertIn('if [ ! -d "node_modules/@prometheus" ]; then', content)
+        # npm install must be offline/fast mode:
+        self.assertIn("npm install --legacy-peer-deps --prefer-offline --no-audit --no-fund", content)
 
     def test_runner_script_defaults(self):
         """run_github_hakt_test.py must configure parallelSlices <= 10 and default to vertical podcast."""
