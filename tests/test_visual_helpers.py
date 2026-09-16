@@ -187,5 +187,27 @@ class TestVisualHelpersEngine(unittest.TestCase):
         self.assertIn(0, plans)
         self.assertEqual(plans[0]["type"], "optical_rack_focus")
 
+    def test_metric_noun_whitelist_rejects_adjectives(self):
+        """Phrases with numbers followed by adjectives like 'physical' are rejected to prevent nonsensical cards."""
+        text_adjective = "than 12,000 physical products"
+        res = _extract_metric_number(text_adjective)
+        self.assertIsNone(res, "Should not create a motion_number badge when noun is an unwhitelisted adjective")
+
+        text_legit = "than 12,000 products"
+        res_legit = _extract_metric_number(text_legit)
+        self.assertIsNotNone(res_legit)
+        self.assertEqual(res_legit["type"], "motion_number")
+        self.assertEqual(res_legit["value"], 12000.0)
+
+    def test_visual_helpers_governance_toggle(self):
+        """When design disables visual helpers, automated extraction is suppressed."""
+        chunks = [{"chunkIndex": 0, "text": "than 12,000 products"}]
+        plans_enabled = detect_and_plan_visual_helpers(chunks, {"allowAutoVisualHelpers": True})
+        self.assertIn(0, plans_enabled)
+
+        plans_disabled = detect_and_plan_visual_helpers(chunks, {"enableVisualHelpers": False})
+        self.assertEqual(plans_disabled, {}, "Should be empty when enableVisualHelpers is False")
+
 if __name__ == "__main__":
     unittest.main()
+

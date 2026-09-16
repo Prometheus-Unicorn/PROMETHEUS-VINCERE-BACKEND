@@ -105,13 +105,21 @@ def _extract_metric_number(text: str) -> Optional[Dict[str, Any]]:
             "position": "flank_right",
         }
 
-    # 4. Large raw count
+    VALID_METRIC_NOUNS = {
+        "USERS", "CLIENTS", "CUSTOMERS", "DOWNLOADS", "SUBSCRIBERS",
+        "MEMBERS", "REVIEWS", "HOURS", "DAYS", "WEEKS", "MONTHS", "YEARS",
+        "UNITS", "ORDERS", "TRANSACTIONS", "SALES", "LEADS", "PEOPLE",
+        "STUDENTS", "PRODUCTS", "ITEMS", "COMPANIES", "BUSINESSES", "BRANDS",
+        "DOLLARS", "EUROS", "POUNDS", "CALLS", "VISITORS", "VIEWS", "IMPRESSIONS",
+    }
+
+    # 4. Large raw count (Strict noun gate: requires a recognized metric noun, prevents capturing adjectives like 'physical')
     m_count = re.search(r"\b(\d{1,3}(?:,\d{3})+|\d{3,9})\s+([a-zA-Z]+)\b", text)
     if m_count:
         num_str = m_count.group(1).replace(",", "")
         val = float(num_str)
         noun = m_count.group(2).upper()
-        if val >= 50:
+        if noun in VALID_METRIC_NOUNS and val >= 50:
             return {
                 "type": "motion_number",
                 "value": val,
@@ -317,6 +325,11 @@ def detect_and_plan_visual_helpers(
     design_dict = design if isinstance(design, dict) else {}
     explicit_helpers = design_dict.get("visualHelpers") or {}
 
+    # Strict governance: check if automated visual helpers are disabled
+    auto_helpers_allowed = design_dict.get("allowAutoVisualHelpers", True)
+    if design_dict.get("disableVisualHelpers") or design_dict.get("enableVisualHelpers") is False:
+        auto_helpers_allowed = False
+
     plans: Dict[int, Dict[str, Any]] = {}
     last_helper_idx = -999
     last_type_idx: Dict[str, int] = {}
@@ -342,6 +355,10 @@ def detect_and_plan_visual_helpers(
             last_helper_idx = idx
             if isinstance(vh, dict) and vh.get("type"):
                 last_type_idx[vh["type"]] = idx
+            continue
+
+        # Skip automated heuristic injection if auto helpers are disabled by governance
+        if not auto_helpers_allowed:
             continue
 
         # Enforce minimum cooldown gap between automated visual helpers (≥ 2 chunks apart)
