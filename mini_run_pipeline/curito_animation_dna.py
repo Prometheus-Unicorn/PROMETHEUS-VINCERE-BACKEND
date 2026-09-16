@@ -716,7 +716,11 @@ CURITO_GENOME_LIBRARY: Dict[str, CuritoGenome] = {
             "The primary hero asset initiates from a fully submerged off-screen position below the lower "
             "frame boundary (Y: +120% viewport), propelled upward along the vertical axis with a steep "
             "power4.out cubic deceleration curve, decelerating sharply into its final locked centroid "
-            "position. During the upward travel phase, a directional slow-shutter motion blur is applied "
+            "position. The asset obeys strict classical rigid-body physics as a single cohesive solid "
+            "topological manifold: zero doubling, zero ghosted duplication, zero mesh fission, zero UV seam "
+            "sliding, zero unphysical cloning, and zero re-convergence artifacts. All material and texture "
+            "coordinates remain pinned and invariant to the physical geometry throughout motion. "
+            "During the upward travel phase, a directional slow-shutter motion blur is applied "
             "along the Y-axis: the asset exhibits 28-frame trailing edge smear with 85% opacity falloff "
             "and directional elongation (scaleY: 1.12 to 1.0) simulating physical inertia. As the asset "
             "locks into position, the trailing blur resolves to zero and a tight ambient occlusion contact "
@@ -727,7 +731,7 @@ CURITO_GENOME_LIBRARY: Dict[str, CuritoGenome] = {
         tags=[
             "entrance", "bottom_up", "vertical", "emergence", "motion_blur",
             "directional_blur", "slow_shutter", "y_axis", "deceleration", "power4",
-            "inertia", "shadow_expand", "s_tier",
+            "inertia", "shadow_expand", "unitary_manifold", "anti_doubling", "s_tier",
         ],
         subfamily=FAMILY_SCENE_BREAKDOWN,
         archetype="high_impact",

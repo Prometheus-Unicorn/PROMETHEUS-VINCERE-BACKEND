@@ -180,6 +180,15 @@ class DiffusionPromptPolicyCritic:
         if not has_rigid_stability:
             flaws.append("VIOLATION (Rigid-Body Stability): Prompt lacks explicit rigid-body invariance or 1-DoF constrained axis specification to prevent temporal morphing and perspective flipping.")
 
+        # 8b. Anti-Ghosting, Anti-UV-Leakage & Unitary Manifold Physics Check
+        has_unitary_manifold = any(w in lowered for w in [
+            "unitary manifold", "single cohesive mesh", "zero ghosting", "zero duplication",
+            "zero doubling", "zero uv sliding", "zero mesh fission", "zero duplicate silhouettes",
+            "unitary topological body", "single physical object", "zero unphysical cloning"
+        ])
+        if not has_unitary_manifold:
+            flaws.append("VIOLATION (Unitary Physics & Anti-Duplication): Prompt lacks explicit unitary manifold / anti-ghosting physics specification (e.g., 'zero ghosted duplication, zero mesh fission, single cohesive solid topological manifold with pinned UV surface coordinates').")
+
         # 9. Timecode Check
         timecode_matches = cls.TIMECODE_REGEX.findall(prompt_text)
         if timecode_matches:
@@ -333,6 +342,9 @@ MANDATORY OPERATING POLICIES:
    - Spatially Locked Camera (Tripod Rig): Never use compound camera orbits or revolving camera moves while an asset rotates internally. Compound movement confuses 6-DoF diffusion projection and causes choppy 180-degree yaw flips! The camera must be a spatially locked fixed-tripod 45-degree isometric perspective (or pure 1-axis optical push-in).
    - 1-DoF Constrained Kinematics: Explicitly declare the single axis of rotation or motion (e.g., 'constrained single-axis clockwise rotation along the fixed central longitudinal shaft').
    - Invariant Geometric Topology: Key teeth, valleys, and mechanical detents must maintain strict topological permanence without morphing or reversing direction. Explicitly state: 'The bitting profile and teeth maintain continuous topological permanence, rigidly oriented throughout the rotation, with zero geometric morphing, zero 180-degree yaw flipping, and zero perspective inversion.'
+   - Invariant Geometric Topology & Anti-Duplication Physics (Strict Single-Object Law):
+     - Never permit an asset or any of its sub-components to double up, split into ghost silhouettes, or fragment into multiple copies that later artificially merge or snap back.
+     - The asset must strictly obey natural classical rigid-body physics as a single cohesive solid topological manifold: zero UV texture sliding across seams, zero mesh fission, zero ghosted duplicate silhouettes, zero unphysical cloning, and zero re-convergence artifacts. All material coordinates remain pinned to the rigid geometry throughout motion.
 
 8. STANDARD 5-ELEMENT OUTPUT SCHEMA:
    Every diffusion prompt must strictly synthesize these 5 components into a single coherent paragraph:
@@ -559,7 +571,7 @@ def extract_and_synthesize_curito_prompt(
     "camera_and_rendering_spec": "lens (85mm), spatially locked tripod, 1-DoF constrained axial rotation, rigid-body topological permanence, zero 180-degree yaw flipping, 24fps"
   },
   "assembled_diffusion_prompt": "Single synthesized prompt paragraph combining the 5 elements with concrete hero artifact, spatial-temporal halftone/grain background (no table), locked tripod camera, rigid-body permanence, and the selected motion treatment optics clause appended at the end",
-  "negative_prompt": "180-degree flip, yaw flip, choppy rotation, perspective inversion, orientation swap, reversing direction, morphing geometry, warping metal, changing teeth, shifting bitting, mutating parts, melting, table, tabletop, desk, furniture, countertop, wooden desk, office room, floorboards, text, words, typography, UI elements, buttons, screen, monitor",
+  "negative_prompt": "doubling, duplicate mesh, split silhouette, ghosting, asset duplication, UV sliding, texture swimming, UV seam tear, unphysical merging, snapping back, 180-degree flip, yaw flip, choppy rotation, perspective inversion, orientation swap, reversing direction, morphing geometry, warping metal, changing teeth, shifting bitting, mutating parts, melting, table, tabletop, desk, furniture, countertop, wooden desk, office room, floorboards, text, words, typography, UI elements, buttons, screen, monitor",
   "selected_background_treatment_id": "one of: halftone_raster_canvas | luxury_editorial_sunlight_canvas | newspaper_collage_deconstructed | modern_swiss_museum_poster",
   "selected_motion_treatment_id": "one of: defocus_blur | gaussian_blur | bokeh_blur | slow_shutter_motion_blur",
   "downstream_remotion_overlay": {
