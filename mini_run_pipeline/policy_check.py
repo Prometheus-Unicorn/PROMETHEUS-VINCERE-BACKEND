@@ -443,6 +443,8 @@ def measure_pixel_row_projection_lines(
 
     row_counts = np.sum(mask, axis=1)
     min_row_px = max(18, int((x1 - x0) * 0.035))
+    min_peak_px = max(65, int((x1 - x0) * 0.065))
+    min_band_area = max(2500, int((x1 - x0) * 2.5))
     active_rows = np.where(row_counts >= min_row_px)[0]
 
     if len(active_rows) == 0:
@@ -460,17 +462,20 @@ def measure_pixel_row_projection_lines(
     valid_bands = []
     for b_idx, band in enumerate(raw_bands):
         # A valid text line in 1080x1920 canvas has substantial vertical glyph stroke (>= 25px)
+        # and substantial stroke mass to distinguish real text from background skin/jewelry highlights
         if len(band) >= 25:
             band_y0 = int(band[0] + y0)
             band_y1 = int(band[-1] + y0)
             max_px = int(np.max(row_counts[band]))
-            if max_px >= min_row_px:
+            total_px = int(np.sum(row_counts[band]))
+            if max_px >= min_peak_px and total_px >= min_band_area:
                 valid_bands.append({
                     "bandIndex": b_idx,
                     "y0": band_y0,
                     "y1": band_y1,
                     "heightPx": band_y1 - band_y0 + 1,
                     "maxRowPixels": max_px,
+                    "totalPixels": total_px,
                 })
 
     return {
