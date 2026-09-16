@@ -1612,7 +1612,7 @@ const KineticLayerRenderer: React.FC<{
     lineHeight: isBehindSubject ? 0.85 : layer.lineHeight,
     marginTop: layer.marginTopPx !== undefined ? `${layer.marginTopPx}px` : undefined,
     marginLeft: ((placement as any)?.dominantZone === "foreground_lower_deck") ? undefined : ((layer as any).marginLeftPx !== undefined ? `${(layer as any).marginLeftPx}px` : undefined),
-    alignSelf: ((layer as any).alignSelf as any) || "center",
+    alignSelf: ((placement as any)?.dominantZone === "foreground_lower_deck") ? "center" : (((layer as any).alignSelf as any) || "center"),
     position: "relative",
     zIndex: isPartialHeadClip ? 4 : (layer.zIndex !== undefined
       ? layer.zIndex
@@ -5835,7 +5835,7 @@ const MultiLayerTypographyCard: React.FC<{
   // When layers use asymmetric alignSelf ('flex-start' / 'flex-end', e.g. image 82 'have choose to' or image 97 'AT POINT, SOME'),
   // a full 980px flex container flings the words 500px apart across the canvas.
   // Shrink-wrapping the card container to 'fit-content' (bounded to the hero word's width) ensures flankers tightly hug the hero word.
-  const hasFlankingLayers = layers.some(
+  const hasFlankingLayers = !isLowerDeck && layers.some(
     (l) => ((l as any).alignSelf === "flex-start" || (l as any).alignSelf === "flex-end")
   );
   const isLeftOrRightAlign = textAlign === "left" || textAlign === "right";

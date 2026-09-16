@@ -1292,9 +1292,10 @@ def preflight_and_fit_layer_widths(
         z_scale = 1200.0 / max(1.0, 1200.0 - depth_z) if (depth_z > 0 and not is_behind) else 1.0
         effective_aspect = round(aspect * z_scale, 4)
         layer["effective_char_aspect"] = effective_aspect
+        margin_offset = float(layer.get("marginLeftPx") or layer.get("margin_left_px") or 0.0) if layer.get("alignSelf") != "center" else 0.0
         current_size = layer.get("font_size_px") or layer.get("fontSizePx", 60)
         layer["font_size_px"] = current_size
-        est_width = len(text) * current_size * effective_aspect
+        est_width = len(text) * current_size * effective_aspect + margin_offset
         layer["est_width"] = est_width
 
     # Largest-first iterative shrink for any layer exceeding max_safe_width
@@ -1309,12 +1310,14 @@ def preflight_and_fit_layer_widths(
         overflowing.sort(key=lambda l: l["font_size_px"], reverse=True)
         target = overflowing[0]
         eff_asp = target.get("effective_char_aspect", target["char_aspect"])
+        margin_offset = float(target.get("marginLeftPx") or target.get("margin_left_px") or 0.0) if target.get("alignSelf") != "center" else 0.0
+        available_w = max(100.0, max_safe_width - margin_offset)
         # Calculate size needed to fit
-        needed_size = int(max_safe_width / (max(1, len(target.get("rawText", ""))) * eff_asp))
+        needed_size = int(available_w / (max(1, len(target.get("rawText", ""))) * eff_asp))
         target["font_size_px"] = max(target["legibility_floor"], min(target["font_size_px"] - 1, needed_size))
         if "fontSizePx" in target:
             target["fontSizePx"] = target["font_size_px"]
-        target["est_width"] = len(target.get("rawText", "")) * target["font_size_px"] * eff_asp
+        target["est_width"] = len(target.get("rawText", "")) * target["font_size_px"] * eff_asp + margin_offset
 
     for layer in layers_info:
         est = layer.get("est_width", 0)
