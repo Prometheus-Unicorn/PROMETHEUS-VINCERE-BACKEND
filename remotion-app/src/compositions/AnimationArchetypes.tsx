@@ -216,8 +216,9 @@ export const StaggerBlurWordReveal: React.FC<ArchetypeProps> = ({
   return (
     <div
       style={{
-        display: "flex",
-        flexWrap: "wrap",
+        display: "inline-flex",
+        flexWrap: "nowrap",
+        whiteSpace: "nowrap",
         justifyContent: "center",
         alignItems: "center",
         gap: "0.22em",
@@ -498,7 +499,8 @@ export const QuoteGlowReveal: React.FC<ArchetypeProps> = ({
       <div
         style={{
           display: "flex",
-          flexWrap: "wrap",
+          flexWrap: "nowrap",
+        whiteSpace: "nowrap",
           justifyContent: "center",
           gap: "0.22em",
           fontFamily: '"Playfair Display", "Bodoni Moda", serif',
@@ -1187,7 +1189,8 @@ export const WordByWord3dFlip: React.FC<ArchetypeProps> = ({
     <div
       style={{
         display: "flex",
-        flexWrap: "wrap",
+        flexWrap: "nowrap",
+        whiteSpace: "nowrap",
         justifyContent: "center",
         gap: "0.22em",
         perspective: "800px",
@@ -2132,7 +2135,8 @@ export const HierarchicalAsymmetricLockup: React.FC<ArchetypeProps> = ({
       <div
         style={{
           display: "inline-flex",
-          flexWrap: "wrap",
+          flexWrap: "nowrap",
+        whiteSpace: "nowrap",
           alignItems: "baseline",
           justifyContent: "flex-start",
           fontFamily: effectiveHeroFont,
@@ -2162,7 +2166,8 @@ export const HierarchicalAsymmetricLockup: React.FC<ArchetypeProps> = ({
     <div
       style={{
         display: "flex",
-        flexWrap: "wrap",
+        flexWrap: "nowrap",
+        whiteSpace: "nowrap",
         alignItems: "center",
         alignSelf: "flex-start", // Asymmetric flush-left lockup
         fontFamily: effectiveModFont,
@@ -2188,7 +2193,8 @@ export const HierarchicalAsymmetricLockup: React.FC<ArchetypeProps> = ({
     <div
       style={{
         display: "flex",
-        flexWrap: "wrap",
+        flexWrap: "nowrap",
+        whiteSpace: "nowrap",
         alignItems: "baseline",
         alignSelf: "flex-start",
         fontFamily: effectiveHeroFont,
@@ -2265,7 +2271,8 @@ export const SpatialPushSpringTypography: React.FC<ArchetypeProps> = ({
       style={{
         position: "relative",
         display: "inline-flex",
-        flexWrap: "wrap",
+        flexWrap: "nowrap",
+        whiteSpace: "nowrap",
         alignItems: "baseline",
         justifyContent: "center",
         maxWidth: "960px",
@@ -2408,7 +2415,8 @@ export const DifferenceKnockoutTypography: React.FC<ArchetypeProps> = ({
       style={{
         position: "relative",
         display: "inline-flex",
-        flexWrap: "wrap",
+        flexWrap: "nowrap",
+        whiteSpace: "nowrap",
         alignItems: "baseline",
         justifyContent: "center",
         maxWidth: "960px",
@@ -2508,7 +2516,8 @@ export const ChiseledPrismMetallic: React.FC<ArchetypeProps> = ({
       style={{
         position: "relative",
         display: "inline-flex",
-        flexWrap: "wrap",
+        flexWrap: "nowrap",
+        whiteSpace: "nowrap",
         alignItems: "baseline",
         justifyContent: "center",
         maxWidth: "960px",
@@ -2614,7 +2623,8 @@ export const VJKineticTypography: React.FC<ArchetypeProps> = ({
       style={{
         position: "relative",
         display: "inline-flex",
-        flexWrap: "wrap",
+        flexWrap: "nowrap",
+        whiteSpace: "nowrap",
         alignItems: "baseline",
         justifyContent: "center",
         maxWidth: "960px",
@@ -2713,7 +2723,8 @@ export const RealEstateLuxuryCurve: React.FC<ArchetypeProps> = ({
     <div
       style={{
         display: "flex",
-        flexWrap: "wrap",
+        flexWrap: "nowrap",
+        whiteSpace: "nowrap",
         justifyContent: "center",
         alignItems: "center",
         fontFamily: fontFamily ? `"${fontFamily}", sans-serif` : undefined,
@@ -2782,7 +2793,8 @@ export const Viral3dCompoundTilt: React.FC<ArchetypeProps> = ({
     <div
       style={{
         display: "flex",
-        flexWrap: "wrap",
+        flexWrap: "nowrap",
+        whiteSpace: "nowrap",
         justifyContent: "center",
         alignItems: "center",
         perspective: "800px",
@@ -2844,7 +2856,8 @@ export const SplitMaskDuotoneGradient: React.FC<ArchetypeProps> = ({
     <div
       style={{
         display: "flex",
-        flexWrap: "wrap",
+        flexWrap: "nowrap",
+        whiteSpace: "nowrap",
         justifyContent: "center",
         alignItems: "center",
         fontFamily: fontFamily ? `"${fontFamily}", sans-serif` : undefined,
@@ -2897,7 +2910,8 @@ export const MultiWordSlideUpStagger: React.FC<ArchetypeProps> = ({
     <div
       style={{
         display: "flex",
-        flexWrap: "wrap",
+        flexWrap: "nowrap",
+        whiteSpace: "nowrap",
         justifyContent: "center",
         alignItems: "center",
         fontFamily: fontFamily ? `"${fontFamily}", sans-serif` : undefined,
@@ -2979,7 +2993,8 @@ export const AppleVariableCurvePop: React.FC<ArchetypeProps> = ({
     <div
       style={{
         display: "flex",
-        flexWrap: "wrap",
+        flexWrap: "nowrap",
+        whiteSpace: "nowrap",
         justifyContent: "center",
         alignItems: "center",
         fontFamily: fontFamily ? `"${fontFamily}", sans-serif` : undefined,
@@ -3033,7 +3048,8 @@ export const SmoothPopOpacitySync: React.FC<ArchetypeProps> = ({
     <div
       style={{
         display: "flex",
-        flexWrap: "wrap",
+        flexWrap: "nowrap",
+        whiteSpace: "nowrap",
         justifyContent: "center",
         alignItems: "center",
         fontFamily: fontFamily ? `"${fontFamily}", sans-serif` : undefined,
@@ -3090,7 +3106,8 @@ export const AnimatedSplitHighlighter: React.FC<ArchetypeProps> = ({
     <div
       style={{
         display: "flex",
-        flexWrap: "wrap",
+        flexWrap: "nowrap",
+        whiteSpace: "nowrap",
         justifyContent: "center",
         alignItems: "center",
         fontFamily: fontFamily ? `"${fontFamily}", sans-serif` : undefined,
@@ -3169,7 +3186,8 @@ export const FilmStripSpecularShine: React.FC<ArchetypeProps> = ({
       style={{
         position: "relative",
         display: "flex",
-        flexWrap: "wrap",
+        flexWrap: "nowrap",
+        whiteSpace: "nowrap",
         justifyContent: "center",
         alignItems: "center",
         fontFamily: fontFamily ? `"${fontFamily}", sans-serif` : undefined,
@@ -3224,7 +3242,8 @@ export const StrobeFlickerIgnition: React.FC<ArchetypeProps> = ({
     <div
       style={{
         display: "flex",
-        flexWrap: "wrap",
+        flexWrap: "nowrap",
+        whiteSpace: "nowrap",
         justifyContent: "center",
         alignItems: "center",
         fontFamily: fontFamily ? `"${fontFamily}", sans-serif` : undefined,
@@ -3295,7 +3314,8 @@ export const PremiumCircularCaptionStack: React.FC<ArchetypeProps> = ({
           zIndex: -1,
         }}
       />
-      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}>
+      <div style={{ display: "flex", flexWrap: "nowrap",
+        whiteSpace: "nowrap", justifyContent: "center" }}>
         {words.map((w, idx) => (
           <span
             key={`prem-stack-${idx}`}

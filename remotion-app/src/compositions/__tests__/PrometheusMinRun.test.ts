@@ -24,6 +24,7 @@ import {
   type CaptionChunk,
   type TypographyLayer,
 } from "../PrometheusMinRun";
+import { StaggerBlurWordReveal } from "../AnimationArchetypes";
 
 describe("resolveWordEntranceFrames", () => {
   test("pre-rolls each word against its own spoken timestamp", () => {
@@ -1093,5 +1094,20 @@ describe("resolveAutoFitScale archetype safe boundary enforcement", () => {
     const renderedFontSize = Math.round(104 * scale);
     expect(renderedFontSize).toBeLessThan(104);
   });
+
+  test("StaggerBlurWordReveal enforces flexWrap nowrap and whiteSpace nowrap", () => {
+    const el = StaggerBlurWordReveal({
+      frame: 10,
+      words: ["FOR", "ME", "IT", "WAS."],
+      color: "#FFFFFF",
+      fontSizePx: 64,
+      fontFamily: "Courier Prime",
+    });
+    expect(el).toBeDefined();
+    expect(el.props.style.flexWrap).toBe("nowrap");
+    expect(el.props.style.whiteSpace).toBe("nowrap");
+    expect(el.props.style.display).toBe("inline-flex");
+  });
 });
+
 

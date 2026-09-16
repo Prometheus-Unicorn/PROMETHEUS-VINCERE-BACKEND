@@ -1675,7 +1675,18 @@ const KineticLayerRenderer: React.FC<{
     isSeeThrough: (layer as any).isSeeThrough,
   });
   if (archetypeEl) {
-    return <div style={baseTextStyle}>{archetypeEl}</div>;
+    return (
+      <div
+        style={{
+          ...baseTextStyle,
+          display: "inline-flex",
+          flexWrap: "nowrap",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {archetypeEl}
+      </div>
+    );
   }
 
   // 0a. TYPEWRITER GHOST CURSOR — Letter-by-letter rhythmic typewriter with blinking accent cursor
