@@ -42,8 +42,8 @@ export function renderOriginCinematicZoomBlur({
       config: { stiffness: 140, damping: 20 },
     });
 
-    const scale = interpolate(p, [0, 1], [4, 1]);
-    const blur = interpolate(p, [0, 1], [20, 0]);
+    const scale = interpolate(p, [0, 1], [2.2, 1]);
+    const blur = interpolate(p, [0, 1], [8, 0]);
     const opacity = interpolate(p, [0, 0.2, 1], [0, 1, 1]);
 
     const style: React.CSSProperties = {
@@ -52,8 +52,7 @@ export function renderOriginCinematicZoomBlur({
       color,
       opacity,
       transform: `scale(${scale.toFixed(3)})`,
-      filter: blur > 0.01 ? `blur(${blur.toFixed(1)}px)` : "none",
-      willChange: "transform, filter, opacity",
+      filter: opacity > 0.05 && blur > 0.1 ? `blur(${blur.toFixed(1)}px)` : undefined,
       ...wordPaintStyle,
     };
 

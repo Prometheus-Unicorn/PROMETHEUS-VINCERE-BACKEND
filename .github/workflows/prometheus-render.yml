@@ -74,7 +74,7 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_UPLOAD_BUCKET: ${{ secrets.R2_UPLOAD_BUCKET }}
           R2_PROCESSED_BUCKET: ${{ secrets.R2_PROCESSED_BUCKET }}
-          PARALLEL_SLICES: "18"
+          PARALLEL_SLICES: "8"
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           PYTHONUTF8: "1"
@@ -102,11 +102,12 @@ jobs:
       - name: Attach prebuilt dependencies and textures
         run: |
           # ── Step 1: root workspace install + shared-types build ──────────────
-          # Always run so workspace symlinks are created and shared-types is compiled.
           if [ -d "/opt/prebuilt/store/root-node_modules" ]; then
             cp -an /opt/prebuilt/store/root-node_modules/. node_modules/ 2>/dev/null || true
           fi
-          npm install --legacy-peer-deps --prefer-offline --no-audit --no-fund
+          if [ ! -d "node_modules/@prometheus" ]; then
+            npm install --legacy-peer-deps --prefer-offline --no-audit --no-fund
+          fi
           npm --workspace @prometheus/shared-types run build
 
           # ── Step 2: remotion-app node_modules ────────────────────────────────
@@ -163,7 +164,7 @@ jobs:
             /tmp/slices/slice_${SLICE_INDEX}.mp4 \
             --props /tmp/props_${JOB_ID}.json \
             --frames=${START_FRAME}-${END_FRAME} \
-            --concurrency=3 \
+            --concurrency=2 \
             --gl=swangle \
             --disable-web-security \
             --pixel-format=yuv420p \

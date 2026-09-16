@@ -57,7 +57,7 @@ KEY_ID = os.environ["R2_ACCESS_KEY_ID"]
 KEY_SECRET = os.environ["R2_SECRET_ACCESS_KEY"]
 UPLOAD_BUCKET = os.environ.get("R2_UPLOAD_BUCKET", "prometheus-uploads")
 PROCESSED_BUCKET = os.environ.get("R2_PROCESSED_BUCKET", "prometheus-processed")
-DEFAULT_PARALLEL_SLICES = int(os.environ.get("PARALLEL_SLICES", "20"))
+DEFAULT_PARALLEL_SLICES = int(os.environ.get("PARALLEL_SLICES", "8"))
 
 s3 = boto3.client(
     "s3",
@@ -67,6 +67,73 @@ s3 = boto3.client(
     config=Config(signature_version="s3v4"),
     region_name="auto",
 )
+
+
+def resolve_verified_precomputed_matte(
+    src_str: str,
+    expected_width: int,
+    expected_height: int,
+    expected_duration_ms: int,
+) -> Path | None:
+    """Finds and strictly validates a precomputed matte matching the source video.
+
+    Prevents alien subject compositing by enforcing:
+      1. Exact identity matching (no fuzzy substring matches like "test" or "male").
+      2. Strict aspect ratio concordance (tolerance <= 5%).
+      3. Duration sufficiency (matte must cover >= 85% of requested window).
+    """
+    if not src_str:
+        return None
+
+    src_stem = Path(src_str).stem
+    src_norm = src_stem.lower().replace("-", "_")
+
+    candidates: list[Path] = [
+        REPO_ROOT / f"remotion-app/public/source/{src_stem}_matte.webm",
+        REPO_ROOT / f"remotion-app/public/source/{src_norm}_matte.webm",
+    ]
+
+    # Explicit canonical identity mapping: strictly known fixtures only
+    if src_norm in ("male_black_talking_head_podcast", "male_black_podcast"):
+        candidates.append(REPO_ROOT / "remotion-app/public/source/male_black_matte.webm")
+
+    for cand in candidates:
+        if not cand.exists() or cand.stat().st_size < 1000:
+            continue
+        try:
+            m_probe = silence.probe_media(str(cand))
+            mw = int(m_probe.get("width", 0))
+            mh = int(m_probe.get("height", 0))
+            mdur = int(m_probe.get("durationMs", 0))
+            if mw <= 0 or mh <= 0:
+                continue
+
+            # Strict aspect ratio validation
+            src_aspect = expected_width / expected_height
+            cand_aspect = mw / mh
+            if abs(src_aspect - cand_aspect) > 0.05:
+                print(
+                    f"[orchestrate] Rejecting matte {cand.name}: aspect {cand_aspect:.3f} "
+                    f"mismatches source aspect {src_aspect:.3f}",
+                    flush=True,
+                )
+                continue
+
+            # Duration sanity check
+            if mdur > 0 and mdur < (expected_duration_ms * 0.85):
+                print(
+                    f"[orchestrate] Rejecting matte {cand.name}: duration {mdur}ms "
+                    f"insufficient for required {expected_duration_ms}ms",
+                    flush=True,
+                )
+                continue
+
+            return cand
+        except Exception as err:
+            print(f"[orchestrate] Failed probing candidate matte {cand.name}: {err}", flush=True)
+            continue
+
+    return None
 
 
 def gha_output(key: str, value: str) -> None:
@@ -461,21 +528,19 @@ def main():
     behind_chunks = [c for c in chunks if c.get("subjectLayering", {}).get("behindSubject")]
     if behind_chunks and (design.get("subjectLayering") != "disabled"):
         try:
-            from mini_run_pipeline import matting
             matte_out = workdir / f"matte_{job_id}.webm"
-            precomputed = None
-            for cand in [
-                REPO_ROOT / f"remotion-app/public/source/{Path(src_str).stem}_matte.webm",
-                REPO_ROOT / "remotion-app/public/source/male_black_matte.webm" if "male" in src_str.lower() else None,
-                REPO_ROOT / "remotion-app/public/source/test_matte.webm" if "test" in src_str.lower() else None,
-            ]:
-                if cand and cand.exists() and cand.stat().st_size > 1000:
-                    precomputed = cand
-                    break
+            precomputed = resolve_verified_precomputed_matte(
+                src_str=src_str,
+                expected_width=source_width,
+                expected_height=source_height,
+                expected_duration_ms=effective_duration_ms,
+            )
             if precomputed:
-                print(f"[orchestrate] Using precomputed repo matte: {precomputed}", flush=True)
+                print(f"[orchestrate] Using verified precomputed repo matte: {precomputed}", flush=True)
                 shutil.copyfile(precomputed, matte_out)
             else:
+                from mini_run_pipeline import matting
+                print(f"[orchestrate] No verified precomputed matte for {src_str}. Attempting dynamic segmentation...", flush=True)
                 matting.segment_video_window(
                     source_video_path=active_shot_path,
                     start_ms=0,
@@ -493,7 +558,7 @@ def main():
                 matte_error = "Matte file was empty or missing after generation"
         except Exception as m_err:
             matte_error = str(m_err)
-            print(f"[orchestrate] Matting notice (graceful degrade): {m_err}", flush=True)
+            print(f"[orchestrate] Matting notice (graceful degrade to foreground): {m_err}", flush=True)
 
     # 15. Upload Graded Source Video to R2
     source_r2_key = f"gha-renders/{job_id}/source.mp4"
