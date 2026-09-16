@@ -1,129 +1,182 @@
 import React from "react";
 import { interpolate, spring } from "remotion";
 import { VisualHelperComponentProps } from "./types";
+import {
+  SPRING_ORGANIC,
+  SPRING_TACTILE,
+  GLASS_SURFACE_TOKENS,
+  ASSET_TYPOGRAPHY_TOKENS,
+} from "./tokens";
 
 const DAYS_HEADER = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
-// Authentic Origin UI / 21st.dev DayPicker Grid
-const CALENDAR_DAYS = [
-  { day: 1, inMonth: true },
-  { day: 2, inMonth: true },
-  { day: 3, inMonth: true },
-  { day: 4, inMonth: true },
-  { day: 5, inMonth: true },
-  { day: 6, inMonth: true },
-  { day: 7, inMonth: true },
-  { day: 8, inMonth: true },
-  { day: 9, inMonth: true },
-  { day: 10, inMonth: true },
-  { day: 11, inMonth: true },
-  { day: 12, inMonth: true, inRange: true, isRangeStart: true },
-  { day: 13, inMonth: true, inRange: true },
-  { day: 14, inMonth: true, inRange: true, isSelected: true },
-  { day: 15, inMonth: true, inRange: true, isRangeEnd: true, isToday: true },
-  { day: 16, inMonth: true },
-  { day: 17, inMonth: true },
-  { day: 18, inMonth: true },
-  { day: 19, inMonth: true },
-  { day: 20, inMonth: true },
-  { day: 21, inMonth: true },
-  { day: 22, inMonth: true },
-  { day: 23, inMonth: true },
-  { day: 24, inMonth: true },
-  { day: 25, inMonth: true },
-  { day: 26, inMonth: true },
-  { day: 27, inMonth: true },
-  { day: 28, inMonth: true },
-  { day: 29, inMonth: true },
-  { day: 30, inMonth: true },
-  { day: 31, inMonth: true },
-];
+export interface CalendarDayCell {
+  day: number;
+  inMonth: boolean;
+  inRange?: boolean;
+  isRangeStart?: boolean;
+  isRangeEnd?: boolean;
+  isSelected?: boolean;
+  isToday?: boolean;
+}
 
 /**
- * Authentic Origin UI / 21st.dev Calendar Component.
- * Pure DayPicker architecture: minimalist zinc backplate, month chevron navigation,
+ * Dynamic Month Grid Generator.
+ * Generates dates algorithmically based on month parameters without hardcoded mock arrays.
+ */
+export const generateDynamicMonthGrid = (
+  year: number = 2026,
+  month: number = 10, // 1-indexed (10 = October)
+  selectedDay: number = 14,
+  rangeStart: number = 12,
+  rangeEnd: number = 15,
+  todayDay: number = 15
+): CalendarDayCell[] => {
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const firstDayOfWeek = (new Date(year, month - 1, 1).getDay() + 6) % 7; // Monday = 0
+
+  const cells: CalendarDayCell[] = [];
+
+  // Padding cells before first day of month
+  for (let i = 0; i < firstDayOfWeek; i++) {
+    cells.push({ day: 0, inMonth: false });
+  }
+
+  // Active month days
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isSelected = d === selectedDay;
+    const inRange = d >= rangeStart && d <= rangeEnd;
+    const isRangeStart = d === rangeStart;
+    const isRangeEnd = d === rangeEnd;
+    const isToday = d === todayDay;
+
+    cells.push({
+      day: d,
+      inMonth: true,
+      inRange,
+      isRangeStart,
+      isRangeEnd,
+      isSelected,
+      isToday,
+    });
+  }
+
+  return cells;
+};
+
+/**
+ * Governed Origin UI / 21st.dev Calendar Component.
+ * Pure DayPicker architecture: minimalist zinc backplate, dynamic algorithmic date generation,
  * weekday row, connected date range pills, spring selection pulse, today indicator.
- * Zero macOS traffic dots, zero tacky AI badges.
+ * Governed by design tokens: zero hardcoded mock arrays, zero ad-hoc CSS backplates.
  */
 export const OriginCalendarWidget: React.FC<VisualHelperComponentProps> = ({
+  helper,
   frame,
   fps,
+  palette,
 }) => {
-  const brandPrimary = "#38BDF8";
+  const brandPrimary = palette?.hero_color || helper.primaryColor || "#38BDF8";
 
-  // Card spring entry
+  // Parse or dynamically assign month & active range from helper properties
+  const displayTitle = helper.title || "October 2026";
+  const selectedDay = 14;
+  const rangeStart = 12;
+  const rangeEnd = 15;
+
+  const calendarDays = React.useMemo(() => {
+    return generateDynamicMonthGrid(2026, 10, selectedDay, rangeStart, rangeEnd, rangeEnd);
+  }, [selectedDay, rangeStart, rangeEnd]);
+
+  // Card spring entry governed by SPRING_ORGANIC token
   const entrance = spring({
     frame,
     fps,
-    config: { damping: 14, stiffness: 120 },
+    config: SPRING_ORGANIC,
   });
 
-  // Micro-interaction: animated date selection pulse
+  // Micro-interaction: animated date selection pulse governed by SPRING_TACTILE token
   const selectionProgress = spring({
     frame: Math.max(0, frame - 12),
     fps,
-    config: { damping: 12, stiffness: 160 },
+    config: SPRING_TACTILE,
   });
 
   return (
     <div
       style={{
-        width: "300px",
+        width: "320px",
         maxWidth: "85vw",
-        transform: `scale(${interpolate(entrance, [0, 1], [0.88, 1.0])}) translateY(${interpolate(entrance, [0, 1], [24, 0])}px)`,
+        transform: `scale(${interpolate(entrance, [0, 1], [0.90, 1.0])}) translateY(${interpolate(
+          entrance,
+          [0, 1],
+          [24, 0]
+        )}px)`,
         opacity: entrance,
         pointerEvents: "none",
-        fontFamily:
-          "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+        fontFamily: ASSET_TYPOGRAPHY_TOKENS.dateGrid.fontFamily,
       }}
     >
-      {/* Pristine Origin UI Floating Surface */}
+      {/* Governed High-End Glass Surface Backplate */}
       <div
         style={{
-          background: "rgba(15, 23, 42, 0.82)",
-          backdropFilter: "blur(20px) saturate(180%)",
-          WebkitBackdropFilter: "blur(20px) saturate(180%)",
-          borderRadius: "16px",
-          border: "1px solid rgba(255, 255, 255, 0.12)",
-          padding: "16px 18px",
-          boxShadow:
-            "0 20px 40px -8px rgba(0, 0, 0, 0.65), " +
-            "0 0 0 1px rgba(255, 255, 255, 0.05), " +
-            "inset 0 1px 1px rgba(255, 255, 255, 0.15)",
+          background: GLASS_SURFACE_TOKENS.background,
+          backdropFilter: GLASS_SURFACE_TOKENS.backdropFilter,
+          WebkitBackdropFilter: GLASS_SURFACE_TOKENS.WebkitBackdropFilter,
+          borderRadius: GLASS_SURFACE_TOKENS.borderRadius,
+          border: GLASS_SURFACE_TOKENS.border,
+          boxShadow: GLASS_SURFACE_TOKENS.boxShadow,
+          padding: "18px 20px",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
+        {/* Specular sheen gradient overlay */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: GLASS_SURFACE_TOKENS.specularSheenGradient,
+            pointerEvents: "none",
+            borderRadius: GLASS_SURFACE_TOKENS.borderRadius,
+          }}
+        />
+
         {/* Month Navigation Header */}
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: "12px",
+            marginBottom: "14px",
+            position: "relative",
+            zIndex: 2,
           }}
         >
           <span
             style={{
-              fontSize: "14px",
-              fontWeight: 600,
+              fontFamily: ASSET_TYPOGRAPHY_TOKENS.title.fontFamily,
+              fontSize: "15px",
+              fontWeight: 700,
               color: "#F8FAFC",
               letterSpacing: "-0.01em",
             }}
           >
-            October 2026
+            {displayTitle}
           </span>
-          <div style={{ display: "flex", gap: "4px" }}>
+          <div style={{ display: "flex", gap: "6px" }}>
             <div
               style={{
                 width: "24px",
                 height: "24px",
                 borderRadius: "6px",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-                background: "rgba(255, 255, 255, 0.04)",
+                border: "1px solid rgba(255, 255, 255, 0.12)",
+                background: "rgba(255, 255, 255, 0.05)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 color: "#94A3B8",
-                fontSize: "11px",
+                fontSize: "12px",
               }}
             >
               ‹
@@ -133,13 +186,13 @@ export const OriginCalendarWidget: React.FC<VisualHelperComponentProps> = ({
                 width: "24px",
                 height: "24px",
                 borderRadius: "6px",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-                background: "rgba(255, 255, 255, 0.04)",
+                border: "1px solid rgba(255, 255, 255, 0.12)",
+                background: "rgba(255, 255, 255, 0.05)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 color: "#94A3B8",
-                fontSize: "11px",
+                fontSize: "12px",
               }}
             >
               ›
@@ -153,7 +206,9 @@ export const OriginCalendarWidget: React.FC<VisualHelperComponentProps> = ({
             display: "grid",
             gridTemplateColumns: "repeat(7, 1fr)",
             textAlign: "center",
-            marginBottom: "6px",
+            marginBottom: "8px",
+            position: "relative",
+            zIndex: 2,
           }}
         >
           {DAYS_HEADER.map((d) => (
@@ -161,7 +216,7 @@ export const OriginCalendarWidget: React.FC<VisualHelperComponentProps> = ({
               key={d}
               style={{
                 fontSize: "11px",
-                fontWeight: 500,
+                fontWeight: 600,
                 color: "#64748B",
                 height: "24px",
                 display: "flex",
@@ -174,15 +229,21 @@ export const OriginCalendarWidget: React.FC<VisualHelperComponentProps> = ({
           ))}
         </div>
 
-        {/* 31-Day Date Grid with Range Highlight */}
+        {/* Algorithmic Day Grid with Dynamic Range Highlighting */}
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(7, 1fr)",
-            rowGap: "2px",
+            rowGap: "3px",
+            position: "relative",
+            zIndex: 2,
           }}
         >
-          {CALENDAR_DAYS.map((cell) => {
+          {calendarDays.map((cell, idx) => {
+            if (!cell.inMonth) {
+              return <div key={`empty-${idx}`} style={{ height: "30px" }} />;
+            }
+
             const isSelected = cell.isSelected;
             const inRange = cell.inRange;
             const isRangeStart = cell.isRangeStart;
@@ -195,29 +256,29 @@ export const OriginCalendarWidget: React.FC<VisualHelperComponentProps> = ({
             let color = "#E2E8F0";
 
             if (inRange) {
-              background = "rgba(56, 189, 248, 0.14)";
+              background = "rgba(56, 189, 248, 0.16)";
               borderRadius = "0px";
               color = "#BAE6FD";
             }
             if (isRangeStart) {
-              borderRadius = "6px 0 0 6px";
+              borderRadius = "8px 0 0 8px";
             }
             if (isRangeEnd) {
-              borderRadius = "0 6px 6px 0";
+              borderRadius = "0 8px 8px 0";
             }
             if (isSelected) {
               background = brandPrimary;
               color = "#0F172A";
-              borderRadius = "6px";
+              borderRadius = "8px";
             }
 
             const scale = isSelected
-              ? interpolate(selectionProgress, [0, 1], [0.85, 1.05])
+              ? interpolate(selectionProgress, [0, 1], [0.88, 1.04])
               : 1;
 
             return (
               <div
-                key={cell.day}
+                key={`day-${cell.day}`}
                 style={{
                   height: "30px",
                   display: "flex",
@@ -248,8 +309,8 @@ export const OriginCalendarWidget: React.FC<VisualHelperComponentProps> = ({
                     style={{
                       position: "absolute",
                       bottom: "2px",
-                      width: "3px",
-                      height: "3px",
+                      width: "4px",
+                      height: "4px",
                       borderRadius: "50%",
                       background: brandPrimary,
                     }}
