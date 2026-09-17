@@ -2650,15 +2650,15 @@ def plan_song_program(
                     c["effective_score"] = c["score"]
                 candidates.sort(key=lambda item: item["effective_score"], reverse=True)
 
-            # Temperature-based selection among top tier
-            top_candidates = candidates[:max(1, min(15, len(candidates)))]
+            # Calibrated Softmax Temperature Sampling across Top Compatible Tracks
+            top_candidates = candidates[:max(1, min(10, len(candidates)))]
             best_score = top_candidates[0]["effective_score"]
-            if len(top_candidates) > 1 and (round(best_score - top_candidates[1]["effective_score"], 4) >= 0.15):
-                selected = top_candidates[0]
-            else:
-                eligible = [c for c in top_candidates if best_score - c["effective_score"] <= 0.40]
-                min_score = min(c["effective_score"] for c in eligible)
-                weights = [math.exp(max(-4.0, min(4.0, (c["effective_score"] - min_score) * 2.0))) for c in eligible]
+            # All candidates within 0.50 score delta participate in seeded weighted lottery
+            eligible = [c for c in top_candidates if (best_score - c["effective_score"]) <= 0.50]
+            if len(eligible) > 1:
+                # Temperature tau = 0.40 ensures strong preference for top matches while guaranteeing variety across seeds
+                tau = 0.40
+                weights = [math.exp((c["effective_score"] - best_score) / tau) for c in eligible]
                 total_weight = sum(weights)
                 pick = rng.uniform(0, total_weight)
                 cum = 0.0
@@ -2668,6 +2668,8 @@ def plan_song_program(
                     if cum >= pick:
                         selected = c
                         break
+            else:
+                selected = top_candidates[0]
 
         track = selected["track"]
         used.add(track["id"])

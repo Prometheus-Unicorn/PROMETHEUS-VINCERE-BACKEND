@@ -879,72 +879,114 @@ def plan_mini_run_orchestration(
             vh_pool = VISUAL_HELPER_SFX_POOLS.get(vh_type, ["tap_punch_bupu", "shutter_snap", "pop_text"])
             vh_cue = _pick_diverse_sfx(vh_pool)
             variant_num = ((len(sfx) + c_idx) % 5) + 1
+            peak_offset_ms = 120  # Spring overshoot / badge snap apex
+            trigger_ms = c_start + peak_offset_ms
             sfx.append({
                 "id": f"sfx-visual-helper-{c_idx}",
                 "cue": vh_cue,
                 "variant": variant_num,
-                "triggerMs": c_start,
+                "triggerMs": trigger_ms,
                 "gainDb": -13.5,
                 "causedByChunkId": str(chunk.get("chunkIndex", c_idx)),
                 "causedByVisualHelper": vh_type,
+                "visualPeakOffsetMs": peak_offset_ms,
             })
-            last_text_sfx_ms = c_start
+            last_text_sfx_ms = trigger_ms
         elif origin_pool and c_start - last_text_sfx_ms >= 440:
             cue = _pick_diverse_sfx(origin_pool)
             variant_num = ((len(sfx) + c_idx) % 5) + 1
             gain = -14.0 if ("reverb" in cue or "drop" in cue or "impact" in cue) else -17.0
+            peak_offset_ms = 160 if any(k in str(origin_preset) for k in ("reveal", "wipe", "melt", "liquid")) else 130
+            trigger_ms = c_start + peak_offset_ms
             sfx.append({
                 "id": f"sfx-origin-entrance-{c_idx}",
                 "cue": cue,
                 "variant": variant_num,
-                "triggerMs": c_start,
+                "triggerMs": trigger_ms,
                 "gainDb": gain,
                 "causedByChunkId": str(chunk.get("chunkIndex", c_idx)),
                 "causedByPreset": str(origin_preset),
+                "visualPeakOffsetMs": peak_offset_ms,
             })
-            last_text_sfx_ms = c_start
+            last_text_sfx_ms = trigger_ms
         elif is_hierarchical_lockup:
-            # Tactile mechanical UI click / shutter tick / transient snap (-18 dB to -24 dB)
-            # Enforce clean acoustic spacing (>= 480ms), tasteful per-chunk density, and dynamic acoustic variance (variants 1-5)
-            max_sfx_this_chunk = min(3, max(1, len(words) // 2)) if len(words) >= 4 else 1
-            sfx_in_chunk = 0
-            for w_idx, w in enumerate(words):
-                if sfx_in_chunk >= max_sfx_this_chunk:
-                    break
-                w_ms = int(w.get("start_ms", c_start + w_idx * 220))
-                if w_ms - last_text_sfx_ms >= 480:
-                    click_cue = _pick_diverse_sfx([
-                        "mechanical_click", "shutter_snap", "click_bupu", "tap_bupu"
-                    ])
-                    # Natural velocity dynamics across entrances
-                    subtle_gain = -20.0 if w_idx == 0 else -22.5
-                    variant_num = ((len(sfx) + w_idx + c_idx) % 5) + 1
-                    sfx.append({
-                        "id": f"sfx-lockup-click-{c_idx}-{w_idx}",
-                        "cue": click_cue,
-                        "variant": variant_num,
-                        "triggerMs": w_ms,
-                        "gainDb": subtle_gain,
-                        "causedByChunkId": str(chunk.get("chunkIndex", c_idx)),
-                        "causedByTreatment": "hierarchical_asymmetric_lockup",
-                    })
-                    last_text_sfx_ms = w_ms
-                    sfx_in_chunk += 1
+            # Context-Aware Typography Acoustic Palettes:
+            # Match acoustic signature to visual typography design (Editorial Serif vs Modern Sans Display vs Cyber Tech)
+            chunk_style_repr = (
+                str(chunk.get("fontFamily", "")) + " " +
+                " ".join(str(l.get("fontFamily", "")) for l in layers) + " " +
+                str(design.get("fontFamily", "")) + " " +
+                str(chunk.get("treatmentSystem", "")) + " " +
+                str(chunk.get("preset", ""))
+            ).lower()
+
+            is_serif = any(k in chunk_style_repr for k in ["garamond", "fraunces", "serif", "cinzel", "didot", "newsreader", "editorial", "playfair", "bodoni"])
+            is_tech = any(k in chunk_style_repr for k in ["mono", "jetbrains", "matrix", "crt", "code", "terminal", "cyber"])
+
+            if is_serif:
+                lockup_pool = ["slow_whoosh_reverb", "whoosh_slow", "sub_impact_reverb", "shutter_snap"]
+                lockup_gain = -18.0
+            elif is_tech:
+                lockup_pool = ["glitch_digital", "click_bupu", "shutter_snap"]
+                lockup_gain = -16.5
+            else:
+                lockup_pool = ["shutter_snap", "tap_punch_bupu", "impact_sharp", "whoosh_fast"]
+                lockup_gain = -16.0
+
+            # Visual peak moment: Kinetic text spring reaches peak overshoot at +140ms after entrance
+            peak_offset_ms = 140
+            hero_trigger_ms = c_start + peak_offset_ms
+
+            if hero_trigger_ms - last_text_sfx_ms >= 480:
+                hero_cue = _pick_diverse_sfx(lockup_pool)
+                variant_num = ((len(sfx) + c_idx) % 5) + 1
+                sfx.append({
+                    "id": f"sfx-lockup-hero-{c_idx}",
+                    "cue": hero_cue,
+                    "variant": variant_num,
+                    "triggerMs": hero_trigger_ms,
+                    "gainDb": lockup_gain,
+                    "causedByChunkId": str(chunk.get("chunkIndex", c_idx)),
+                    "causedByTreatment": "hierarchical_asymmetric_lockup",
+                    "visualPeakOffsetMs": peak_offset_ms,
+                })
+                last_text_sfx_ms = hero_trigger_ms
         elif is_single_word:
-            # Tactile clicks, mechanical ticks, crisp UI taps - punchy and audible (-12.0 dB)
-            click_cue = _pick_diverse_sfx([
-                "click_bupu", "tap_bupu", "mechanical_click", "pop_text", "shutter_snap"
-            ])
-            variant_num = ((len(sfx) + c_idx) % 5) + 1
-            sfx.append({
-                "id": f"sfx-text-entry-{c_idx}",
-                "cue": click_cue,
-                "variant": variant_num,
-                "triggerMs": c_start,
-                "gainDb": -10.0,
-                "causedByChunkId": str(chunk.get("chunkIndex", c_idx)),
-            })
-            last_text_sfx_ms = c_start
+            chunk_style_repr = (
+                str(chunk.get("fontFamily", "")) + " " +
+                " ".join(str(l.get("fontFamily", "")) for l in layers) + " " +
+                str(design.get("fontFamily", ""))
+            ).lower()
+
+            is_serif = any(k in chunk_style_repr for k in ["garamond", "fraunces", "serif", "cinzel", "didot", "newsreader", "editorial", "playfair", "bodoni"])
+            is_tech = any(k in chunk_style_repr for k in ["mono", "jetbrains", "matrix", "crt", "code", "terminal"])
+
+            if is_serif:
+                single_pool = ["whoosh_slow", "slow_whoosh_reverb", "sub_impact_reverb"]
+                single_gain = -14.0
+            elif is_tech:
+                single_pool = ["glitch_digital", "click_bupu"]
+                single_gain = -12.0
+            else:
+                single_pool = ["tap_punch_bupu", "shutter_snap", "impact_sharp", "whoosh_fast"]
+                single_gain = -11.0
+
+            peak_offset_ms = 110  # Rapid kinetic single-word punch apex
+            trigger_ms = c_start + peak_offset_ms
+
+            if trigger_ms - last_text_sfx_ms >= 450:
+                click_cue = _pick_diverse_sfx(single_pool)
+                variant_num = ((len(sfx) + c_idx) % 5) + 1
+                sfx.append({
+                    "id": f"sfx-text-entry-{c_idx}",
+                    "cue": click_cue,
+                    "variant": variant_num,
+                    "triggerMs": trigger_ms,
+                    "gainDb": single_gain,
+                    "causedByChunkId": str(chunk.get("chunkIndex", c_idx)),
+                    "visualPeakOffsetMs": peak_offset_ms,
+                })
+                last_text_sfx_ms = trigger_ms
 
     # Purposeful camera zoom-ins for high-impact chunks (see plan_zoom_ins):
     # slow push / fast punch / J-cut, seeded with any transition-coupled moves,
