@@ -15,6 +15,9 @@ Orchestrates the complete lifecycle of generative Curito animations:
 from __future__ import annotations
 
 import json
+import os
+import shutil
+import subprocess
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
@@ -58,6 +61,7 @@ class CuritoPlacementDirective:
     composite_layer: str = "background_video_cutaway"
     blend_mode: str = "normal"
     opacity: float = 1.0
+    relative_asset_path: Optional[str] = None
     outfit_reference: Optional[CuritoOutfitReference] = None
     sentiment_blendshape: Optional[CuritoSentimentBlendShape] = None
 
@@ -72,6 +76,7 @@ class CuritoPlacementDirective:
             "durationSec": self.duration_sec,
             "treatmentFamily": self.treatment_family,
             "mp4Path": str(self.mp4_path),
+            "relativeAssetPath": self.relative_asset_path or str(self.mp4_path),
             "wordSync": self.word_sync.to_dict(),
             "genomesUsed": self.genomes_used,
             "reportJsonPath": str(self.report_json_path),
@@ -237,13 +242,52 @@ class CuritoAnimationOrchestrator:
             aspect_ratio=aspect_ratio,
         )
 
-        # 3. Generate Animation & Produce Storyboard Report via Google Flow MCP
+        # 3. Generate Animation & Produce Storyboard Report via Google Flow MCP / Autonomous Synthesizer
         clip_filename = f"curito_chunk_{chunk_index:02d}_{word_sync.total_duration_sec}s.mp4"
         report = self.client.generate_curito_animation(
             prompt=stitched,
             concept_title=title,
             clip_filename=clip_filename,
         )
+
+        mp4_path_obj = Path(report.mp4_asset_path)
+
+        # Enforce pristine H.264 encoding via FFmpeg for 100% Remotion/Chromium compatibility
+        ffmpeg_bin = shutil.which("ffmpeg")
+        if ffmpeg_bin and mp4_path_obj.exists():
+            tmp_transcode = mp4_path_obj.with_name(f"{mp4_path_obj.stem}_h264.mp4")
+            try:
+                subprocess.run(
+                    [
+                        ffmpeg_bin, "-y",
+                        "-i", str(mp4_path_obj),
+                        "-c:v", "libx264",
+                        "-preset", "ultrafast",
+                        "-pix_fmt", "yuv420p",
+                        "-movflags", "+faststart",
+                        str(tmp_transcode),
+                    ],
+                    check=True,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+                if tmp_transcode.exists() and tmp_transcode.stat().st_size > 500:
+                    shutil.move(str(tmp_transcode), str(mp4_path_obj))
+            except Exception:
+                if tmp_transcode.exists():
+                    tmp_transcode.unlink(missing_ok=True)
+
+        # Mirror asset into remotion-app/public/source/ so Remotion can resolve it via staticFile()
+        rel_asset_path = f"source/{clip_filename}"
+        repo_root = Path(__file__).resolve().parent.parent
+        remotion_pub_dir = repo_root / "remotion-app" / "public" / "source"
+        if remotion_pub_dir.exists() and mp4_path_obj.exists():
+            target_public_file = remotion_pub_dir / clip_filename
+            try:
+                if str(mp4_path_obj.resolve()) != str(target_public_file.resolve()):
+                    shutil.copyfile(mp4_path_obj, target_public_file)
+            except Exception:
+                pass
 
         # 4. Compute Timeline Window
         timeline_start_ms = start_ms
@@ -262,7 +306,8 @@ class CuritoAnimationOrchestrator:
             duration_ms=word_sync.total_duration_sec * 1000,
             duration_sec=word_sync.total_duration_sec,
             treatment_family=CURITO_TREATMENT_FAMILY,
-            mp4_path=report.mp4_asset_path,
+            mp4_path=str(mp4_path_obj),
+            relative_asset_path=rel_asset_path,
             word_sync=word_sync,
             genomes_used=stitched.genome_ids,
             report_json_path=str(report_json),

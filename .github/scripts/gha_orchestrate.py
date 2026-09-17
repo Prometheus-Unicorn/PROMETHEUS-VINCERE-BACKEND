@@ -565,6 +565,28 @@ def main():
     s3.upload_file(str(active_shot_path), PROCESSED_BUCKET, source_r2_key)
     print(f"[orchestrate] Uploaded graded source -> R2:{source_r2_key} ({active_shot_path.stat().st_size/1024/1024:.2f} MB)", flush=True)
 
+    # 15b. Upload Background Cutaways & Curito Animation Assets to R2
+    curito_r2_keys = []
+    if orchestration_manifest and orchestration_manifest.get("backgrounds"):
+        for b_idx, bg in enumerate(orchestration_manifest["backgrounds"]):
+            broll_info = bg.get("broll") or {}
+            vid_file = broll_info.get("videoFile")
+            local_p = broll_info.get("localPath")
+            target_p = None
+            if local_p and Path(local_p).exists() and Path(local_p).stat().st_size > 500:
+                target_p = Path(local_p)
+            elif vid_file:
+                cand_p = REPO_ROOT / "remotion-app" / "public" / vid_file
+                if cand_p.exists() and cand_p.stat().st_size > 500:
+                    target_p = cand_p
+
+            if target_p:
+                broll_r2_key = f"gha-renders/{job_id}/broll_{b_idx}_{target_p.name}"
+                s3.upload_file(str(target_p), PROCESSED_BUCKET, broll_r2_key)
+                broll_info["r2Key"] = broll_r2_key
+                curito_r2_keys.append(broll_r2_key)
+                print(f"[orchestrate] Uploaded background animation -> R2:{broll_r2_key} ({target_p.name})", flush=True)
+
     # 16. Build and Upload props.json for Remotion
     props = {
         "jobId": job_id,
@@ -642,6 +664,10 @@ def main():
             "r2Key": matte_r2_key or None,
             "behindSubjectChunkCount": len(behind_chunks),
             "error": str(matte_error) if matte_error else None,
+        },
+        "curitoAnimations": {
+            "count": len(curito_r2_keys),
+            "r2Keys": curito_r2_keys,
         },
         "deploymentFingerprint": {
             "gitSha": git_sha,

@@ -42,5 +42,23 @@ if MATTE_KEY:
     except Exception as e:
         print(f"[download] Warning: could not download matte: {e}", flush=True)
 
+# Download any background cutaways & Curito animation assets from R2
+try:
+    import json
+    with open(props_local, "r", encoding="utf-8") as pf:
+        props_data = json.load(pf)
+    orch_data = props_data.get("orchestration") or {}
+    for bg_item in orch_data.get("backgrounds", []):
+        br = bg_item.get("broll") or {}
+        r2_k = br.get("r2Key")
+        v_f = br.get("videoFile")
+        if r2_k and v_f:
+            dest_f = Path("remotion-app/public") / v_f
+            dest_f.parent.mkdir(parents=True, exist_ok=True)
+            s3.download_file(PROCESSED_BUCKET, r2_k, str(dest_f))
+            print(f"[download] Background asset {v_f} downloaded ({dest_f.stat().st_size/1024/1024:.2f} MB)", flush=True)
+except Exception as e:
+    print(f"[download] Background asset download notice: {e}", flush=True)
+
 if src_local.exists():
     shutil.copyfile(src_local, src_dir / "test.mp4")

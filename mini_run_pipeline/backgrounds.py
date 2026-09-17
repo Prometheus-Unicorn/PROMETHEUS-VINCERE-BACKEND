@@ -29,8 +29,10 @@ same way the rest of the orchestration module is.
 from __future__ import annotations
 
 import hashlib
+import os
 import re
 import secrets
+import shutil
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
@@ -39,6 +41,7 @@ try:  # Pillow is optional; the catalog degrades to safe defaults without it.
 except Exception:  # pragma: no cover - import guard
     Image = None  # type: ignore
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
 TEXTURE_DIR = Path(__file__).resolve().parent / "textures"
 
 # 9:16 (portrait) render viewport we judge every asset against.
@@ -53,6 +56,7 @@ BACKGROUND_KINDS = (
     "brand_canvas",
     "blurred_wings",
     "broll_cutaway",
+    "curito_animation",
     "negative_space_stencil",
     "viewfinder_scaffold",
     "frame_break_cutout_2_5d",
@@ -685,6 +689,8 @@ def parse_background_preferences(
             preferred_kind = "brand_canvas"
         elif re.search(r"\b(texture\s+canvas|paper\s+texture|fabric\s+texture|grunge|tactile)\b", prompt_lower):
             preferred_kind = "texture_canvas"
+        elif re.search(r"\b(curito|curito\s+animation|animations_curito|generative\s+animation|motion\s+graphic\s+animation)\b", prompt_lower):
+            preferred_kind = "curito_animation"
         elif re.search(r"\b(b[\s_-]?roll|cutaway|footage\s+change|scene\s+footage)\b", prompt_lower):
             preferred_kind = "broll_cutaway"
         elif re.search(r"\b(negative\s+space|knockout|stencil|cutout)\b", prompt_lower):
@@ -1033,7 +1039,7 @@ def plan_backgrounds(
             # suitability evaluation). B-roll candidates come exclusively from
             # the suitability engine gate below.
             preferred_kind = prefs.get("preferredKind")
-            if preferred_kind == "broll_cutaway":
+            if preferred_kind in ("broll_cutaway", "curito_animation"):
                 preferred_kind = None
             candidate_kind = preferred_kind or (rule.get("default_kind") if rule else "texture_canvas")
 
@@ -1096,6 +1102,40 @@ def plan_backgrounds(
                 time_since_broll = c_start_sec + 100.0
                 time_since_break = max(0.0, c_start_sec - (last_end_ms / 1000.0 if last_end_ms > 0 else 0.0))
 
+                # 1. Curito generative background animation candidate evaluation
+                is_curito, curito_score, curito_rationale = False, 0.0, ""
+                try:
+                    from mini_run_pipeline.curito_animation_orchestrator import CuritoAnimationDetector
+                    is_curito, curito_score, curito_rationale = CuritoAnimationDetector.evaluate_chunk_for_animation(
+                        chunk=chunk,
+                        chunk_index=index,
+                        time_since_last_animation_sec=time_since_broll,
+                    )
+                except Exception:
+                    pass
+
+                if is_curito and (is_directed or curito_score >= 0.60 or prefs.get("preferredKind") == "curito_animation"):
+                    curito_scaled = int(curito_score * 145)
+                    candidates.append({
+                        "index": index,
+                        "chunk": chunk,
+                        "scene": scene,
+                        "score": curito_scaled,
+                        "trigger": "curito_animation",
+                        "candidate": "curito_animation",
+                        "kind": "broll_cutaway",
+                        "code": "bg_curito_animation",
+                        "texture": None,
+                        "curito_eval": {
+                            "is_candidate": True,
+                            "score": curito_score,
+                            "rationale": curito_rationale,
+                        },
+                        "gate": "curito_sentiment_suitability",
+                        "reason": curito_rationale,
+                    })
+                    continue
+
                 broll_eval = BrollSuitabilityEngine.evaluate_chunk(
                     chunk_index=index,
                     text=c_text,
@@ -1147,8 +1187,9 @@ def plan_backgrounds(
         if len(selected) >= max_backgrounds:
             break
         scene = item["scene"]
-        start_ms = int(scene["startMs"])
-        end_ms = min(int(scene["endMs"]), duration_ms)
+        chunk = item["chunk"]
+        start_ms = int(scene.get("startMs", chunk.get("startMs", 0)))
+        end_ms = min(int(scene.get("endMs", chunk.get("endMs", start_ms + 3000))), duration_ms)
         if start_ms + entry_ms >= end_ms:
             continue
         spacing_gap_ms = broll_cooldown_ms if item.get("kind") == "broll_cutaway" else min_gap_ms
@@ -1412,70 +1453,121 @@ def plan_backgrounds(
                 "revealFromBelow": True,
             }
         elif kind == "broll_cutaway":
-            try:
-                from mini_run_pipeline.broll_engine import (
-                    PexelsVideoClient,
-                    extract_broll_search_queries,
-                    prescribe_after_effects_treatment,
-                )
-                from dataclasses import asdict
-                broll_eval = item.get("broll_eval")
-                c_text = str(chunk.get("text", "")).strip()
-                primary_q, fallback_q = extract_broll_search_queries(c_text, beat_name=scene.get("role"))
-                client = PexelsVideoClient()
-                asset = client.materialize_asset(primary_q, download_local=True)
-                if not asset and fallback_q != primary_q:
-                    asset = client.materialize_asset(fallback_q, download_local=True)
+            if item.get("trigger") == "curito_animation" or item.get("candidate") == "curito_animation":
+                try:
+                    from mini_run_pipeline.curito_animation_orchestrator import CuritoAnimationOrchestrator
+                    from mini_run_pipeline.broll_engine import prescribe_after_effects_treatment
+                    from dataclasses import asdict
 
-                if not asset:
-                    h_id = hashlib.md5(c_text.encode()).hexdigest()[:8]
+                    c_idx_resolved = int(item.get("index", chunk.get("chunkIndex", idx - 1)))
+                    orchestrator = CuritoAnimationOrchestrator()
+                    directive = orchestrator.plan_and_generate_animation(
+                        chunk=chunk,
+                        chunk_index=c_idx_resolved,
+                        concept_title=scene.get("role") or f"Curito Beat #{c_idx_resolved + 1}",
+                    )
+
+                    mp4_path = Path(directive.mp4_path)
+                    rel_file = directive.relative_asset_path or f"source/{mp4_path.name}"
+                    remotion_pub = REPO_ROOT / "remotion-app" / "public"
+                    if not (remotion_pub / rel_file).exists() and mp4_path.exists():
+                        target = remotion_pub / rel_file
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        if str(mp4_path.resolve()) != str(target.resolve()):
+                            shutil.copyfile(mp4_path, target)
+
                     asset_data = {
-                        "assetId": f"broll_{h_id}",
-                        "source": "mock",
-                        "query": primary_q,
+                        "assetId": directive.id,
+                        "source": "curito_generative_engine",
+                        "query": directive.word_sync.target_phrase,
                         "videoUrl": "",
-                        "videoFile": "",
-                        "durationSec": round(total_duration / 1000.0, 2),
+                        "videoFile": rel_file,
+                        "localPath": str(mp4_path),
+                        "durationSec": directive.duration_sec,
                         "width": 1080,
                         "height": 1920,
                         "aspectRatio": "9:16",
+                        "directive": directive.to_dict(),
                     }
-                else:
-                    asset_data = {
-                        "assetId": asset.asset_id,
-                        "source": asset.source,
-                        "query": asset.query,
-                        "videoUrl": asset.video_url,
-                        "videoFile": asset.local_file,
-                        "durationSec": asset.duration_sec,
-                        "width": asset.width,
-                        "height": asset.height,
-                        "aspectRatio": asset.aspect_ratio,
-                        "photographer": asset.photographer,
-                        "photographerUrl": asset.photographer_url,
+                    treatment_obj = prescribe_after_effects_treatment(
+                        treatment_type=design.get("brollTreatment") or "evidentiary_dossier_card",
+                        beat_type=scene.get("role"),
+                        seed=seed,
+                    )
+                    background["broll"] = {
+                        **asset_data,
+                        "treatment": asdict(treatment_obj),
+                        "curitoDirective": directive.to_dict(),
                     }
-
-                treatment_obj = prescribe_after_effects_treatment(
-                    treatment_type=design.get("brollTreatment"),
-                    beat_type=scene.get("role"),
-                    evaluation=broll_eval,
-                    seed=seed,
-                )
-                background["broll"] = {
-                    **asset_data,
-                    "treatment": asdict(treatment_obj),
-                    "evaluation": asdict(broll_eval) if broll_eval else {},
-                }
-                if treatment_obj.treatment_name == "retinal_flash_cut":
-                    background["transition"]["kind"] = "hard_cut"
-                elif treatment_obj.treatment_name == "evidentiary_dossier_card":
+                    background["curito"] = directive.to_dict()
                     background["transition"]["kind"] = "zoom_punch"
-                elif treatment_obj.treatment_name == "track_matte_unfurl":
-                    background["transition"]["kind"] = "directional_slide_right"
-                elif treatment_obj.treatment_name == "hinged_3d_swing":
-                    background["transition"]["kind"] = "whip_pan_transition"
-            except Exception as exc:
-                print(f"[backgrounds] B-roll asset materialization skipped: {exc}", flush=True)
+                except Exception as c_exc:
+                    print(f"[backgrounds] Curito animation materialization notice: {c_exc}", flush=True)
+            else:
+                try:
+                    from mini_run_pipeline.broll_engine import (
+                        PexelsVideoClient,
+                        extract_broll_search_queries,
+                        prescribe_after_effects_treatment,
+                    )
+                    from dataclasses import asdict
+                    broll_eval = item.get("broll_eval")
+                    c_text = str(chunk.get("text", "")).strip()
+                    primary_q, fallback_q = extract_broll_search_queries(c_text, beat_name=scene.get("role"))
+                    client = PexelsVideoClient()
+                    asset = client.materialize_asset(primary_q, download_local=True)
+                    if not asset and fallback_q != primary_q:
+                        asset = client.materialize_asset(fallback_q, download_local=True)
+
+                    if not asset:
+                        h_id = hashlib.md5(c_text.encode()).hexdigest()[:8]
+                        asset_data = {
+                            "assetId": f"broll_{h_id}",
+                            "source": "mock",
+                            "query": primary_q,
+                            "videoUrl": "",
+                            "videoFile": "",
+                            "durationSec": round(total_duration / 1000.0, 2),
+                            "width": 1080,
+                            "height": 1920,
+                            "aspectRatio": "9:16",
+                        }
+                    else:
+                        asset_data = {
+                            "assetId": asset.asset_id,
+                            "source": asset.source,
+                            "query": asset.query,
+                            "videoUrl": asset.video_url,
+                            "videoFile": asset.local_file,
+                            "durationSec": asset.duration_sec,
+                            "width": asset.width,
+                            "height": asset.height,
+                            "aspectRatio": asset.aspect_ratio,
+                            "photographer": asset.photographer,
+                            "photographerUrl": asset.photographer_url,
+                        }
+
+                    treatment_obj = prescribe_after_effects_treatment(
+                        treatment_type=design.get("brollTreatment"),
+                        beat_type=scene.get("role"),
+                        evaluation=broll_eval,
+                        seed=seed,
+                    )
+                    background["broll"] = {
+                        **asset_data,
+                        "treatment": asdict(treatment_obj),
+                        "evaluation": asdict(broll_eval) if broll_eval else {},
+                    }
+                    if treatment_obj.treatment_name == "retinal_flash_cut":
+                        background["transition"]["kind"] = "hard_cut"
+                    elif treatment_obj.treatment_name == "evidentiary_dossier_card":
+                        background["transition"]["kind"] = "zoom_punch"
+                    elif treatment_obj.treatment_name == "track_matte_unfurl":
+                        background["transition"]["kind"] = "directional_slide_right"
+                    elif treatment_obj.treatment_name == "hinged_3d_swing":
+                        background["transition"]["kind"] = "whip_pan_transition"
+                except Exception as exc:
+                    print(f"[backgrounds] B-roll asset materialization skipped: {exc}", flush=True)
 
         if texture:
             cover = texture.get("portraitCover") or {}
