@@ -22,7 +22,9 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 from .broll_engine import BrollSuitabilityEngine
 from .curito_animation_dna import (
     CURITO_TREATMENT_FAMILY,
+    CuritoOutfitReference,
     CuritoPromptStitcher,
+    CuritoSentimentBlendShape,
     CuritoWordSyncCalculator,
     CuritoWordSyncSchema,
 )
@@ -56,9 +58,11 @@ class CuritoPlacementDirective:
     composite_layer: str = "background_video_cutaway"
     blend_mode: str = "normal"
     opacity: float = 1.0
+    outfit_reference: Optional[CuritoOutfitReference] = None
+    sentiment_blendshape: Optional[CuritoSentimentBlendShape] = None
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        res = {
             "id": self.id,
             "chunkIndex": self.chunk_index,
             "conceptTitle": self.concept_title,
@@ -76,6 +80,13 @@ class CuritoPlacementDirective:
             "blendMode": self.blend_mode,
             "opacity": self.opacity,
         }
+        if self.outfit_reference:
+            res["outfitReference"] = self.outfit_reference.to_dict()
+            res["outfit_reference"] = self.outfit_reference.to_dict()
+        if self.sentiment_blendshape:
+            res["sentimentBlendshape"] = self.sentiment_blendshape.to_dict()
+            res["sentiment_blendshape"] = self.sentiment_blendshape.to_dict()
+        return res
 
 
 # ---------------------------------------------------------------------------
@@ -154,6 +165,9 @@ class CuritoAnimationOrchestrator:
         target_phrase: Optional[str] = None,
         sync_offset_sec: Optional[float] = 3.0,
         concept_title: Optional[str] = None,
+        outfit_reference: Optional[CuritoOutfitReference] = None,
+        sentiment_blendshape: Optional[CuritoSentimentBlendShape] = None,
+        extrapolate_hold_sec: Optional[float] = None,
         model: str = "Veo 3.1 - Fast",
         aspect_ratio: str = "9:16",
     ) -> CuritoPlacementDirective:
@@ -165,6 +179,9 @@ class CuritoAnimationOrchestrator:
             target_phrase: Specific spoken words to synchronize (default: extracted from chunk text).
             sync_offset_sec: Seconds from chunk start where the target word occurs.
             concept_title: Human-readable concept title.
+            outfit_reference: Ground-truth reference anchor of the speaker's outfit in the video.
+            sentiment_blendshape: Extrapolated emotional sentiment & facial blend shape expression.
+            extrapolate_hold_sec: Post-speech hold runway buffer (default: 2.0s, e.g. 3s mapped -> 5s total).
             model: Google Flow / Veo model name.
             aspect_ratio: Video aspect ratio ("9:16" vertical).
         """
@@ -183,18 +200,39 @@ class CuritoAnimationOrchestrator:
         start_ts = CuritoWordSyncCalculator.format_seconds_to_timestamp(start_ms / 1000.0)
         title = concept_title or f"Curito Beat #{chunk_index + 1}: {resolved_phrase}"
 
-        # 1. Compute Word-Sync Schema
+        # Resolve ground-truth video reference anchors if not provided
+        if outfit_reference is None:
+            outfit_reference = CuritoOutfitReference(
+                description="minimalist studio wardrobe",
+                palette=["#121212", "#2A2A2A"],
+                material_texture="matte textile weave",
+                reference_frame_ms=start_ms,
+                style_category="editorial_luxury",
+            )
+        if sentiment_blendshape is None:
+            sentiment_blendshape = CuritoSentimentBlendShape(
+                primary_emotion="resolute_focus",
+                intensity=0.85,
+                blendshape_weights={"brow_concentration": 0.70, "jaw_conviction": 0.65},
+                motion_direction="forward_push",
+                energy_velocity_curve="sharp_snap_hold",
+            )
+
+        # 1. Compute Word-Sync Schema (with 3s mapped -> extrapolate 2s = 5s total architecture)
         word_sync = CuritoWordSyncCalculator.compute_word_sync(
             interview_start_timestamp=start_ts,
             target_phrase=resolved_phrase,
             target_word_offset_sec=sync_offset_sec,
             desired_duration_sec=chunk_dur_sec,
+            extrapolate_hold_sec=extrapolate_hold_sec,
         )
 
-        # 2. Stitch Curito Prompt from DNA Genomes
+        # 2. Stitch Curito Prompt from DNA Genomes with Video Outfit & Sentiment Anchors
         stitched = CuritoPromptStitcher.stitch_prompt(
             subject_metaphor=f"Cinematic visual metaphor for {resolved_phrase}",
             word_sync=word_sync,
+            outfit_reference=outfit_reference,
+            sentiment_blendshape=sentiment_blendshape,
             model=model,
             aspect_ratio=aspect_ratio,
         )
@@ -230,6 +268,8 @@ class CuritoAnimationOrchestrator:
             report_json_path=str(report_json),
             report_md_path=str(report_md),
             composite_layer="background_video_cutaway",
+            outfit_reference=outfit_reference,
+            sentiment_blendshape=sentiment_blendshape,
         )
 
         return directive

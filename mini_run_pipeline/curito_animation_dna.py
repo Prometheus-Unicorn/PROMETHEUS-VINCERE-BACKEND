@@ -129,6 +129,44 @@ class CuritoWordSyncSchema:
 
 
 @dataclass
+class CuritoOutfitReference:
+    """Visual reference anchor for the speaker's outfit/wardrobe extracted from the source video."""
+    description: str                   # e.g. "Charcoal minimalist wool turtleneck"
+    palette: List[str]                 # e.g. ["#1A1A1A", "#333333"]
+    material_texture: str              # e.g. "Matte woven heavy cotton"
+    reference_frame_ms: int            # Timestamp of video reference frame
+    style_category: str = "editorial_luxury"  # 'editorial_luxury', 'tech_minimal', 'streetwear'
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "description": self.description,
+            "palette": list(self.palette),
+            "materialTexture": self.material_texture,
+            "referenceFrameMs": self.reference_frame_ms,
+            "styleCategory": self.style_category,
+        }
+
+
+@dataclass
+class CuritoSentimentBlendShape:
+    """Emotional expression and facial blend shape interpolation from the video source."""
+    primary_emotion: str               # e.g. "deep_conviction", "intellectual_urgency", "contemplative"
+    intensity: float                   # 0.0 to 1.0
+    blendshape_weights: Dict[str, float] # e.g. {"brow_furrow": 0.65, "jaw_clench": 0.40, "eye_focus": 0.85}
+    motion_direction: str              # "forward_push", "lateral_sweep_left", "lateral_sweep_right", "vertical_rise"
+    energy_velocity_curve: str         # "sharp_snap_hold", "smooth_acceleration", "exponential_surge"
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "primaryEmotion": self.primary_emotion,
+            "intensity": self.intensity,
+            "blendshapeWeights": dict(self.blendshape_weights),
+            "motionDirection": self.motion_direction,
+            "energyVelocityCurve": self.energy_velocity_curve,
+        }
+
+
+@dataclass
 class CuritoStitchedPrompt:
     """Complete synthesized generative prompt stitched from modular DNA genomes."""
     genome_ids: List[str]
@@ -144,9 +182,11 @@ class CuritoStitchedPrompt:
     model: str
     duration_sec: int
     aspect_ratio: str = "9:16"
+    outfit_reference: Optional[CuritoOutfitReference] = None
+    sentiment_blendshape: Optional[CuritoSentimentBlendShape] = None
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        res = {
             "genomeIds": list(self.genome_ids),
             "genome_ids": list(self.genome_ids),
             "subjectElement": self.subject_element,
@@ -172,6 +212,13 @@ class CuritoStitchedPrompt:
             "aspectRatio": self.aspect_ratio,
             "aspect_ratio": self.aspect_ratio,
         }
+        if self.outfit_reference:
+            res["outfitReference"] = self.outfit_reference.to_dict()
+            res["outfit_reference"] = self.outfit_reference.to_dict()
+        if self.sentiment_blendshape:
+            res["sentimentBlendshape"] = self.sentiment_blendshape.to_dict()
+            res["sentiment_blendshape"] = self.sentiment_blendshape.to_dict()
+        return res
 
 
 # ---------------------------------------------------------------------------
@@ -1158,8 +1205,18 @@ class CuritoWordSyncCalculator:
         return f"{minutes:02d}:{remaining_sec:06.3f}"
 
     @classmethod
-    def clamp_generative_duration(cls, required_sec: float) -> int:
-        """Clamp duration strictly to valid Google Flow / Veo durations (4s, 6s, 8s)."""
+    def clamp_generative_duration(cls, required_sec: float, allow_5s: bool = False) -> int:
+        """Clamp duration strictly to valid Google Flow / Veo generative durations (4s, 6s, 8s, or 5s if enabled)."""
+        if allow_5s:
+            rounded = int(round(required_sec))
+            if rounded <= 4:
+                return 4
+            elif rounded == 5:
+                return 5
+            elif rounded in (6, 7):
+                return 6
+            else:
+                return 8
         if required_sec <= 5.0:
             return 4
         elif required_sec <= 7.0:
@@ -1174,16 +1231,22 @@ class CuritoWordSyncCalculator:
         target_phrase: str,
         target_word_offset_sec: Optional[float] = None,
         desired_duration_sec: Optional[float] = None,
+        extrapolate_hold_sec: Optional[float] = None,
         climax_description: Optional[str] = None,
     ) -> CuritoWordSyncSchema:
         """Compute exact word-sync schema relative to the interview timestamp.
+        
+        Supports the full cause-and-effect extrapolation architecture:
+        Given an active speech window (e.g. 3.0s), extrapolates forward by +2.0s hold runway,
+        yielding a 5.0s generative sequence with continuous sub-pixel drift.
         
         Args:
             interview_start_timestamp: e.g. "05:30.000" or "05:30" (or "330.0")
             target_phrase: Key spoken phrase (e.g. "radical self-reliance" or "execute")
             target_word_offset_sec: Delta from interview segment start where the target word occurs.
                                    If None, defaults to 3.0s (e.g. 3 seconds into the interview moment).
-            desired_duration_sec: Target duration in seconds. Clamped to 4, 6, or 8s.
+            desired_duration_sec: Target duration in seconds.
+            extrapolate_hold_sec: Optional additional duration buffer after the climax/speech window.
             climax_description: Description of the visual event locking at the sync moment.
         """
         start_sec = cls.parse_timestamp_str_to_seconds(interview_start_timestamp)
@@ -1196,17 +1259,31 @@ class CuritoWordSyncCalculator:
         # Calculate sync offset (default: 3.0s into the segment)
         offset_sec = 3.0 if target_word_offset_sec is None else max(0.5, float(target_word_offset_sec))
 
-        # Required video duration must cover lead-in, climax, and hold
+        # Full Cause-and-Effect Extrapolation Pipeline:
+        # e.g. 3.0s speech window + 2.0s hold extrapolation = 5.0s generative duration
+        allow_5s = False
         if desired_duration_sec is not None:
-            raw_duration = float(desired_duration_sec)
+            if extrapolate_hold_sec is not None:
+                raw_duration = float(desired_duration_sec) + float(extrapolate_hold_sec)
+                allow_5s = True
+            elif abs(float(desired_duration_sec) - 3.0) <= 0.6:
+                # Dynamic cause-and-effect extrapolation: 3.0s mapped from video -> extrapolate 2.0s to 5.0s
+                raw_duration = float(desired_duration_sec) + 2.0
+                allow_5s = True
+            else:
+                raw_duration = float(desired_duration_sec)
         else:
-            # Climax at offset + 2.0s hold
-            raw_duration = max(4.0, offset_sec + 2.5)
+            if extrapolate_hold_sec is not None:
+                raw_duration = offset_sec + float(extrapolate_hold_sec)
+                allow_5s = True
+            else:
+                # Legacy default: offset + 2.5s hold (e.g. 3.0 + 2.5 = 5.5s -> clamps to 6s)
+                raw_duration = max(4.0, offset_sec + 2.5)
 
-        veo_duration = cls.clamp_generative_duration(raw_duration)
+        veo_duration = cls.clamp_generative_duration(raw_duration, allow_5s=allow_5s)
 
         # Bound sync offset within the duration window
-        effective_offset = min(offset_sec, veo_duration - 1.0)
+        effective_offset = min(offset_sec, max(0.5, veo_duration - 1.0))
         lead_in = max(0.8, round(effective_offset * 0.45, 2))
         hold = max(1.0, round(veo_duration - effective_offset, 2))
 
@@ -1274,6 +1351,8 @@ class CuritoPromptStitcher:
         subject_metaphor: str,
         word_sync: CuritoWordSyncSchema,
         selected_genomes: Optional[Dict[str, CuritoGenome]] = None,
+        outfit_reference: Optional[CuritoOutfitReference] = None,
+        sentiment_blendshape: Optional[CuritoSentimentBlendShape] = None,
         model: str = "Veo 3.1 - Fast",
         aspect_ratio: str = "9:16",
         aesthetic: str = "auto",
@@ -1281,10 +1360,16 @@ class CuritoPromptStitcher:
         """Stitch genomes together adhering strictly to the proven 6-part Google Flow structure:
         [Subject/Element] + [Action/Movement] + [Location/Background] + [Context/Lighting] + [Composition] + [Style/Cues]
         
+        Seamlessly condition on the source video as the ground-truth reference:
+        - Stitches the subject's outfit and wardrobe palette directly into Subject & Lighting.
+        - Interpolates the speaker's emotional sentiment & facial blend shape into Action trajectory & dynamics.
+        
         Args:
             subject_metaphor: Core visual object/metaphor description.
             word_sync: Timing and word synchronization schema.
             selected_genomes: Optional explicit map of 4 category genomes.
+            outfit_reference: Ground-truth reference anchor of the speaker's outfit/wardrobe in the video.
+            sentiment_blendshape: Extrapolated emotional sentiment & facial blend shape expression.
             model: Target Veo / Google Flow model.
             aspect_ratio: Usually "9:16".
             aesthetic: 'auto', 'curito_editorial_paper', or 'dark_obsidian'.
@@ -1313,15 +1398,26 @@ class CuritoPromptStitcher:
             else:
                 is_curito_paper = False
 
-        # 1. Subject / Element
+        # 1. Subject / Element (with Outfit Stitching)
         subject = f"{subject_metaphor.strip()}, featuring {vis_genome.dna_snippet}"
+        if outfit_reference:
+            subject += (
+                f", meticulously color-keyed and texture-matched to the speaker's reference outfit "
+                f"({outfit_reference.description}, {outfit_reference.material_texture})"
+            )
 
-        # 2. Action / Movement (Incorporating word-sync timing trigger)
+        # 2. Action / Movement (Incorporating word-sync timing trigger & sentiment blend shape)
         action = (
             f"{scene_genome.dna_snippet}, timed so that at +{word_sync.sync_offset_sec:.1f}s into the sequence "
             f"the asset achieves locked contact bounce and physical impact synchronously with the cue words "
             f"'{word_sync.target_phrase}'"
         )
+        if sentiment_blendshape:
+            action += (
+                f", animated along a {sentiment_blendshape.motion_direction} trajectory with "
+                f"{sentiment_blendshape.energy_velocity_curve} dynamics reflecting {sentiment_blendshape.primary_emotion} "
+                f"(intensity {sentiment_blendshape.intensity:.2f})"
+            )
 
         # 3. Location / Background
         if is_curito_paper:
@@ -1343,6 +1439,8 @@ class CuritoPromptStitcher:
             )
         else:
             lighting = f"{lit_genome.dna_snippet}, throwing sharp directional highlights across tactile materials"
+        if outfit_reference and outfit_reference.palette:
+            lighting += f", with specular bounce harmonized to the wardrobe palette ({', '.join(outfit_reference.palette[:2])})"
 
         # 5. Composition
         composition = f"{cam_genome.dna_snippet}, vertical {aspect_ratio} framing with dynamic depth layering"
@@ -1393,6 +1491,8 @@ class CuritoPromptStitcher:
             model=model,
             duration_sec=word_sync.total_duration_sec,
             aspect_ratio=aspect_ratio,
+            outfit_reference=outfit_reference,
+            sentiment_blendshape=sentiment_blendshape,
         )
 
 
