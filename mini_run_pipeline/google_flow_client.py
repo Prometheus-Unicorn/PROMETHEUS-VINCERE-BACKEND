@@ -293,11 +293,10 @@ class GoogleFlowMCPClient:
         target_path.parent.mkdir(parents=True, exist_ok=True)
 
         if not target_path.exists():
-            self._synthesize_curito_clip(
-                output_path=target_path,
-                duration_sec=duration_sec,
-                title=prompt.word_sync.target_phrase,
-                sync_offset_sec=prompt.word_sync.sync_offset_sec,
+            raise FileNotFoundError(
+                f"Google Flow video asset was not generated or downloaded at '{target_path}'. "
+                "Fake mock synthesis via OpenCV is strictly prohibited by Rule 3 (No Fake Mocks) "
+                "and Rule 4 (No Artificial Completion). Verify Google Flow session health or use native VeoBackendClient."
             )
 
         return target_path
@@ -426,118 +425,4 @@ class GoogleFlowMCPClient:
 
         return report
 
-    # -----------------------------------------------------------------------
-    # Offline / Test Video Synthesizer (Real OpenCV 9:16 Vertical Video)
-    # -----------------------------------------------------------------------
 
-    @staticmethod
-    def _synthesize_curito_clip(
-        output_path: Path,
-        duration_sec: int = 6,
-        width: int = 1080,
-        height: int = 1920,
-        fps: int = 24,
-        title: str = "CURITO ANIMATION",
-        sync_offset_sec: float = 3.0,
-    ) -> None:
-        """Synthesizes a broadcast-standard 9:16 vertical MP4 video file.
-        
-        Renders real visual telemetry, transparent checkerboard patterns,
-        and dynamic physical impact squashes matching the word-sync offset.
-        """
-        output_path = Path(output_path)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-
-        total_frames = int(duration_sec * fps)
-        climax_frame = int(sync_offset_sec * fps)
-
-        # Use mp4v or avc1 codec
-        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-        writer = cv2.VideoWriter(str(output_path), fourcc, fps, (width, height))
-
-        if not writer.isOpened():
-            # Fallback to XVID / standard
-            fourcc = cv2.VideoWriter_fourcc(*"XVID")
-            writer = cv2.VideoWriter(str(output_path), fourcc, fps, (width, height))
-
-        for f in range(total_frames):
-            frame = np.zeros((height, width, 3), dtype=np.uint8)
-            t = f / fps
-
-            # 1. Dark minimalist obsidian background with subtle gradient
-            bg_val = int(12 + 8 * (f / total_frames))
-            frame[:] = (bg_val, bg_val + 2, bg_val + 5)
-
-            # 2. Transparent checkerboard grid simulation in lower quadrant
-            cb_size = 32
-            for cy in range(height // 2 - 200, height // 2 + 200, cb_size):
-                for cx in range(width // 2 - 360, width // 2 + 360, cb_size):
-                    if ((cx // cb_size) + (cy // cb_size)) % 2 == 0:
-                        frame[cy:cy + cb_size, cx:cx + cb_size] = (
-                            min(255, frame[cy, cx, 0] + 16),
-                            min(255, frame[cy, cx, 1] + 16),
-                            min(255, frame[cy, cx, 2] + 20),
-                        )
-
-            # 3. Dynamic scale & position (Simulating Slap-Drop with Contact Bounce)
-            if f < climax_frame:
-                # Approach phase
-                progress = f / max(1, climax_frame)
-                scale = 1.3 - 0.3 * progress
-                card_y = int((height // 2) - 150 * (1.0 - progress))
-                box_w = int(720 * scale)
-                box_h = int(400 * scale)
-                box_color = (240, 180, 56)  # Warm cyan/gold
-            else:
-                # Contact bounce & settle phase
-                frames_since_impact = f - climax_frame
-                decay = np.exp(-0.15 * frames_since_impact)
-                squash = 0.04 * decay * np.sin(frames_since_impact * 0.8)
-                scale_w = 1.0 + squash
-                scale_h = 1.0 - squash
-                card_y = height // 2
-                box_w = int(720 * scale_w)
-                box_h = int(400 * scale_h)
-                box_color = (56, 189, 248)  # Neon cyan
-
-            x1 = max(0, (width - box_w) // 2)
-            y1 = max(0, card_y - (box_h // 2))
-            x2 = min(width - 1, x1 + box_w)
-            y2 = min(height - 1, y1 + box_h)
-
-            # Draw card outline & telemetry
-            cv2.rectangle(frame, (x1, y1), (x2, y2), box_color, 4)
-            cv2.putText(
-                frame,
-                f"CURITO ANIMATION: {title.upper()[:24]}",
-                (x1 + 30, y1 + 60),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1.0,
-                (255, 255, 255),
-                2,
-                cv2.LINE_AA,
-            )
-            cv2.putText(
-                frame,
-                f"TIME: {t:.2f}s / {duration_sec:.1f}s | SYNC: {sync_offset_sec:.2f}s",
-                (x1 + 30, y1 + 120),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.7,
-                (148, 163, 184),
-                1,
-                cv2.LINE_AA,
-            )
-            cv2.putText(
-                frame,
-                "GOOGLE FLOW MCP / VEO 3.1 ORCHESTRATION",
-                (x1 + 30, y2 - 40),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.6,
-                (56, 189, 248),
-                1,
-                cv2.LINE_AA,
-            )
-
-            writer.write(frame)
-
-        writer.release()
