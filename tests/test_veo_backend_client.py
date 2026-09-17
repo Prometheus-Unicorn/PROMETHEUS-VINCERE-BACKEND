@@ -67,8 +67,7 @@ class VeoBackendClientTests(unittest.TestCase):
             call_kwargs = client.client.models.generate_videos.call_args.kwargs
             self.assertEqual(call_kwargs["model"], "veo-3.1-fast-generate-preview")
             self.assertEqual(call_kwargs["config"].aspect_ratio, "9:16")
-            self.assertEqual(call_kwargs["config"].duration_seconds, 5)
-            self.assertEqual(call_kwargs["config"].fps, 24)
+            self.assertEqual(call_kwargs["config"].duration_seconds, 6)
         finally:
             if out_path.exists():
                 out_path.unlink()

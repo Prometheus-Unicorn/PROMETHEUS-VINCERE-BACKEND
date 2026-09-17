@@ -126,11 +126,11 @@ class VeoBackendClient:
         target_model = model or self.DEFAULT_MODEL
         prompt_text = prompt.full_prompt if isinstance(prompt, CuritoStitchedPrompt) else str(prompt)
 
-        # Build config
+        # Build config (fps is internal 24fps in Gemini Developer API mode; Veo accepts discrete durations: 4, 6, 8)
+        veo_dur = 4 if duration_sec <= 4 else (6 if duration_sec <= 6 else 8)
         config_kwargs: Dict[str, Any] = {
             "aspect_ratio": aspect_ratio,
-            "duration_seconds": duration_sec,
-            "fps": fps,
+            "duration_seconds": veo_dur,
         }
 
         if reference_image_bytes:
