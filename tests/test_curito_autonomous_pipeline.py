@@ -201,6 +201,52 @@ class CuritoAutonomousPipelineTests(unittest.TestCase):
             self.assertEqual(broll.get("videoFile"), "source/test_curito.mp4")
             self.assertEqual(broll.get("r2Key"), "gha-renders/job123/broll_0_test_curito.mp4")
 
+    def test_curito_orchestrator_headless_veo_client_dispatch(self):
+        """Verify: CuritoAnimationOrchestrator seamlessly orchestrates via headless VeoBackendClient."""
+        from unittest.mock import MagicMock
+        from mini_run_pipeline.veo_backend_client import VeoBackendClient, VeoGenerationResult
+
+        chunk = {
+            "chunkIndex": 5,
+            "text": "The entire strategic architecture compounds exponentially.",
+            "startMs": 12000,
+            "endMs": 15000,
+        }
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_out = Path(tmpdir)
+            mock_veo = MagicMock(spec=VeoBackendClient)
+
+            fake_mp4 = tmp_out / "curito_chunk_05_5s.mp4"
+            fake_mp4.write_bytes(b"\x00" * 4096)
+
+            mock_veo.generate_curito_video.return_value = VeoGenerationResult(
+                mp4_path=str(fake_mp4),
+                duration_sec=5,
+                aspect_ratio="9:16",
+                model="veo-3.1-fast-generate-preview",
+                file_size_bytes=4096,
+                operation_name="operations/veo-gen-mock-789",
+                prompt="Stitched prompt",
+                completed_at=1789500000.0,
+            )
+
+            orchestrator = CuritoAnimationOrchestrator(veo_client=mock_veo, output_dir=tmp_out)
+            directive = orchestrator.plan_and_generate_animation(
+                chunk=chunk,
+                chunk_index=5,
+            )
+
+            mock_veo.generate_curito_video.assert_called_once()
+            call_kwargs = mock_veo.generate_curito_video.call_args.kwargs
+            self.assertEqual(call_kwargs["duration_sec"], 5)
+            self.assertEqual(call_kwargs["aspect_ratio"], "9:16")
+
+            self.assertEqual(directive.id, "curito_anim_05")
+            self.assertEqual(directive.duration_sec, 5)
+            self.assertTrue(Path(directive.report_json_path).exists())
+            self.assertTrue(Path(directive.report_md_path).exists())
+
 
 if __name__ == "__main__":
     unittest.main()

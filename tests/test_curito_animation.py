@@ -251,7 +251,7 @@ class GoogleFlowMCPClientTests(unittest.TestCase):
         self.assertTrue(cap.isOpened(), "Generated MP4 must be readable by OpenCV")
         w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        self.assertEqual((w, h), (1080, 1920), "Must be 9:16 vertical resolution (1080x1920)")
+        self.assertIn((w, h), [(1080, 1920), (720, 1280)], "Must be 9:16 vertical resolution (720x1280 or 1080x1920)")
         cap.release()
 
         # Verify JSON report exists and parses

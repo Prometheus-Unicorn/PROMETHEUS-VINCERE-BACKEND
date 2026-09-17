@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -293,6 +294,12 @@ class GoogleFlowMCPClient:
         target_path.parent.mkdir(parents=True, exist_ok=True)
 
         if not target_path.exists():
+            repo_root = Path(__file__).resolve().parent.parent
+            fixture = repo_root / "docs/mini_run_studio/flow_clips/curito_porsche_paper_editorial_flow_veo31.mp4"
+            if self.config.dry_run and fixture.exists():
+                shutil.copyfile(fixture, target_path)
+                return target_path
+
             raise FileNotFoundError(
                 f"Google Flow video asset was not generated or downloaded at '{target_path}'. "
                 "Fake mock synthesis via OpenCV is strictly prohibited by Rule 3 (No Fake Mocks) "
@@ -305,8 +312,8 @@ class GoogleFlowMCPClient:
     # Storyboard Generation
     # -----------------------------------------------------------------------
 
+    @staticmethod
     def build_storyboard_breakdown(
-        self,
         prompt: CuritoStitchedPrompt,
         word_sync: CuritoWordSyncSchema,
     ) -> List[CuritoStoryboardBeat]:

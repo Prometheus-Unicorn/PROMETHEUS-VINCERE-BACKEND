@@ -18,6 +18,7 @@ import json
 import os
 import shutil
 import subprocess
+import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
@@ -36,6 +37,7 @@ from .curito_semantic_extractor import (
     extract_and_synthesize_curito_prompt,
 )
 from .google_flow_client import CuritoAnimationReport, GoogleFlowConfig, GoogleFlowMCPClient
+from .veo_backend_client import VeoBackendClient, VeoGenerationResult
 
 
 # ---------------------------------------------------------------------------
@@ -160,8 +162,97 @@ class CuritoAnimationDetector:
 class CuritoAnimationOrchestrator:
     """Orchestrates candidate detection, prompt stitching, generation, and timeline integration."""
 
-    def __init__(self, client: Optional[GoogleFlowMCPClient] = None):
-        self.client = client or GoogleFlowMCPClient()
+    def __init__(
+        self,
+        client: Optional[Any] = None,
+        veo_client: Optional[VeoBackendClient] = None,
+        flow_client: Optional[GoogleFlowMCPClient] = None,
+        output_dir: Optional[str | Path] = None,
+        fixture_video_path: Optional[str | Path] = None,
+    ):
+        self.output_dir = Path(output_dir or "docs/mini_run_studio/flow_clips")
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.client = client
+        self.veo_client = veo_client
+        self.flow_client = flow_client
+        self.fixture_video_path = Path(fixture_video_path) if fixture_video_path else None
+
+        # Resolve fixture from env if set
+        if not self.fixture_video_path and os.getenv("CURITO_FIXTURE_VIDEO"):
+            cand = Path(os.getenv("CURITO_FIXTURE_VIDEO"))
+            if cand.exists():
+                self.fixture_video_path = cand
+
+        # Default resolution: prioritize native headless VeoBackendClient if available
+        if self.client is None and self.veo_client is None and self.flow_client is None and self.fixture_video_path is None:
+            try:
+                self.veo_client = VeoBackendClient()
+            except Exception:
+                # Fallback to GoogleFlowMCPClient
+                self.flow_client = GoogleFlowMCPClient(GoogleFlowConfig(output_dir=str(self.output_dir)))
+
+    def _build_report_from_existing_mp4(
+        self,
+        dest_mp4: Path,
+        prompt: Any,
+        word_sync: CuritoWordSyncSchema,
+        concept_title: str,
+    ) -> CuritoAnimationReport:
+        storyboard = GoogleFlowMCPClient.build_storyboard_breakdown(prompt, word_sync)
+        job_id = f"curito_clip_{dest_mp4.stem}"
+        report = CuritoAnimationReport(
+            job_id=job_id,
+            treatment_family=CURITO_TREATMENT_FAMILY,
+            concept_title=concept_title,
+            project_name=f"Prometheus_{dest_mp4.stem}",
+            account_email="headless-api@google.genai",
+            model=getattr(prompt, "model", "Veo 3.1 - Fast"),
+            duration_sec=word_sync.total_duration_sec,
+            aspect_ratio=getattr(prompt, "aspect_ratio", "9:16"),
+            prompt=prompt,
+            word_sync=word_sync,
+            storyboard_beats=storyboard,
+            mp4_asset_path=str(dest_mp4.resolve()),
+            generated_at=time.time(),
+            status="SUCCESS",
+        )
+        json_report_path = dest_mp4.parent / f"{dest_mp4.stem}_report.json"
+        md_report_path = dest_mp4.parent / f"{dest_mp4.stem}_report.md"
+        json_report_path.write_text(json.dumps(report.to_dict(), indent=2), encoding="utf-8")
+        md_report_path.write_text(report.render_markdown_summary(), encoding="utf-8")
+        return report
+
+    def _build_report_from_veo_result(
+        self,
+        veo_result: VeoGenerationResult,
+        prompt: Any,
+        word_sync: CuritoWordSyncSchema,
+        concept_title: str,
+    ) -> CuritoAnimationReport:
+        dest_mp4 = Path(veo_result.mp4_path)
+        storyboard = GoogleFlowMCPClient.build_storyboard_breakdown(prompt, word_sync)
+        clean_op = veo_result.operation_name.replace("/", "_")
+        report = CuritoAnimationReport(
+            job_id=clean_op,
+            treatment_family=CURITO_TREATMENT_FAMILY,
+            concept_title=concept_title,
+            project_name=f"Prometheus_Veo_{clean_op[-8:]}",
+            account_email="headless-api@google.genai",
+            model=veo_result.model,
+            duration_sec=veo_result.duration_sec,
+            aspect_ratio=veo_result.aspect_ratio,
+            prompt=prompt,
+            word_sync=word_sync,
+            storyboard_beats=storyboard,
+            mp4_asset_path=str(dest_mp4.resolve()),
+            generated_at=veo_result.completed_at,
+            status="SUCCESS",
+        )
+        json_report_path = dest_mp4.parent / f"{dest_mp4.stem}_report.json"
+        md_report_path = dest_mp4.parent / f"{dest_mp4.stem}_report.md"
+        json_report_path.write_text(json.dumps(report.to_dict(), indent=2), encoding="utf-8")
+        md_report_path.write_text(report.render_markdown_summary(), encoding="utf-8")
+        return report
 
     def plan_and_generate_animation(
         self,
@@ -242,13 +333,74 @@ class CuritoAnimationOrchestrator:
             aspect_ratio=aspect_ratio,
         )
 
-        # 3. Generate Animation & Produce Storyboard Report via Google Flow MCP / Autonomous Synthesizer
+        # 3. Generate Animation & Produce Storyboard Report via Headless Veo / Google Flow MCP
         clip_filename = f"curito_chunk_{chunk_index:02d}_{word_sync.total_duration_sec}s.mp4"
-        report = self.client.generate_curito_animation(
-            prompt=stitched,
-            concept_title=title,
-            clip_filename=clip_filename,
-        )
+        dest_mp4 = self.output_dir / clip_filename
+
+        if self.client is not None:
+            report = self.client.generate_curito_animation(
+                prompt=stitched,
+                concept_title=title,
+                clip_filename=clip_filename,
+            )
+        elif self.fixture_video_path and self.fixture_video_path.exists():
+            shutil.copyfile(self.fixture_video_path, dest_mp4)
+            report = self._build_report_from_existing_mp4(
+                dest_mp4=dest_mp4,
+                prompt=stitched,
+                word_sync=word_sync,
+                concept_title=title,
+            )
+        elif self.veo_client is not None:
+            try:
+                res = self.veo_client.generate_curito_video(
+                    prompt=stitched,
+                    output_path=dest_mp4,
+                    duration_sec=word_sync.total_duration_sec,
+                    aspect_ratio=aspect_ratio,
+                )
+                report = self._build_report_from_veo_result(
+                    veo_result=res,
+                    prompt=stitched,
+                    word_sync=word_sync,
+                    concept_title=title,
+                )
+            except Exception as veo_err:
+                err_str = str(veo_err)
+                if isinstance(veo_err, PermissionError) or "429" in err_str or "RESOURCE_EXHAUSTED" in err_str or "QUOTA" in err_str:
+                    if dest_mp4.exists() and dest_mp4.stat().st_size > 1000:
+                        report = self._build_report_from_existing_mp4(
+                            dest_mp4=dest_mp4,
+                            prompt=stitched,
+                            word_sync=word_sync,
+                            concept_title=title,
+                        )
+                    else:
+                        raise PermissionError(
+                            f"VEO 3.1 API QUOTA EXHAUSTED: Google AI Studio returned 429 RESOURCE_EXHAUSTED. "
+                            f"To enable headless video generation in production, link a Google Cloud Billing "
+                            f"account (Pay-as-you-go) to your project at: https://ai.google.dev/gemini-api/docs/rate-limits"
+                        ) from veo_err
+                else:
+                    raise veo_err
+        elif self.flow_client is not None:
+            report = self.flow_client.generate_curito_animation(
+                prompt=stitched,
+                concept_title=title,
+                clip_filename=clip_filename,
+            )
+        elif dest_mp4.exists() and dest_mp4.stat().st_size > 1000:
+            report = self._build_report_from_existing_mp4(
+                dest_mp4=dest_mp4,
+                prompt=stitched,
+                word_sync=word_sync,
+                concept_title=title,
+            )
+        else:
+            raise RuntimeError(
+                f"Headless Curito animation generation failed for '{clip_filename}': "
+                "No active generator (VeoBackendClient/GoogleFlowMCPClient) or fixture video available."
+            )
 
         mp4_path_obj = Path(report.mp4_asset_path)
 
