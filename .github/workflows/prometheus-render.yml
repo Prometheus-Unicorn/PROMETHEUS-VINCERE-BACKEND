@@ -127,14 +127,17 @@ jobs:
         run: |
           if [ "${{ steps.cache-deps.outputs.cache-hit }}" != "true" ]; then
             npm install --legacy-peer-deps --prefer-offline --no-audit --no-fund
-            npm --workspace @prometheus/shared-types run build
             cd remotion-app && npm install --legacy-peer-deps --prefer-offline --no-audit --no-fund && cd ..
           fi
+          npm --workspace @prometheus/shared-types run build
+          mkdir -p node_modules/@prometheus
+          rm -rf node_modules/@prometheus/shared-types
+          ln -sf "$(pwd)/packages/shared-types" node_modules/@prometheus/shared-types || \
+          cp -a packages/shared-types node_modules/@prometheus/shared-types
           mkdir -p remotion-app/node_modules/@prometheus
-          if [ ! -e "remotion-app/node_modules/@prometheus/shared-types" ]; then
-            ln -sf "$(pwd)/packages/shared-types" remotion-app/node_modules/@prometheus/shared-types || \
-            cp -a packages/shared-types remotion-app/node_modules/@prometheus/shared-types
-          fi
+          rm -rf remotion-app/node_modules/@prometheus/shared-types
+          ln -sf "$(pwd)/packages/shared-types" remotion-app/node_modules/@prometheus/shared-types || \
+          cp -a packages/shared-types remotion-app/node_modules/@prometheus/shared-types
           mkdir -p remotion-app/public/textures
           cp -rn mini_run_pipeline/textures/* remotion-app/public/textures/ 2>/dev/null || true
 
