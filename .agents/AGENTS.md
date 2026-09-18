@@ -73,3 +73,7 @@ All agents across all sessions must subject rendered video outputs to the automa
 4. **Audio Stem Separation & Vocal Intelligibility**: Vocal clearance > 4.0:1 ducking ratio over music beds.
 No output may be reported as successful without inline pixel/metric verification artifacts demonstrating compliance.
 
+## 🚨 RULE 12: NO CONFABULATED BENCHMARKS OR RETROACTIVE EVIDENCE SUBSTITUTION
+- Never claim a speedup, latency drop, or performance improvement without an inline, empirical benchmark artifact measured from an actual run executed in the current session.
+- Never substitute theoretical/projected hardware specs (e.g. CPU core counts, vendor marketing claims) or unrelated test suites (e.g. in-memory unit tests, manifest checks) as proof of an end-to-end execution speedup.
+- Never present stale or pre-existing output artifacts (such as prior session MP4s) as evidence of a current run. If an actual render or benchmark has not yet been executed, state explicitly and upfront: 'No live render has been executed yet.' Nuanced evasion or concealing unverified assumptions is strictly prohibited.

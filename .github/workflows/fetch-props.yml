@@ -1,4 +1,4 @@
-﻿name: Fetch Props from R2
+name: Fetch Props from R2
 on:
   workflow_dispatch:
     inputs:
@@ -8,7 +8,7 @@ on:
         default: "gha_hakt_30s_pbd_1788904859"
 jobs:
   fetch:
-    runs-on: ubuntu-22.04
+    runs-on: ubicloud-standard-2
     steps:
       - uses: actions/setup-python@v5
         with:

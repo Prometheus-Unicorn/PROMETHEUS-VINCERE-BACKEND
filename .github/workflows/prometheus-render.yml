@@ -17,7 +17,7 @@ env:
 jobs:
   orchestrate:
     name: "Orchestrate pipeline"
-    runs-on: ubuntu-22.04
+    runs-on: ubicloud-standard-4
     outputs:
       job_id: ${{ steps.plan.outputs.job_id }}
       slice_matrix: ${{ steps.plan.outputs.slice_matrix }}
@@ -84,7 +84,7 @@ jobs:
   render_slice:
     name: "Slice ${{ matrix.slice_index }}"
     needs: orchestrate
-    runs-on: ubuntu-22.04
+    runs-on: ubicloud-standard-4
     container:
       image: ghcr.io/${{ github.repository_owner }}/prometheus-render:latest
       credentials:
@@ -185,7 +185,7 @@ jobs:
   stitch:
     name: "Stitch & finalise"
     needs: [orchestrate, render_slice]
-    runs-on: ubuntu-22.04
+    runs-on: ubicloud-standard-4
 
     steps:
       - name: Checkout
