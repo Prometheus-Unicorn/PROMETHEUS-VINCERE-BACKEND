@@ -33,7 +33,7 @@ jobs:
 
       - name: Pull target fixture video via Git LFS
         run: |
-          git lfs pull --include="remotion-app/public/source/MALE-BLACK-TALKING-HEAD-PODCAST.mp4"
+          git lfs pull --include="remotion-app/public/source/MALE-BLACK-TALKING-HEAD-PODCAST.mp4,remotion-app/public/source/test-video.mp4"
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5

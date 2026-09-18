@@ -237,7 +237,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Trigger 30s HAKT Cloud Render with dynamic or custom styling")
     parser.add_argument("--motif", default=None, choices=CURATED_MOTIFS, help="Brand motif palette")
     parser.add_argument("--look", default="none", choices=SUPPORTED_LOOKS, help="Cinematic 3D LUT look or 'none' for original studio Rec.709 passthrough")
-    parser.add_argument("--source", default="remotion-app/public/source/test-video.mp4", help="Path to source video")
+    parser.add_argument("--source", default="remotion-app/public/source/MALE-BLACK-TALKING-HEAD-PODCAST.mp4", help="Path to source video")
     parser.add_argument("--subject-layering", default="auto", choices=["auto", "required", "disabled"], help="Subject layering policy")
     parser.add_argument("--mood", default=None, help="Mood descriptor")
     args = parser.parse_args()

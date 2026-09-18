@@ -637,7 +637,6 @@ def main():
     git_sha = os.environ.get("GITHUB_SHA")
     if not git_sha:
         try:
-            import subprocess
             git_sha = subprocess.check_output(["git", "rev-parse", "HEAD"], stderr=subprocess.DEVNULL).decode("utf-8").strip()
         except Exception:
             git_sha = "unknown"
