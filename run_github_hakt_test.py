@@ -42,7 +42,7 @@ JOB_ID = f"gha_hakt_30s_pbd_{int(time.time())}"
 
 def build_payload(args=None) -> dict:
     selected_motif = (args.motif if args and args.motif else random.choice(CURATED_MOTIFS))
-    selected_look = (args.look if args and args.look else "none")
+    selected_look = (args.look if args and args.look != "none" else "teal_and_orange_blockbuster")
     selected_source = (args.source if args and getattr(args, "source", None) else "remotion-app/public/source/MALE-BLACK-TALKING-HEAD-PODCAST.mp4")
     selected_layering = (args.subject_layering if args and getattr(args, "subject_layering", None) else "auto")
     
@@ -52,7 +52,7 @@ def build_payload(args=None) -> dict:
         "selectedWindow": {"sourceStartMs": 0, "sourceEndMs": 30000},
         "maxClipMs": 30000,
         "silencePolicy": "preserve",
-        "parallelSlices": 6,
+        "parallelSlices": 18,
         "metadata": {
             "pipeline": "minirun",
             "jobName": "pbd_30s_hakt_gha",

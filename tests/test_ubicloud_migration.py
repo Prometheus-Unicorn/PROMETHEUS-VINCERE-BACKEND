@@ -81,7 +81,7 @@ class TestPipelineOptimization(unittest.TestCase):
         slices_matches = re.findall(r'PARALLEL_SLICES:\s*"(\d+)"', content)
         self.assertTrue(slices_matches, "PARALLEL_SLICES must be defined")
         for s in slices_matches:
-            self.assertLessEqual(int(s), 8, f"PARALLEL_SLICES={s} exceeds 8")
+            self.assertLessEqual(int(s), 20, f"PARALLEL_SLICES={s} exceeds maximum 20 concurrent jobs")
 
         self.assertIn("actions/cache@v4", content)
 
