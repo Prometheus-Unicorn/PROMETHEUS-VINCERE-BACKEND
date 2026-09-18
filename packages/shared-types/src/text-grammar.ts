@@ -115,10 +115,10 @@ export const textAnimationGrammarSchema = z.object({
   exit: textExitSchema,
   transform: z.object({
     keyframes: z.array(textTransformKeyframeSchema).default([])
-  }).default({}),
+  }).default({ keyframes: [] }),
   style: z.object({
     keyframes: z.array(textStyleKeyframeSchema).default([])
-  }).default({}),
+  }).default({ keyframes: [] }),
   sync: textSyncSchema,
   selectiveEffects: z.array(textSelectiveEffectsSchema).default([])
 });

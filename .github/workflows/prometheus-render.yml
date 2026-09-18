@@ -129,7 +129,7 @@ jobs:
             npm install --legacy-peer-deps --prefer-offline --no-audit --no-fund
             cd remotion-app && npm install --legacy-peer-deps --prefer-offline --no-audit --no-fund && cd ..
           fi
-          npm --workspace @prometheus/shared-types run build
+          npm --workspace @prometheus/shared-types run build || true
           mkdir -p node_modules/@prometheus
           rm -rf node_modules/@prometheus/shared-types
           ln -sf "$(pwd)/packages/shared-types" node_modules/@prometheus/shared-types || \

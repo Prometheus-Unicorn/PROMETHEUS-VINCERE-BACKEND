@@ -303,7 +303,7 @@ export const TypographyProfileV2Schema = z.object({
   annotations: z.array(TypographyAnnotationSchema).default([]),
   frameTreatment: TypographyFrameTreatmentSchema.optional(),
   subjectZone: TypographySubjectZoneSchema.optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type TypographyAnchor = z.infer<typeof TypographyAnchorSchema>;

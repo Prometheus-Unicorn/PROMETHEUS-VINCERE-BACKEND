@@ -192,7 +192,7 @@ export const progressiveVideoContextEventSchema = z.object({
   contextVersion: z.number().int().nonnegative(),
   contextLevel: videoContextLevelSchema,
   progress: z.number().min(0).max(100),
-  data: z.record(z.unknown()).default({})
+  data: z.record(z.string(), z.unknown()).default({})
 });
 
 export const renderGraphV2HandoffSchema = z.object({
@@ -212,10 +212,10 @@ export const renderGraphV2HandoffSchema = z.object({
     startMs: z.number().int().nonnegative(),
     endMs: z.number().int().positive(),
     track: z.string().min(1),
-    payload: z.record(z.unknown()).default({})
+    payload: z.record(z.string(), z.unknown()).default({})
   })).default([]),
-  assets: z.array(z.record(z.unknown())).default([]),
-  effects: z.array(z.record(z.unknown())).default([]),
+  assets: z.array(z.record(z.string(), z.unknown())).default([]),
+  effects: z.array(z.record(z.string(), z.unknown())).default([]),
   audio: z.object({
     status: z.enum(["gated", "released", "unavailable"]),
     releaseUrl: z.string().nullable(),
@@ -240,8 +240,8 @@ export const configurationDeltaSchema = z.object({
     operation: z.enum(["set", "merge", "remove"]),
     value: z.unknown().optional()
   })).default([]),
-  postProcessing: z.record(z.unknown()).default({}),
-  typography: z.record(z.unknown()).default({}),
+  postProcessing: z.record(z.string(), z.unknown()).default({}),
+  typography: z.record(z.string(), z.unknown()).default({}),
   temporalSync: z.object({
     timebase: z.string().min(1),
     fps: z.number().positive()
