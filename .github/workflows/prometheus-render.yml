@@ -11,13 +11,10 @@ on:
 concurrency:
   group: prometheus-render-${{ github.run_id }}
 
-env:
-  RENDER_IMAGE: ghcr.io/${{ github.repository_owner }}/prometheus-render:latest
-
 jobs:
   orchestrate:
     name: "Orchestrate pipeline"
-    runs-on: ubicloud-standard-4
+    runs-on: ubuntu-latest
     outputs:
       job_id: ${{ steps.plan.outputs.job_id }}
       slice_matrix: ${{ steps.plan.outputs.slice_matrix }}
@@ -74,7 +71,7 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_UPLOAD_BUCKET: ${{ secrets.R2_UPLOAD_BUCKET }}
           R2_PROCESSED_BUCKET: ${{ secrets.R2_PROCESSED_BUCKET }}
-          PARALLEL_SLICES: "8"
+          PARALLEL_SLICES: "6"
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           PYTHONUTF8: "1"
@@ -84,12 +81,7 @@ jobs:
   render_slice:
     name: "Slice ${{ matrix.slice_index }}"
     needs: orchestrate
-    runs-on: ubicloud-standard-4
-    container:
-      image: ghcr.io/${{ github.repository_owner }}/prometheus-render:latest
-      credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         include: ${{ fromJson(needs.orchestrate.outputs.slice_matrix) }}
@@ -99,37 +91,48 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Attach prebuilt dependencies and textures
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Python deps
+        run: pip install --quiet boto3
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: "package-lock.json"
+
+      - name: Cache node modules and Chromium
+        uses: actions/cache@v4
+        id: cache-deps
+        with:
+          path: |
+            node_modules
+            remotion-app/node_modules
+            ~/.cache/remotion
+          key: ${{ runner.os }}-remotion-cache-${{ hashFiles('package-lock.json', 'remotion-app/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-remotion-cache-
+
+      - name: Install dependencies & setup environment
         run: |
-          # ── Step 1: root workspace install + shared-types build ──────────────
-          if [ -d "/opt/prebuilt/store/root-node_modules" ]; then
-            cp -an /opt/prebuilt/store/root-node_modules/. node_modules/ 2>/dev/null || true
+          if [ "${{ steps.cache-deps.outputs.cache-hit }}" != "true" ]; then
+            npm install --legacy-peer-deps --prefer-offline --no-audit --no-fund
+            npm --workspace @prometheus/shared-types run build
+            cd remotion-app && npm install --legacy-peer-deps --prefer-offline --no-audit --no-fund && cd ..
           fi
-          npm install --legacy-peer-deps --prefer-offline --no-audit --no-fund
-          npm --workspace @prometheus/shared-types run build
-
-          # ── Step 2: remotion-app node_modules ────────────────────────────────
-          if [ ! -d "remotion-app/node_modules" ] && [ -d "/opt/prebuilt/store/remotion-app-node_modules" ]; then
-            cp -an /opt/prebuilt/store/remotion-app-node_modules/. remotion-app/node_modules/
-          fi
-          if [ ! -d "remotion-app/node_modules" ]; then
-            cd remotion-app && npm ci --legacy-peer-deps --prefer-offline --no-audit --no-fund && cd ..
-          fi
-
-          # ── Step 3: wire @prometheus/shared-types into remotion-app ──────────
           mkdir -p remotion-app/node_modules/@prometheus
           if [ ! -e "remotion-app/node_modules/@prometheus/shared-types" ]; then
-            ln -s "$(pwd)/packages/shared-types" remotion-app/node_modules/@prometheus/shared-types || \
+            ln -sf "$(pwd)/packages/shared-types" remotion-app/node_modules/@prometheus/shared-types || \
             cp -a packages/shared-types remotion-app/node_modules/@prometheus/shared-types
           fi
-
-          # ── Step 4: textures + Chromium cache ────────────────────────────────
           mkdir -p remotion-app/public/textures
           cp -rn mini_run_pipeline/textures/* remotion-app/public/textures/ 2>/dev/null || true
-          mkdir -p ~/.cache/remotion
-          if [ -d "/opt/remotion/browser" ]; then
-            cp -rn /opt/remotion/browser/* ~/.cache/remotion/ 2>/dev/null || true
-          fi
 
       - name: Download source video + props from R2
         env:
@@ -185,7 +188,7 @@ jobs:
   stitch:
     name: "Stitch & finalise"
     needs: [orchestrate, render_slice]
-    runs-on: ubicloud-standard-4
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout

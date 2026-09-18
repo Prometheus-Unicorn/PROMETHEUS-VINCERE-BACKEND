@@ -52,7 +52,7 @@ def build_payload(args=None) -> dict:
         "selectedWindow": {"sourceStartMs": 0, "sourceEndMs": 30000},
         "maxClipMs": 30000,
         "silencePolicy": "preserve",
-        "parallelSlices": 8,
+        "parallelSlices": 6,
         "metadata": {
             "pipeline": "minirun",
             "jobName": "pbd_30s_hakt_gha",
