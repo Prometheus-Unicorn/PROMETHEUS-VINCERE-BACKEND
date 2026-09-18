@@ -4336,15 +4336,17 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
             l_eff_aspect = round(l_aspect * l_z_scale, 4)
             l_sz = float(l.get("fontSizePx", 60))
             est = len(l_clean) * l_sz * l_eff_aspect
-            l["estimatedWidthPx"] = int(round(est))
-            l["est_width"] = est
             if est > max_safe_width:
                 auto_scale = round(max_safe_width / est, 4)
                 l["autoFitScale"] = auto_scale
                 l["fitScale"] = auto_scale
+                l["estimatedWidthPx"] = int(round(est * auto_scale))
+                l["est_width"] = est * auto_scale
             else:
                 l["autoFitScale"] = 1.0
                 l["fitScale"] = 1.0
+                l["estimatedWidthPx"] = int(round(est))
+                l["est_width"] = est
 
         chunk_fx = next((l.get("fxPreset") for l in rendered_layers if l.get("isHero")), hero_fx_preset)
         manifest_chunks.append({
