@@ -57,10 +57,8 @@ class EditorialPlacementRefinementsTests(unittest.TestCase):
         print("PASS_G1_COMPANION_OK")
 
     def test_cranial_negative_space_elevates_into_open_ceiling(self):
-        """When abundant headroom exists above the speaker (e.g. head top at 0.20-0.25),
-
-        cranial text center must be allowed to elevate into the upper negative space (e.g. 8%-12% Y),
-        rather than being clamped at an artificial 15%-19% floor where it gets swallowed by the hair.
+        """Cranial negative space placement must anchor in the conformant upper composition zone (15%-19% Y),
+        satisfying the 60/40 rule without tripping the ceiling sequestering circuit breaker (<15%) or head collision (>20%).
         """
         analysis = analyze_cranial_negative_space(
             subject_box={"x": 0.30, "y": 0.22, "width": 0.40, "height": 0.65},
@@ -69,9 +67,8 @@ class EditorialPlacementRefinementsTests(unittest.TestCase):
         self.assertEqual(analysis["dominantZone"], "cranial_crown")
         y_str = analysis.get("yPercent", "")
         y_val = float(y_str.replace("%", ""))
-        # Text center should elevate into the upper negative space (~9%-13%), not jammed down at 15%-19%
-        self.assertLessEqual(y_val, 13.5, f"Cranial Y {y_val}% is clamped too low down onto the head!")
-        self.assertGreaterEqual(y_val, 6.0, f"Cranial Y {y_val}% breached upper ceiling safe margin!")
+        self.assertLessEqual(y_val, 19.0, f"Cranial Y {y_val}% is too low down onto the head!")
+        self.assertGreaterEqual(y_val, 15.0, f"Cranial Y {y_val}% breached the 15% anti-sequestering ceiling floor!")
         print("PASS_G2_CRANIAL_OK")
 
     def test_companion_clause_styling_not_flat_generic(self):
