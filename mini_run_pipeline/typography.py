@@ -1044,7 +1044,7 @@ COMPANION_UPGRADE_FONTS = [
     "Outfit",
     "DM Sans",
     "Altone",
-    "Pathway Extreme",
+    "Syne",
 ]
 
 GENERIC_FALLBACK_FONTS = {"sans-serif", "serif", "system-ui", "arial", "helvetica", ""}
@@ -1097,6 +1097,8 @@ DECORATIVE_BARRED_COMPANION_FONTS = {
     "vogue",
     "antenna",
     "abril fatface",
+    "pathway extreme",
+    "pathway",
 }
 
 BARRED_COMPANION_KEYWORDS = (
@@ -1104,7 +1106,7 @@ BARRED_COMPANION_KEYWORDS = (
     "erotique", "quanton", "blaak", "foundland", "aulion", "aesthico",
     "the glamoure", "black delights", "bellavoir", "candlescript",
     "freebooter", "grand cru", "grandcru", "zt otez", "migra", "elegist",
-    "vogue", "antenna", "abril fatface"
+    "vogue", "antenna", "abril fatface", "pathway extreme"
 )
 
 
@@ -3970,11 +3972,20 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
                 style_treatment["vjkt"] = True
 
             if is_lockup_treatment:
-                letter_spacing = -0.035 if is_hero_layer else 0.005
+                letter_spacing = -0.035 if is_hero_layer else 0.03
             else:
                 letter_spacing = float(f_style.get("letter_spacing_em", 0.01))
                 if is_single_word and is_hero_layer:
                     letter_spacing = max(0.04, letter_spacing)
+
+            # Refined companion tracking & styling:
+            # Companion / secondary tiers must NEVER have cramped or zero tracking.
+            # When uppercase, require minimum 0.04em (sleek tracked caps); otherwise minimum 0.02em.
+            if not is_hero_layer and not is_layer_behind:
+                if str(casing).lower() in ("uppercase", "all_caps"):
+                    letter_spacing = max(0.04, letter_spacing)
+                else:
+                    letter_spacing = max(0.02, letter_spacing)
 
             base_size = max(1.0, float(f_style.get("size_px_base", 60)))
             vertical_margin_top = float(f_style.get("vertical_margin_top_px", 0))
@@ -4132,7 +4143,8 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
                 "fontSizePx": font_size_px,
                 "color": style_treatment["textFillColor"],
                 "casing": casing,
-                "letterSpacingEm": letter_spacing,
+                "letterSpacing": f"{round(letter_spacing, 4)}em",
+                "letterSpacingEm": round(letter_spacing, 4),
                 "lineHeight": (0.88 if is_hero_layer else 1.0) if is_lockup_treatment else float(f_style.get("line_height", 1.05)),
                 "marginTopPx": margin_top_px,
                 "marginLeftPx": margin_left_px,

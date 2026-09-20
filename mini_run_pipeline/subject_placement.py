@@ -307,7 +307,9 @@ def analyze_cranial_negative_space(
         else:
             text_x = round(max(0.35, min(0.45, head_mid_x - 0.12)), 3)
 
-        center_y = round(max(0.150, min(0.190, actual_head_top - 0.09)), 3)
+        # Elevate cleanly into open upper ceiling headroom (down to 8.5% Y),
+        # ensuring text never encroaches closer than 9.5% above actual head top.
+        center_y = round(max(0.085, min(0.190, actual_head_top - 0.095)), 3)
         x_pct_str = "50%" if round(text_x * 100, 1) == 50.0 else f"{round(text_x * 100, 1)}%"
 
         return {
@@ -379,7 +381,9 @@ def analyze_cranial_negative_space(
         else:
             text_x = round(max(0.35, min(0.45, head_mid_x - 0.12)), 3)
 
-        center_y = round(max(0.150, min(0.190, actual_head_top - 0.09)), 3)
+        # Elevate cleanly into open upper ceiling headroom (down to 8.5% Y),
+        # ensuring text never encroaches closer than 9.5% above actual head top.
+        center_y = round(max(0.085, min(0.190, actual_head_top - 0.095)), 3)
         x_pct_str = "50%" if round(text_x * 100, 1) == 50.0 else f"{round(text_x * 100, 1)}%"
 
         return {
@@ -698,10 +702,15 @@ def plan_subject_safe_placements(
                 "haloGuard": cranial_analysis.get("haloGuard", True),
             }
 
-            # Layer-level placement (Round 16 Commit 2):
-            # Only the pivot layer goes cranial/behind; the companion layer stays in the deck zone (80% Y).
+            # Layer-level placement (Round 16 Commit 2 & Editorial Placement Refinements):
+            # The companion layer stays in the natural middle-third / lower-middle field (56%-64% Y),
+            # safely below the speaker's chin and strictly above the lower deck (>= 72% Y) where microphones reside.
             companion_face_bottom = cranial_analysis.get("faceBottom")
-            deck_comp_y_str = "80%"
+            if companion_face_bottom is not None:
+                comp_y = max(0.56, min(0.64, companion_face_bottom + 0.09))
+            else:
+                comp_y = 0.60
+            deck_comp_y_str = f"{int(round(comp_y * 100)) if round(comp_y * 100, 1).is_integer() else round(comp_y * 100, 1)}%"
 
             deck_companion_placement = {
                 "xPercent": "50%",
@@ -737,7 +746,7 @@ def plan_subject_safe_placements(
             else:
                 consecutive_same_zone = 1
             prev_zone = dom_zone
-            prev_fg_y = 0.80 if has_companion else None
+            prev_fg_y = comp_y if has_companion else None
             prev_x = None
         else:
             # Foreground captions: NEVER OCCLUDE THE SPEAKER'S HEAD/FACE.
