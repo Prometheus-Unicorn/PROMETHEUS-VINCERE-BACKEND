@@ -16,6 +16,7 @@ Cinematic textures & shaders:
 
 from __future__ import annotations
 
+from datetime import datetime
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -53,6 +54,8 @@ CALLOUT_PATTERNS = [
 
 def _extract_metric_number(text: str) -> Optional[Dict[str, Any]]:
     """Inspect text for strong numerical/metric claims suitable for motion_number."""
+    text_lower = text.lower()
+
     # 1. Currency
     m_curr = re.search(r"(\$|€|£)\s*(\d+(?:,\d+)*(?:\.\d+)?)\s*([kmbtKMBT])?", text)
     if m_curr:
@@ -61,6 +64,20 @@ def _extract_metric_number(text: str) -> Optional[Dict[str, Any]]:
         unit = (m_curr.group(3) or "").upper()
         multiplier = {"K": 1_000, "M": 1_000_000, "B": 1_000_000_000, "T": 1_000_000_000_000}.get(unit, 1)
         full_value = raw_val * multiplier if unit else raw_val
+
+        # Dynamic title from narrative context
+        title = "FINANCIAL IMPACT"
+        if "revenue" in text_lower:
+            title = "REVENUE IMPACT"
+        elif "sales" in text_lower:
+            title = "TOTAL SALES"
+        elif "profit" in text_lower:
+            title = "NET PROFIT"
+        elif "spend" in text_lower or "cost" in text_lower:
+            title = "TOTAL SPEND"
+        elif "valuation" in text_lower:
+            title = "VALUATION"
+
         return {
             "type": "motion_number",
             "value": full_value,
@@ -69,7 +86,7 @@ def _extract_metric_number(text: str) -> Optional[Dict[str, Any]]:
             "suffix": unit if unit else "",
             "format": "currency",
             "texture": "liquid_glass",
-            "title": "METRIC IMPACT",
+            "title": title,
             "position": "flank_right",
         }
 
@@ -77,6 +94,18 @@ def _extract_metric_number(text: str) -> Optional[Dict[str, Any]]:
     m_pct = re.search(r"(\d+(?:,\d+)*(?:\.\d+)?)\s*%", text)
     if m_pct:
         val = float(m_pct.group(1).replace(",", ""))
+        title = "PERFORMANCE GAIN"
+        if "retention" in text_lower:
+            title = "RETENTION GAIN"
+        elif "growth" in text_lower:
+            title = "GROWTH RATE"
+        elif "conversion" in text_lower:
+            title = "CONVERSION RATE"
+        elif "margin" in text_lower:
+            title = "MARGIN EXPANSION"
+        elif "increase" in text_lower:
+            title = "MEASURED GAIN"
+
         return {
             "type": "motion_number",
             "value": val,
@@ -85,7 +114,7 @@ def _extract_metric_number(text: str) -> Optional[Dict[str, Any]]:
             "suffix": "%",
             "format": "percent",
             "texture": "liquid_glass",
-            "title": "PERFORMANCE",
+            "title": title,
             "position": "flank_right",
         }
 
@@ -93,6 +122,14 @@ def _extract_metric_number(text: str) -> Optional[Dict[str, Any]]:
     m_mult = re.search(r"\b(\d+(?:\.\d+)?)\s*[xX]\b", text)
     if m_mult:
         val = float(m_mult.group(1))
+        title = "ACCELERATION"
+        if "pipeline" in text_lower or "velocity" in text_lower:
+            title = "VELOCITY MULTIPLIER"
+        elif "scale" in text_lower or "growth" in text_lower:
+            title = "SCALE MULTIPLIER"
+        elif "efficiency" in text_lower:
+            title = "EFFICIENCY MULTIPLIER"
+
         return {
             "type": "motion_number",
             "value": val,
@@ -101,7 +138,7 @@ def _extract_metric_number(text: str) -> Optional[Dict[str, Any]]:
             "suffix": "X",
             "format": "number",
             "texture": "mesh_gradient",
-            "title": "MULTIPLIER",
+            "title": title,
             "position": "flank_right",
         }
 
@@ -135,16 +172,22 @@ def _extract_metric_number(text: str) -> Optional[Dict[str, Any]]:
     return None
 
 def _extract_comparison(text: str) -> Optional[Dict[str, Any]]:
-    """Inspect text for contrasting entities or before/after comparison."""
+    """Inspect text for contrasting entities or before/after comparison with dynamic labels."""
     # Before and after
-    if re.search(r"\b(?:before\s+and\s+after)\b", text, re.IGNORECASE):
+    m_ba = re.search(r"\b(?:before\s+and\s+after)\s*(?:of\s+)?([a-zA-Z0-9\s]{2,24})?", text, re.IGNORECASE)
+    if m_ba:
+        subject = (m_ba.group(1) or "").strip().title()
+        if subject.upper() in ("TRANSFORMATION", "EVOLUTION", "CHANGE", ""):
+            title = subject.upper() if subject else "TRANSFORMATION"
+        else:
+            title = f"{subject.upper()} EVOLUTION"
         return {
             "type": "before_after_comparison",
-            "title": "TRANSFORMATION",
+            "title": title[:24],
             "beforeLabel": "BEFORE",
-            "beforeValue": "Old Method",
+            "beforeValue": "Initial Phase",
             "afterLabel": "AFTER",
-            "afterValue": "Streamlined",
+            "afterValue": "Optimized Result",
             "texture": "liquid_glass",
             "splitRatio": 0.5,
             "position": "lower_deck",
@@ -156,13 +199,14 @@ def _extract_comparison(text: str) -> Optional[Dict[str, Any]]:
     if m_vs:
         left = m_vs.group(1).strip().title()
         right = m_vs.group(2).strip().title()
+        title = f"{left[:12].upper()} VS {right[:12].upper()}".strip()
         return {
             "type": "before_after_comparison",
-            "title": "HEAD TO HEAD",
-            "beforeLabel": left[:24],
-            "beforeValue": "Standard",
-            "afterLabel": right[:24],
-            "afterValue": "Optimized",
+            "title": title,
+            "beforeLabel": left[:20].upper(),
+            "beforeValue": left[:25],
+            "afterLabel": right[:20].upper(),
+            "afterValue": right[:25],
             "texture": "liquid_glass",
             "splitRatio": 0.5,
             "position": "lower_deck",
@@ -174,13 +218,14 @@ def _extract_comparison(text: str) -> Optional[Dict[str, Any]]:
     if m_instead:
         old_opt = m_instead.group(1).strip().title()
         new_opt = m_instead.group(2).strip().title()
+        title = f"{old_opt[:16].upper()} VS {new_opt[:16].upper()}".strip()
         return {
             "type": "before_after_comparison",
-            "title": "THE PARADIGM SHIFT",
-            "beforeLabel": "OBSOLETE",
-            "beforeValue": old_opt[:20],
-            "afterLabel": "RECOMMENDED",
-            "afterValue": new_opt[:20],
+            "title": title,
+            "beforeLabel": "INSTEAD OF",
+            "beforeValue": old_opt[:24],
+            "afterLabel": "CHOOSE",
+            "afterValue": new_opt[:24],
             "texture": "liquid_gradient",
             "splitRatio": 0.5,
             "position": "lower_deck",
@@ -192,12 +237,13 @@ def _extract_comparison(text: str) -> Optional[Dict[str, Any]]:
     if m_shift:
         old_opt = m_shift.group(1).strip().title()
         new_opt = m_shift.group(2).strip().title()
+        title = f"{old_opt[:20].upper()} ➔ {new_opt[:20].upper()}".strip()
         return {
             "type": "before_after_comparison",
-            "title": "THE PARADIGM SHIFT",
-            "beforeLabel": "OLD FOCUS",
+            "title": title,
+            "beforeLabel": "FROM",
             "beforeValue": old_opt[:24],
-            "afterLabel": "NEW FOCUS",
+            "afterLabel": "TO",
             "afterValue": new_opt[:24],
             "texture": "liquid_gradient",
             "splitRatio": 0.5,
@@ -210,11 +256,12 @@ def _extract_comparison(text: str) -> Optional[Dict[str, Any]]:
 def _extract_callout_badge(text: str) -> Optional[Dict[str, Any]]:
     """Inspect text for golden rules, pro tips, and crucial warnings."""
     text_lower = text.lower()
+    clean_sub = re.sub(r"^(?:here\s+is\s+a\s+|the\s+)+", "", text, flags=re.IGNORECASE).strip()[:48]
     if any(k in text_lower for k in ("pro tip", "protip")):
         return {
             "type": "callout_badge",
             "title": "PRO TIP",
-            "subtitle": text[:48],
+            "subtitle": clean_sub,
             "badge": "TACTICAL INSIGHT",
             "icon": "zap",
             "texture": "mesh_gradient",
@@ -224,7 +271,7 @@ def _extract_callout_badge(text: str) -> Optional[Dict[str, Any]]:
         return {
             "type": "callout_badge",
             "title": "GOLDEN RULE",
-            "subtitle": text[:48],
+            "subtitle": clean_sub,
             "badge": "NON-NEGOTIABLE",
             "icon": "star",
             "texture": "liquid_glass",
@@ -234,7 +281,7 @@ def _extract_callout_badge(text: str) -> Optional[Dict[str, Any]]:
         return {
             "type": "callout_badge",
             "title": "KEY TAKEAWAY",
-            "subtitle": text[:48],
+            "subtitle": clean_sub,
             "badge": "CORE PRINCIPLE",
             "icon": "target",
             "texture": "liquid_glass",
@@ -244,7 +291,7 @@ def _extract_callout_badge(text: str) -> Optional[Dict[str, Any]]:
         return {
             "type": "callout_badge",
             "title": "CRITICAL ALERT",
-            "subtitle": text[:48],
+            "subtitle": clean_sub,
             "badge": "ATTENTION",
             "icon": "alert",
             "texture": "liquid_glass",
@@ -252,34 +299,61 @@ def _extract_callout_badge(text: str) -> Optional[Dict[str, Any]]:
         }
     return None
 
-def _extract_calendar_widget(text: str) -> Optional[Dict[str, Any]]:
-    """Inspect text for calendar, scheduling, or agenda concepts to trigger Origin UI calendar widget."""
+def _extract_calendar_widget(text: str, context: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    """Inspect text for genuine calendar, scheduling, or agenda concepts with dynamic dates."""
     text_lower = text.lower()
+    full_context = f"{context or ''} {text_lower}".lower()
+
+    # Rhetorical rejection guard: do not trigger calendar when the speaker is rejecting schedules/calendars
+    if re.search(r"\b(?:past|beyond|stop|don't|not|never|instead\s+of|forget|cookie-cutter)\b", full_context):
+        return None
+
     calendar_keywords = ["calendar", "calendars", "schedule", "scheduling", "day planner", "agenda", "timeline"]
     if any(re.search(rf"\b{k}\b", text_lower) for k in calendar_keywords):
+        now = datetime.now()
+        month_name = now.strftime("%B")
+        year = now.year
+        for m in ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]:
+            if m.lower() in text_lower:
+                month_name = m
+                break
+
+        clean_text = re.sub(r"[^\w\s]", "", text).strip()
+        subtitle = clean_text[:45].title() if clean_text else "Strategic Timeline Planning"
+
         return {
             "type": "calendar_widget",
-            "title": "October 2026",
-            "subtitle": "Packed Calendar ≠ True Progress",
-            "badge": "CALENDAR OVERLOAD",
+            "title": f"{month_name} {year}",
+            "subtitle": subtitle,
+            "badge": "SCHEDULE MILESTONE",
             "texture": "liquid_glass",
             "position": "flank_right",
             "durationMs": 4800,
         }
     return None
 
-def _extract_time_widget(text: str) -> Optional[Dict[str, Any]]:
-    """Inspect text for finite time, time capital, or non-renewable hours to trigger Origin UI time/hourglass widget."""
+def _extract_time_widget(text: str, context: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    """Inspect text for finite time, time capital, or non-renewable hours with dynamic topic extraction."""
     text_lower = text.lower()
+    full_context = f"{context or ''} {text_lower}".lower()
+
+    # Rejection guard: statements like "time doesn't need to be managed" are priority arguments, not time management widgets
+    if re.search(r"\btime\s+(?:doesn't|does\s+not|isn't|is\s+not)\b", full_context):
+        return None
+
     if re.search(r"\btime\b", text_lower) and any(
         re.search(rf"\b{k}\b", text_lower)
         for k in ["managed", "manage", "management", "capital", "finite", "non-renewable", "allocation", "waste"]
     ):
+        m_manage = re.search(r"\b(time\s+management|time\s+allocation|finite\s+time|time\s+capital)\b", text_lower)
+        title = m_manage.group(1).title() if m_manage else "Time Allocation"
+        clean_text = re.sub(r"[^\w\s]", "", text).strip()
+        subtitle = clean_text[:45].capitalize() if clean_text else "Strategic Resource Allocation"
         return {
             "type": "time_widget",
-            "title": "Time Is Non-Renewable",
-            "badge": "FINITE CAPITAL",
-            "subtitle": "Fixed 24h allocation — zero carryover",
+            "title": title,
+            "badge": "RESOURCE ALLOCATION",
+            "subtitle": subtitle,
             "texture": "geometric_drafting",
             "position": "cranial_top",
             "imageSrc": "showcase-assets/hourglass-sand.png",
@@ -297,10 +371,21 @@ def _extract_optical_rack_focus(text: str) -> Optional[Dict[str, Any]]:
     ]):
         m_pri = re.search(r"\b(competing\s+priorities|something\s+has\s+to\s+win|inflection\s+point|focal\s+point|priorities)\b", text_lower)
         headline = m_pri.group(1).upper() if m_pri else "CINEMATIC FOCUS"
+
+        # Context-grounded dialogue subtitle, avoiding internal camera mechanics jargon
+        if "something has to win" in text_lower:
+            sub = "SOMETHING HAS TO WIN"
+        elif "priorities" in text_lower:
+            sub = "ALIGNING CRITICAL FOCUS"
+        elif "focal" in text_lower:
+            sub = "CENTER OF IMPACT"
+        else:
+            sub = "DECISIVE INFLECTION POINT"
+
         return {
             "type": "optical_rack_focus",
             "headlineText": headline,
-            "subtitleText": "PHYSICAL LENS BREATHING & KINETIC COMPRESSION",
+            "subtitleText": sub,
             "position": "fullscreen",
             "enableBloom": True,
             "enableVignette": True,
@@ -365,12 +450,16 @@ def detect_and_plan_visual_helpers(
         if idx - last_helper_idx < 2:
             continue
 
+        # Rolling sentence context window (up to 4 chunks back and 2 chunks forward)
+        window_start = max(0, idx - 4)
+        window_end = min(len(chunks), idx + 3)
+        sentence_context = " ".join(str(c.get("text", "")).strip() for c in chunks[window_start:window_end])
         prev_text = str(chunks[idx - 1].get("text", "")).strip() if idx > 0 else ""
         next_text = str(chunks[idx + 1].get("text", "")).strip() if idx + 1 < len(chunks) else ""
         context_text = f"{prev_text} {raw_text} {next_text}".strip()
 
-        # 3. Check for Time / Hourglass Widget (physical 3D asset)
-        time_w = _extract_time_widget(raw_text) or _extract_time_widget(context_text)
+        # 3. Check for Time Widget (physical 3D asset)
+        time_w = _extract_time_widget(raw_text, context=sentence_context)
         if time_w and idx - last_type_idx.get("time_widget", -999) >= 6:
             plans[idx] = time_w
             last_helper_idx = idx
@@ -378,7 +467,7 @@ def detect_and_plan_visual_helpers(
             continue
 
         # 4. Check for Calendar Widget (physical UI component)
-        cal = _extract_calendar_widget(raw_text) or _extract_calendar_widget(context_text)
+        cal = _extract_calendar_widget(raw_text, context=sentence_context)
         if cal and idx - last_type_idx.get("calendar_widget", -999) >= 6:
             plans[idx] = cal
             last_helper_idx = idx

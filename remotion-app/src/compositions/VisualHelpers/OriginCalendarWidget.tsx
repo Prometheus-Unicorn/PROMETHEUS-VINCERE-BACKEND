@@ -25,15 +25,23 @@ export interface CalendarDayCell {
  * Generates dates algorithmically based on month parameters without hardcoded mock arrays.
  */
 export const generateDynamicMonthGrid = (
-  year: number = 2026,
-  month: number = 10, // 1-indexed (10 = October)
-  selectedDay: number = 14,
-  rangeStart: number = 12,
-  rangeEnd: number = 15,
-  todayDay: number = 15
+  year?: number,
+  month?: number, // 1-indexed (1 = Jan, 12 = Dec)
+  selectedDay?: number,
+  rangeStart?: number,
+  rangeEnd?: number,
+  todayDay?: number
 ): CalendarDayCell[] => {
-  const daysInMonth = new Date(year, month, 0).getDate();
-  const firstDayOfWeek = (new Date(year, month - 1, 1).getDay() + 6) % 7; // Monday = 0
+  const now = new Date();
+  const y = year ?? now.getFullYear();
+  const m = month ?? (now.getMonth() + 1);
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const firstDayOfWeek = (new Date(y, m - 1, 1).getDay() + 6) % 7; // Monday = 0
+
+  const sDay = selectedDay ?? Math.min(daysInMonth, now.getDate());
+  const rStart = rangeStart ?? Math.max(1, sDay - 2);
+  const rEnd = rangeEnd ?? Math.min(daysInMonth, sDay + 1);
+  const tDay = todayDay ?? Math.min(daysInMonth, now.getDate());
 
   const cells: CalendarDayCell[] = [];
 
@@ -44,11 +52,11 @@ export const generateDynamicMonthGrid = (
 
   // Active month days
   for (let d = 1; d <= daysInMonth; d++) {
-    const isSelected = d === selectedDay;
-    const inRange = d >= rangeStart && d <= rangeEnd;
-    const isRangeStart = d === rangeStart;
-    const isRangeEnd = d === rangeEnd;
-    const isToday = d === todayDay;
+    const isSelected = d === sDay;
+    const inRange = d >= rStart && d <= rEnd;
+    const isRangeStart = d === rStart;
+    const isRangeEnd = d === rEnd;
+    const isToday = d === tDay;
 
     cells.push({
       day: d,
@@ -79,14 +87,18 @@ export const OriginCalendarWidget: React.FC<VisualHelperComponentProps> = ({
   const brandPrimary = palette?.hero_color || helper.primaryColor || "#38BDF8";
 
   // Parse or dynamically assign month & active range from helper properties
-  const displayTitle = helper.title || "October 2026";
-  const selectedDay = 14;
-  const rangeStart = 12;
-  const rangeEnd = 15;
+  const now = React.useMemo(() => new Date(), []);
+  const targetYear = (helper as any).year ?? now.getFullYear();
+  const targetMonth = (helper as any).month ?? (now.getMonth() + 1);
+  const selectedDay = (helper as any).selectedDay ?? now.getDate();
+  const rangeStart = (helper as any).rangeStart ?? Math.max(1, selectedDay - 2);
+  const rangeEnd = (helper as any).rangeEnd ?? Math.min(28, selectedDay + 1);
+  const defaultMonthName = now.toLocaleString("default", { month: "long" });
+  const displayTitle = helper.title || `${defaultMonthName} ${targetYear}`;
 
   const calendarDays = React.useMemo(() => {
-    return generateDynamicMonthGrid(2026, 10, selectedDay, rangeStart, rangeEnd, rangeEnd);
-  }, [selectedDay, rangeStart, rangeEnd]);
+    return generateDynamicMonthGrid(targetYear, targetMonth, selectedDay, rangeStart, rangeEnd, selectedDay);
+  }, [targetYear, targetMonth, selectedDay, rangeStart, rangeEnd]);
 
   // Card spring entry governed by SPRING_ORGANIC token
   const entrance = spring({

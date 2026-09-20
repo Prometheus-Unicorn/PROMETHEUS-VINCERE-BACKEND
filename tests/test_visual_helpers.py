@@ -12,22 +12,34 @@ from mini_run_pipeline.typography import generate_font_manifest
 
 class TestVisualHelpersEngine(unittest.TestCase):
     def test_calendar_widget_extraction(self):
-        """Phrases referencing calendars, scheduling, or planners trigger calendar_widget."""
+        """Phrases referencing calendars, scheduling, or planners trigger calendar_widget with dynamic date."""
         text_cal = "information of how to manage your calendars and how to spend"
         res_cal = _extract_calendar_widget(text_cal)
         self.assertIsNotNone(res_cal)
         self.assertEqual(res_cal["type"], "calendar_widget")
         self.assertEqual(res_cal["position"], "flank_right")
+        self.assertEqual(res_cal["badge"], "SCHEDULE MILESTONE")
+        self.assertIn("202", res_cal["title"])
+
+        # Rhetorical rejection guard: dismissing calendar advice must NOT trigger a calendar widget
+        rejection_text = "past the cookie-cutter information of how to manage your calendars"
+        self.assertIsNone(_extract_calendar_widget(rejection_text))
 
     def test_time_widget_extraction(self):
-        """Phrases emphasizing finite time and management trigger time_widget."""
-        text_time = "time doesn't need to be managed your priorities do"
+        """Phrases emphasizing finite time allocation trigger time_widget, while negative time statements are guarded."""
+        # Legitimate time allocation
+        text_time = "strategic time allocation and management across your projects"
         res_time = _extract_time_widget(text_time)
         self.assertIsNotNone(res_time)
         self.assertEqual(res_time["type"], "time_widget")
-        self.assertEqual(res_time["badge"], "FINITE CAPITAL")
+        self.assertEqual(res_time["badge"], "RESOURCE ALLOCATION")
+
+        # Negative/rejection statement must NOT trigger time widget
+        neg_time = "time doesn't need to be managed your priorities do"
+        self.assertIsNone(_extract_time_widget(neg_time))
+
     def test_before_after_comparison_extraction(self):
-        """Phrases indicating comparison or transformation trigger before_after_comparison."""
+        """Phrases indicating comparison or transformation trigger before_after_comparison with dynamic titles and labels."""
         # Case A: Before and after
         text_a = "LOOK AT THE BEFORE AND AFTER TRANSFORMATION"
         res_a = _extract_comparison(text_a)
@@ -35,20 +47,34 @@ class TestVisualHelpersEngine(unittest.TestCase):
         self.assertEqual(res_a["type"], "before_after_comparison")
         self.assertEqual(res_a["title"], "TRANSFORMATION")
 
-        # Case B: VS / Versus
+        # Case B: VS / Versus (dynamic entity title and labels)
         text_b = "Manual Outreach vs Automated Inbound"
         res_b = _extract_comparison(text_b)
         self.assertIsNotNone(res_b)
         self.assertEqual(res_b["type"], "before_after_comparison")
-        self.assertEqual(res_b["beforeLabel"], "Manual Outreach")
-        self.assertEqual(res_b["afterLabel"], "Automated Inbound")
+        self.assertEqual(res_b["beforeLabel"], "MANUAL OUTREACH")
+        self.assertEqual(res_b["afterLabel"], "AUTOMATED INBOUND")
+        self.assertEqual(res_b["title"], "MANUAL OUTRE VS AUTOMATED IN")
 
-        # Case C: Instead of
+        # Case C: Instead of (dynamic entity title and role labels)
         text_c = "Instead of guessing keywords, use high-intent buyer search terms"
         res_c = _extract_comparison(text_c)
         self.assertIsNotNone(res_c)
         self.assertEqual(res_c["type"], "before_after_comparison")
-        self.assertEqual(res_c["title"], "THE PARADIGM SHIFT")
+        self.assertEqual(res_c["beforeLabel"], "INSTEAD OF")
+        self.assertEqual(res_c["afterLabel"], "CHOOSE")
+        self.assertIn("GUESSING", res_c["title"])
+        self.assertIn("HIGH-INT", res_c["title"])
+
+        # Case D: Moving from X to Y (dynamic entity title and role labels)
+        text_d = "No, we're moving now from managing time to managing priorities."
+        res_d = _extract_comparison(text_d)
+        self.assertIsNotNone(res_d)
+        self.assertEqual(res_d["type"], "before_after_comparison")
+        self.assertEqual(res_d["beforeLabel"], "FROM")
+        self.assertEqual(res_d["afterLabel"], "TO")
+        self.assertIn("MANAGING", res_d["title"])
+        self.assertIn("PRIORITIES", res_d["title"])
 
     def test_motion_number_metric_extraction(self):
         """Numbers with currency, percentages, multipliers, or metric nouns trigger motion_number."""
