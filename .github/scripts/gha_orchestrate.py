@@ -198,6 +198,9 @@ def main():
         urllib.request.urlretrieve(src_str, local_vid)
         found_source = local_vid.exists() and local_vid.stat().st_size > 100
     elif src_str and Path(src_str).exists() and Path(src_str).is_file():
+        if Path(src_str).stat().st_size < 1000:
+            print(f"[orchestrate] Source {src_str} appears to be a git-lfs pointer, pulling via git lfs...", flush=True)
+            subprocess.run(["git", "lfs", "pull", "--include", src_str], check=False)
         print(f"[orchestrate] Using local file: {src_str}", flush=True)
         shutil.copyfile(src_str, local_vid)
         found_source = True
