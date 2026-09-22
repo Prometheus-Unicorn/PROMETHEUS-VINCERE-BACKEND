@@ -2458,6 +2458,9 @@ def _score_system_autonomous(
         elif track_arch in act_archetypes:
             storyboard_score += 0.40
             evidence.append(f"Storyline archetype affinity: '{track_arch}' matches active act progression.")
+        elif dom_arch == "educational" and any(k in track_arch for k in ("lo-fi", "chill", "lifestyle", "positive", "uplift", "pop", "motivational")):
+            storyboard_score += 0.70
+            evidence.append(f"Educational cross-genre synergy: Speech-friendly groove '{track_arch}' supports vocal clarity.")
 
         # Archetype clash penalties
         if dom_arch == "emotional" and track_intensity == "hard":
@@ -2653,11 +2656,11 @@ def plan_song_program(
             # Calibrated Softmax Temperature Sampling across Top Compatible Tracks
             top_candidates = candidates[:max(1, min(10, len(candidates)))]
             best_score = top_candidates[0]["effective_score"]
-            # All candidates within 0.50 score delta participate in seeded weighted lottery
-            eligible = [c for c in top_candidates if (best_score - c["effective_score"]) <= 0.50]
+            # All candidates within 0.65 score delta participate in seeded weighted lottery
+            eligible = [c for c in top_candidates if (best_score - c["effective_score"]) <= 0.65]
             if len(eligible) > 1:
-                # Temperature tau = 0.40 ensures strong preference for top matches while guaranteeing variety across seeds
-                tau = 0.40
+                # Temperature tau = 0.55 ensures strong preference for top matches while guaranteeing variety across seeds
+                tau = 0.55
                 weights = [math.exp((c["effective_score"] - best_score) / tau) for c in eligible]
                 total_weight = sum(weights)
                 pick = rng.uniform(0, total_weight)
@@ -2776,7 +2779,7 @@ def plan_song_program(
         "selectionNonce": nonce,
         "durationMs": duration_ms,
         "crossfadeMs": crossfade_ms,
-        "baseGainDb": float(design.get("songGainDb", -13.0)),
+        "baseGainDb": float(design.get("songGainDb", -16.0)),
         "prompt": resolved_prompt or None,
         "audioIntent": {
             "activeDomains": audio_intent.get("activeDomains", []),

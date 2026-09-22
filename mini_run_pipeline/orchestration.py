@@ -703,10 +703,10 @@ def plan_mini_run_orchestration(
         # 2. Causal Synchronized Transition SFX (Elevated, punchy, broadcast-audible)
         if p_idx == 0:
             sfx_cue = "whoosh_fast"
-            sfx_gain = -6.5
+            sfx_gain = -4.5
         else:
             sfx_cue = "slow_whoosh_reverb"
-            sfx_gain = -7.0
+            sfx_gain = -5.0
 
         sfx.append({
             "id": f"sfx-{transition_id}",
@@ -799,31 +799,40 @@ def plan_mini_run_orchestration(
         print(f"[orchestration] background planning skipped: {exc}", flush=True)
         backgrounds = []
 
+    MECHANICAL_SFX_POOL = [
+        "mechanical_click",
+        "camera_shutter_bupu",
+        "shutter_snap",
+        "shutter_clicks_v2_bupu",
+        "click_bupu",
+        "mechanical_click_bupu",
+    ]
+
     ORIGIN_PRESET_SFX_POOLS: Dict[str, List[str]] = {
         "origin_matrix_letter_rain": ["glitch_digital", "mechanical_click", "click_bupu"],
         "origin_cinematic_zoom_blur": ["whoosh_fast", "sub_impact_reverb", "impact_deep"],
         "origin_reveal_wipe": ["whoosh_slow", "slow_whoosh_reverb", "whoosh_fast"],
-        "origin_shiny_pill": ["shutter_snap", "tap_punch_bupu", "click_bupu"],
-        "origin_outline_flicker_fill": ["mechanical_click", "click_bupu", "shutter_snap"],
+        "origin_shiny_pill": ["mechanical_click", "shutter_snap", "click_bupu"],
+        "origin_outline_flicker_fill": ["mechanical_click", "shutter_clicks_v2_bupu", "shutter_snap"],
         "origin_liquid_melt": ["sub_drop", "sub_impact_reverb", "slow_whoosh_reverb"],
         "origin_wave_color_sweep": ["slow_whoosh_reverb", "charge_riser_bupu", "whoosh_slow"],
-        "origin_inkdrop_spread": ["pop_text", "tap_bupu", "click_bupu"],
+        "origin_inkdrop_spread": ["mechanical_click", "click_bupu", "shutter_snap"],
         "origin_spotlight_reveal": ["whoosh_fast", "impact_sharp", "charge_riser_bupu"],
-        "origin_ripple_wave": ["slow_whoosh_reverb", "pop_text", "tap_bupu"],
+        "origin_ripple_wave": ["slow_whoosh_reverb", "camera_shutter_bupu", "mechanical_click"],
         "origin_spiral_in": ["whoosh_slow", "riser_short", "charge_bupu"],
         "origin_fuzzy_noise_overlay": ["glitch_digital", "mechanical_click"],
         "origin_kinetic_editorial_v2": ["camera_shutter_bupu", "shutter_snap", "click_bupu"],
     }
 
     VISUAL_HELPER_SFX_POOLS: Dict[str, List[str]] = {
-        "callout_badge": ["shutter_snap", "tap_punch_bupu", "click_bupu"],
+        "callout_badge": ["camera_shutter_bupu", "shutter_snap", "mechanical_click"],
         "before_after_comparison": ["whoosh_fast", "sub_impact_reverb"],
-        "motion_number": ["mechanical_click", "pop_text"],
-        "listicle": ["click_bupu", "mechanical_click"],
-        "image_sticker": ["tap_punch_bupu", "pop_text"],
+        "motion_number": ["mechanical_click", "shutter_clicks_v2_bupu", "click_bupu"],
+        "listicle": ["click_bupu", "mechanical_click", "mechanical_click_bupu"],
+        "image_sticker": ["camera_shutter_bupu", "shutter_snap"],
     }
 
-    # 2. Intelligent Sound Orchestration for Kinetic Typography (Anti-Overfitting Multi-Category Pool)
+    # 2. Intelligent Sound Orchestration for Kinetic Typography (Mechanical & Broadcast-Audible)
     # Uses rolling history buffer to guarantee acoustic variety without repeating sounds
     recent_sfx_cues: List[str] = []
 
@@ -865,7 +874,7 @@ def plan_mini_run_orchestration(
                 "cue": hook_cue,
                 "variant": 1,
                 "triggerMs": 0,
-                "gainDb": -10.0,
+                "gainDb": -8.0,
                 "causedByChunkId": str(chunk.get("chunkIndex", 0)),
                 "causedByTreatment": "opening_hook",
             })
@@ -876,7 +885,7 @@ def plan_mini_run_orchestration(
 
         if visual_helper and isinstance(visual_helper, dict) and c_start - last_text_sfx_ms >= 420:
             vh_type = str(visual_helper.get("type", "callout_badge"))
-            vh_pool = VISUAL_HELPER_SFX_POOLS.get(vh_type, ["tap_punch_bupu", "shutter_snap", "pop_text"])
+            vh_pool = VISUAL_HELPER_SFX_POOLS.get(vh_type, MECHANICAL_SFX_POOL)
             vh_cue = _pick_diverse_sfx(vh_pool)
             variant_num = ((len(sfx) + c_idx) % 5) + 1
             peak_offset_ms = 120  # Spring overshoot / badge snap apex
@@ -886,7 +895,7 @@ def plan_mini_run_orchestration(
                 "cue": vh_cue,
                 "variant": variant_num,
                 "triggerMs": trigger_ms,
-                "gainDb": -13.5,
+                "gainDb": -8.5,
                 "causedByChunkId": str(chunk.get("chunkIndex", c_idx)),
                 "causedByVisualHelper": vh_type,
                 "visualPeakOffsetMs": peak_offset_ms,
@@ -895,7 +904,7 @@ def plan_mini_run_orchestration(
         elif origin_pool and c_start - last_text_sfx_ms >= 440:
             cue = _pick_diverse_sfx(origin_pool)
             variant_num = ((len(sfx) + c_idx) % 5) + 1
-            gain = -14.0 if ("reverb" in cue or "drop" in cue or "impact" in cue) else -17.0
+            gain = -8.5 if ("reverb" in cue or "drop" in cue or "impact" in cue) else -9.0
             peak_offset_ms = 160 if any(k in str(origin_preset) for k in ("reveal", "wipe", "melt", "liquid")) else 130
             trigger_ms = c_start + peak_offset_ms
             sfx.append({
@@ -911,7 +920,7 @@ def plan_mini_run_orchestration(
             last_text_sfx_ms = trigger_ms
         elif is_hierarchical_lockup:
             # Context-Aware Typography Acoustic Palettes:
-            # Match acoustic signature to visual typography design (Editorial Serif vs Modern Sans Display vs Cyber Tech)
+            # Tactile mechanical clicks and shutter snaps for crisp kinetic reveal
             chunk_style_repr = (
                 str(chunk.get("fontFamily", "")) + " " +
                 " ".join(str(l.get("fontFamily", "")) for l in layers) + " " +
@@ -924,14 +933,14 @@ def plan_mini_run_orchestration(
             is_tech = any(k in chunk_style_repr for k in ["mono", "jetbrains", "matrix", "crt", "code", "terminal", "cyber"])
 
             if is_serif:
-                lockup_pool = ["slow_whoosh_reverb", "whoosh_slow", "sub_impact_reverb", "shutter_snap"]
-                lockup_gain = -18.0
+                lockup_pool = ["camera_shutter_bupu", "mechanical_click", "shutter_snap", "slow_whoosh_reverb"]
+                lockup_gain = -9.0
             elif is_tech:
-                lockup_pool = ["glitch_digital", "click_bupu", "shutter_snap"]
-                lockup_gain = -16.5
+                lockup_pool = ["glitch_digital", "mechanical_click", "click_bupu", "shutter_clicks_v2_bupu"]
+                lockup_gain = -8.5
             else:
-                lockup_pool = ["shutter_snap", "tap_punch_bupu", "impact_sharp", "whoosh_fast"]
-                lockup_gain = -16.0
+                lockup_pool = ["mechanical_click", "camera_shutter_bupu", "shutter_snap", "whoosh_fast"]
+                lockup_gain = -8.0
 
             # Visual peak moment: Kinetic text spring reaches peak overshoot at +140ms after entrance
             peak_offset_ms = 140
@@ -962,14 +971,14 @@ def plan_mini_run_orchestration(
             is_tech = any(k in chunk_style_repr for k in ["mono", "jetbrains", "matrix", "crt", "code", "terminal"])
 
             if is_serif:
-                single_pool = ["whoosh_slow", "slow_whoosh_reverb", "sub_impact_reverb"]
-                single_gain = -14.0
+                single_pool = ["camera_shutter_bupu", "mechanical_click", "slow_whoosh_reverb"]
+                single_gain = -9.0
             elif is_tech:
-                single_pool = ["glitch_digital", "click_bupu"]
-                single_gain = -12.0
+                single_pool = ["glitch_digital", "mechanical_click", "click_bupu"]
+                single_gain = -8.5
             else:
-                single_pool = ["tap_punch_bupu", "shutter_snap", "impact_sharp", "whoosh_fast"]
-                single_gain = -11.0
+                single_pool = ["mechanical_click", "camera_shutter_bupu", "shutter_snap", "click_bupu"]
+                single_gain = -8.0
 
             peak_offset_ms = 110  # Rapid kinetic single-word punch apex
             trigger_ms = c_start + peak_offset_ms
@@ -1053,7 +1062,7 @@ def plan_mini_run_orchestration(
         "backgrounds": backgrounds,
         "spatialCamera3D": spatial_camera_3d,
         "pip": pip,
-        "sfx": sfx + zoom_plan.get("sfx", []),
+        "sfx": sfx,
     }
 
 
