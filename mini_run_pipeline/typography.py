@@ -1933,7 +1933,7 @@ ANIMA_RUNTIME_TREATMENTS: List[Dict[str, Any]] = [
     {"id": "origin_liquid_melt", "styles": {"kinetic", "cinematic"}, "energy": 0.50, "tier": "premium_new"},
     {"id": "origin_splitflap_board", "styles": {"kinetic", "editorial"}, "energy": 0.70, "tier": "premium_new"},
     {"id": "origin_domino_cascade", "styles": {"kinetic", "editorial"}, "energy": 0.70, "tier": "premium_new"},
-    {"id": "origin_shiny_pill", "styles": {"editorial", "cinematic", "special_ops"}, "energy": 0.45, "tier": "premium_new"},
+    {"id": "origin_kinetic_editorial_v2", "styles": {"editorial", "cinematic"}, "energy": 0.45, "tier": "premium_new"},
     {"id": "origin_ripple_wave", "styles": {"cinematic", "editorial"}, "energy": 0.50, "tier": "premium_new"},
     {"id": "popcorn_char_burst", "styles": {"kinetic", "editorial"}, "energy": 0.68, "tier": "premium_new"},
 ]
@@ -2743,7 +2743,7 @@ def _select_primary_treatment(
     }
     SPECIAL_OPS_FAMILY = {
         "origin_spotlight_reveal",
-        "origin_shiny_pill",
+        "origin_kinetic_editorial_v2",
         "real_estate_luxury_curve", "real_estate_captions",
         "multi_word_slide_up_stagger", "multiple_word_slide_up",
         "hierarchical_asymmetric_lockup", "documentary_lockup_captions", "micro_macro_kinetic_type",

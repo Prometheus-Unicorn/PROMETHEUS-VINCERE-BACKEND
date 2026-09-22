@@ -307,7 +307,10 @@ def analyze_cranial_negative_space(
         else:
             text_x = round(max(0.35, min(0.45, head_mid_x - 0.12)), 3)
 
-        center_y = round(max(0.150, min(0.190, actual_head_top - 0.09)), 3)
+        if actual_head_top >= 0.24:
+            center_y = round(max(0.150, min(0.190, actual_head_top - 0.09)), 3)
+        else:
+            center_y = round(max(0.080, min(0.120, actual_head_top - 0.075)), 3)
         x_pct_str = "50%" if round(text_x * 100, 1) == 50.0 else f"{round(text_x * 100, 1)}%"
 
         return {
@@ -317,7 +320,7 @@ def analyze_cranial_negative_space(
             "yPercent": f"{round(center_y * 100, 1)}%",
             "anchor": "center",
             "textAlign": "center",
-            "maxWidthPercent": "50%",
+            "maxWidthPercent": "85%",
             "fontTreatment": "tall_didone_arch",
             "headroomRatio": round(top_headroom, 3),
             "flankLeftRatio": round(left_flank, 3),
@@ -659,24 +662,32 @@ def plan_subject_safe_placements(
             safe_cranial_x = _clamp_safe_x_percent(cranial_analysis["xPercent"], est_width_px=behind_w)
 
             # Head Occlusion Policy Safeguard (Rule 6 / Rule 11):
-            # Behind-subject pivot must never exceed 40% head occlusion.
-            # If candidate flank placement has predicted occlusion > 30%, and cranial headroom
-            # is available (>= 0.10), fallback to cranial_crown where space above head is open.
+            # Behind-subject text must never be swallowed behind the skull or hair volume.
+            # If flank candidate overlaps head, push lateral flank outward into clear space;
+            # if cranial crown is used, elevate into genuine headroom (<= 9.5% Y) and clamp font size.
             head_top_r = float(cranial_analysis.get("headroomRatio", 0.15))
-            if dom_zone in ("flank_right_column", "flank_left_column") and head_top_r >= 0.10:
+            if dom_zone in ("flank_right_column", "flank_left_column"):
                 try:
                     cand_x_pct = float(str(safe_cranial_x).replace("%", "")) / 100.0
                     t_x0 = max(0.0, cand_x_pct * 1080.0 - behind_w / 2.0)
                     t_x1 = min(1080.0, cand_x_pct * 1080.0 + behind_w / 2.0)
                     h_x0, h_x1 = 0.35 * 1080.0, 0.65 * 1080.0
                     ix0, ix1 = max(t_x0, h_x0), min(t_x1, h_x1)
-                    if ix1 > ix0 and ((ix1 - ix0) / max(1.0, t_x1 - t_x0)) > 0.30:
-                        dom_zone = "cranial_crown"
-                        safe_cranial_x = "50%"
-                        cranial_analysis["yPercent"] = f"{round(max(0.12, min(0.19, head_top_r - 0.04)), 3) * 100:.1f}%" if head_top_r >= 0.14 else "15.0%"
-                        safe_mwp = "50%"
+                    if ix1 > ix0 and ((ix1 - ix0) / max(1.0, t_x1 - t_x0)) > 0.25:
+                        # Push flank further outward into clear lateral negative space
+                        if "left" in dom_zone:
+                            safe_cranial_x = "22%"
+                        else:
+                            safe_cranial_x = "78%"
                 except Exception:
                     pass
+            elif dom_zone == "cranial_crown":
+                # Elevate behind-subject text into true negative space above hair volume when headroom is tight
+                if head_top_r < 0.24:
+                    cranial_analysis["yPercent"] = f"{round(max(0.075, min(0.100, head_top_r - 0.11)), 3) * 100:.1f}%"
+                    safe_mwp = "85%"
+                    if behind_layer and float(behind_layer.get("fontSizePx", 180)) > 135:
+                        behind_layer["fontSizePx"] = 135.0
 
             cranial_placement = {
                 "xPercent": safe_cranial_x,
@@ -698,14 +709,14 @@ def plan_subject_safe_placements(
                 "haloGuard": cranial_analysis.get("haloGuard", True),
             }
 
-            # Layer-level placement (Round 16 Commit 2 & Editorial Placement Refinements):
-            # The companion layer stays in the natural middle-third / lower-middle field (56%-64% Y),
-            # safely below the speaker's chin and strictly above the lower deck (>= 72% Y) where microphones reside.
+            # Layer-level placement (Cinematic Middle-Third Focus):
+            # Companion captions stay centered in the middle third (55%-59% Y),
+            # comfortably below the chin (typically 52-54%) and strictly above the lower microphone deck (>= 64%).
             companion_face_bottom = cranial_analysis.get("faceBottom")
             if companion_face_bottom is not None:
-                comp_y = max(0.56, min(0.64, companion_face_bottom + 0.09))
+                comp_y = max(0.55, min(0.59, companion_face_bottom + 0.035))
             else:
-                comp_y = 0.60
+                comp_y = 0.57
             deck_comp_y_str = f"{int(round(comp_y * 100)) if round(comp_y * 100, 1).is_integer() else round(comp_y * 100, 1)}%"
 
             deck_companion_placement = {
