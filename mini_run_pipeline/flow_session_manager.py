@@ -123,6 +123,15 @@ class FlowSessionValidator:
                 except Exception:
                     pass
 
+            # Dismiss cookie consent dialogs if present
+            try:
+                consent_btn = await page.query_selector("button:has-text('Accept all'), button:has-text('I agree'), [aria-label*='Accept all' i]")
+                if consent_btn:
+                    await page.evaluate("el => el.click()", consent_btn)
+                    await page.wait_for_timeout(1000)
+            except Exception:
+                pass
+
             # 2. Landed on /about landing page -> click entry button
             if "/about" in current_url:
                 logger.info("Landed on /about, attempting to click entry button...")
@@ -140,9 +149,12 @@ class FlowSessionValidator:
                         if create_btn:
                             logger.info(f"Clicking entry button: '{sel}'")
                             try:
-                                await create_btn.click(no_wait_after=True, timeout=5000)
-                            except Exception as ce:
-                                logger.warning(f"Create button click warning: {ce}")
+                                await page.evaluate("el => el.click()", create_btn)
+                            except Exception:
+                                try:
+                                    await create_btn.click(force=True, no_wait_after=True, timeout=5000)
+                                except Exception as ce:
+                                    logger.warning(f"Create button click warning: {ce}")
                             try:
                                 await page.wait_for_url(lambda u: "/about" not in u, timeout=8000)
                             except Exception:
@@ -175,9 +187,12 @@ class FlowSessionValidator:
                         if btn:
                             logger.info(f"Found account item with selector '{sel}', clicking...")
                             try:
-                                await btn.click(no_wait_after=True, timeout=5000)
-                            except Exception as be:
-                                logger.warning(f"Account button click warning: {be}")
+                                await page.evaluate("el => el.click()", btn)
+                            except Exception:
+                                try:
+                                    await btn.click(force=True, no_wait_after=True, timeout=5000)
+                                except Exception as be:
+                                    logger.warning(f"Account button click warning: {be}")
                             try:
                                 await page.wait_for_url(lambda u: "accountchooser" not in u, timeout=8000)
                             except Exception:

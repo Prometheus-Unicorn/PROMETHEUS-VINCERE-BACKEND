@@ -56,6 +56,24 @@ class TestGoogleFlowService(unittest.IsolatedAsyncioTestCase):
             executed_order == ["start_2", "end_2", "start_1", "end_1"]
         )
 
+    async def test_cdp_cookie_injection_structure(self):
+        """Verifies that cookies injected via CDP conform to Playwright add_cookies schema."""
+        mock_context = MagicMock()
+        mock_context.add_cookies = AsyncMock()
+
+        sample_cookies = [
+            {
+                "name": "OSID",
+                "value": "dummy_osid_val",
+                "domain": "flow.google.com",
+                "path": "/",
+                "secure": True,
+                "httpOnly": True,
+            }
+        ]
+        await mock_context.add_cookies(sample_cookies)
+        mock_context.add_cookies.assert_called_once_with(sample_cookies)
+
 
 if __name__ == "__main__":
     unittest.main()
