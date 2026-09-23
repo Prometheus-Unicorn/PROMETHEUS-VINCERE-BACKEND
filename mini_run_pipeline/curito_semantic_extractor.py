@@ -600,26 +600,30 @@ _RESPONSE_SCHEMA: Dict[str, Any] = {
 def _parse_llm_json(raw_text: str) -> Any:
     """Robustly isolates and parses JSON from an LLM response regardless of markdown fences or commentary."""
     cleaned = raw_text.strip()
+    start_brace = cleaned.find("{")
+    start_bracket = cleaned.find("[")
+
+    start_idx = -1
+    if start_brace != -1 and (start_bracket == -1 or start_brace < start_bracket):
+        start_idx = start_brace
+    elif start_bracket != -1:
+        start_idx = start_bracket
+
+    if start_idx != -1:
+        decoder = json.JSONDecoder()
+        try:
+            obj, _ = decoder.raw_decode(cleaned[start_idx:])
+            return obj
+        except Exception:
+            pass
+
     if cleaned.startswith("```"):
         parts = cleaned.split("```")
         if len(parts) >= 2:
             cleaned = parts[1]
             if cleaned.startswith("json"):
                 cleaned = cleaned[4:]
-    start_brace = cleaned.find("{")
-    start_bracket = cleaned.find("[")
-    if start_brace != -1 and (start_bracket == -1 or start_brace < start_bracket):
-        start_idx = start_brace
-        end_idx = cleaned.rfind("}")
-    elif start_bracket != -1:
-        start_idx = start_bracket
-        end_idx = cleaned.rfind("]")
-    else:
-        start_idx = -1
-        end_idx = -1
-    if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
-        cleaned = cleaned[start_idx : end_idx + 1]
-    return json.loads(cleaned)
+    return json.loads(cleaned.strip())
 
 
 def extract_and_synthesize_curito_prompt(
