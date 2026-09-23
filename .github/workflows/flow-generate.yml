@@ -44,7 +44,6 @@ jobs:
         with:
           name: flow-generation-artifacts
           path: |
-            docs/mini_run_studio/flow_clips/*.mp4
-            docs/mini_run_studio/flow_clips/*.receipt.json
-            docs/mini_run_studio/flow_clips/*.json
+            docs/mini_run_studio/flow_clips/gha_flow_output.mp4
+            docs/mini_run_studio/flow_clips/gha_flow_output.receipt.json
             scratch/*.png

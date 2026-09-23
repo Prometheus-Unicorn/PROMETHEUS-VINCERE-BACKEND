@@ -264,6 +264,10 @@ class GoogleFlowServerClient:
                 "--disable-web-security",
                 "--allow-running-insecure-content",
                 "--dns-result-order=ipv4first",
+                "--no-first-run",
+                "--no-default-browser-check",
+                "--disable-sync",
+                "--disable-features=AppBoundEncryptionProvider,AppBoundEncryption",
             ]
             if sys.platform == "win32":
                 browser_args.extend(["--use-gl=angle", "--use-angle=d3d11"])
@@ -344,7 +348,9 @@ class GoogleFlowServerClient:
                             await asyncio.sleep(2.0)
 
                     # Step 4: Session Validation
-                    await FlowSessionValidator.validate_session_active(page, timeout_ms=20000)
+                    await FlowSessionValidator.validate_session_active(page, timeout_ms=45000)
+                    if len(context.pages) > 1:
+                        page = context.pages[-1]
 
                     # Step 5: Snapshot Initial Video Sources
                     initial_sources = await FlowJobTracker.snapshot_video_sources(page)
