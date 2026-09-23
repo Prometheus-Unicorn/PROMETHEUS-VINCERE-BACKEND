@@ -177,7 +177,7 @@ class DiffusionPromptPolicyCritic:
 
         # 7. Kinetic Manner Dynamics Check (Adverb / Velocity coupling)
         has_manner_dynamics = any(w in lowered for w in [
-            "torque", "decelerating", "rotational", "firmly", "mechanical snap",
+            "torque", "decelerating", "deceleration", "rotational", "firmly", "mechanical snap",
             "locked-state", "micro-drift", "engagement", "settling", "rotates",
             "snaps into", "seals", "overtakes", "tilts", "locks out"
         ])
@@ -233,7 +233,8 @@ class DiffusionPromptPolicyCritic:
             "propelled upward", "initiates from", "drawn into frame", "submerged off-screen",
             "defocus crystallization", "entrance", "slap-drop", "friction slide", "bottom-up emergence",
             "elevates forward", "sliding from", "upward travel", "rises into", "enters horizontally",
-            "unpopulated", "off-screen position"
+            "unpopulated", "off-screen position", "optical rack-focus", "rack-focus", "stops down",
+            "bokeh accretion", "anamorphic bokeh", "elevates upward"
         ])
         has_static_duck = any(w in lowered for w in [
             "sits suspended from frame 0", "rests at center frame from frame 0",
@@ -277,6 +278,7 @@ class DiffusionPromptPolicyCritic:
         "slapdrop_bounce",
         "off_axis_3d_swing",
         "polarizing_bevel_elevation",
+        "optical_rack_focus_bokeh_accretion",
     }
 
     @classmethod
@@ -448,12 +450,13 @@ MANDATORY OPERATING POLICIES:
 11. MANDATORY DYNAMIC ENTRANCE-INTO-VIEW TREATMENT (ZERO FRAME-ZERO STATIC DUCKS):
     The hero asset MUST NOT sit statically on screen at frame 0.0s like a stationary prop or 'sitting duck'.
     The scene MUST open on an unpopulated/pristine graphic canvas, and the hero asset must dynamically animate into view during the initial 0.0s to 1.5s phase before the sync hit.
-    Select one of the five canonical entrance treatments from ENTRANCE_TREATMENT_REGISTRY:
+    Select one of the six canonical entrance treatments from ENTRANCE_TREATMENT_REGISTRY:
     - "vertical_bottom_emergence" → DEFAULT. Initiates submerged below lower frame boundary (Y: +120% viewport), propelled upward along vertical axis with steep power4.out cubic deceleration curve, decelerating sharply into locked centroid position.
     - "lateral_friction_slide" → Enters horizontally from outer frame flank at high initial velocity with zero ease-in, sliding across the surface against 70% physical friction before braking into centroid position.
     - "slapdrop_bounce" → Drops into frame along Z-axis with exponential decrescendo from above, executing a 2-frame 3% scale squash on impact with subtle contact bounce and pendulum settle.
     - "off_axis_3d_swing" → Pinned pivot anchor at outer edge, swinging in with dynamic 3D perspective from 80 degrees off-axis down to 0 degrees before locking.
     - "polarizing_bevel_elevation" → Elevates forward along Z-axis into frame with chamfered metallic bevel borders catching edge highlights.
+    - "optical_rack_focus_bokeh_accretion" → S-Tier anamorphic rack-focus reveal (f/1.2 cinema lens stopping down from blur: 36px / brightness: 1.6 to tack-sharp clarity, focal plane Z-depth stagger, bottom-up elevation with directional motion blur, 1.8s–4.5s breathing micro-drift hold, and 4.5s–6.0s defocus dissolve outro).
     Output the selected ID in "selected_entrance_treatment_id". Incorporate its dynamic entrance description into the [6. Dynamic Entrance Kinematic Spec] and ensure the assembled diffusion prompt explicitly narrates the transition from unpopulated canvas to dynamic entrance into position.
 """
 
@@ -558,7 +561,8 @@ _RESPONSE_SCHEMA: Dict[str, Any] = {
             "description": (
                 "ID of the selected canonical entrance treatment from ENTRANCE_TREATMENT_REGISTRY. "
                 "Must be exactly one of: 'vertical_bottom_emergence', 'lateral_friction_slide', "
-                "'slapdrop_bounce', 'off_axis_3d_swing', 'polarizing_bevel_elevation'. "
+                "'slapdrop_bounce', 'off_axis_3d_swing', 'polarizing_bevel_elevation', "
+                "'optical_rack_focus_bokeh_accretion'. "
                 "Default: 'vertical_bottom_emergence'. Select based on artifact structure and narrative force."
             ),
         },
@@ -702,7 +706,7 @@ def extract_and_synthesize_curito_prompt(
   "negative_prompt": "doubling, duplicate mesh, split silhouette, ghosting, asset duplication, UV sliding, texture swimming, UV seam tear, unphysical merging, snapping back, 180-degree flip, yaw flip, choppy rotation, perspective inversion, orientation swap, reversing direction, morphing geometry, warping metal, changing teeth, shifting bitting, mutating parts, melting, table, tabletop, desk, furniture, countertop, wooden desk, office room, floorboards, text, words, typography, UI elements, buttons, screen, monitor",
   "selected_background_treatment_id": "one of: halftone_raster_canvas | luxury_editorial_sunlight_canvas | newspaper_collage_deconstructed | modern_swiss_museum_poster",
   "selected_motion_treatment_id": "one of: defocus_blur | gaussian_blur | bokeh_blur | slow_shutter_motion_blur",
-  "selected_entrance_treatment_id": "one of: vertical_bottom_emergence | lateral_friction_slide | slapdrop_bounce | off_axis_3d_swing | polarizing_bevel_elevation",
+  "selected_entrance_treatment_id": "one of: vertical_bottom_emergence | lateral_friction_slide | slapdrop_bounce | off_axis_3d_swing | polarizing_bevel_elevation | optical_rack_focus_bokeh_accretion",
   "downstream_remotion_overlay": {
     "primary_headline": "UPPERCASE HEADLINE",
     "secondary_italic_subline": "Italic serif phrase",
@@ -728,16 +732,12 @@ def extract_and_synthesize_curito_prompt(
         }
     }
 
-    # Model priority: highest capability first, graceful fallback to faster variants.
     # Model priority: gemini-3.8-flash (highest-tier, near-instantaneous reasoning)
-    # with automatic fallback across the full Gemini family: 3.7-flash -> 3.5-flash -> 2.5-flash -> 2.5-flash-lite -> 2.5-pro.
+    # with automatic ultra-low-latency fallback cascade: gemini-3-flash-preview -> gemini-2.5-flash.
     PREFERRED_MODELS = [
         "gemini-3.8-flash",
-        "gemini-3.7-flash",
-        "gemini-3.5-flash",
+        "gemini-3-flash-preview",
         "gemini-2.5-flash",
-        "gemini-2.5-flash-lite",
-        "gemini-2.5-pro",
     ]
     if model_name in PREFERRED_MODELS:
         candidate_models = PREFERRED_MODELS[PREFERRED_MODELS.index(model_name):]

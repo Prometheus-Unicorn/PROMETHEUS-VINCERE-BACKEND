@@ -171,35 +171,51 @@ class FlowSessionValidator:
             except Exception:
                 pass
 
+            if "rejected" in current_url:
+                scratch_dir = REPO_ROOT / "scratch"
+                scratch_dir.mkdir(parents=True, exist_ok=True)
+                screenshot_path = scratch_dir / "flow_auth_rejected.png"
+                try:
+                    await page.screenshot(path=str(screenshot_path), timeout=5000)
+                except Exception:
+                    pass
+                raise PermissionError(
+                    f"Google Bot Detection rejected sign-in ({current_url}). "
+                    "Pre-authenticated fresh session cookies required. "
+                    f"Diagnostic screenshot saved to {screenshot_path}"
+                )
+
             if "accountchooser" in current_url or has_acct_elem:
                 logger.info("Landed on Google Account Chooser. Attempting automatic account selection...")
                 account_selectors = [
-                    "[data-email*='ipsasummagnitudo'], [data-identifier*='ipsasummagnitudo']",
-                    "div:has-text('ipsasummagnitudo@gmail.com'), li:has-text('ipsasummagnitudo@gmail.com')",
-                    "[data-email], [data-identifier]",
+                    "[data-email*='ipsasummagnitudo']",
+                    "[data-identifier*='ipsasummagnitudo']",
+                    "div:has-text('ipsasummagnitudo@gmail.com')",
+                    "li:has-text('ipsasummagnitudo@gmail.com')",
+                    "[data-email]",
+                    "[data-identifier]",
                     "div[role='link']:has(div[data-email])",
                     "li:has([data-email])",
                     "ul li:first-child",
                 ]
-                for sel in account_selectors:
-                    try:
-                        btn = await page.wait_for_selector(sel, timeout=3000)
-                        if btn:
-                            logger.info(f"Found account item with selector '{sel}', clicking...")
+                combined_selector = ", ".join(account_selectors)
+                try:
+                    btn = await page.wait_for_selector(combined_selector, timeout=3000)
+                    if btn:
+                        logger.info("Found account item, clicking...")
+                        try:
+                            await page.evaluate("el => el.click()", btn)
+                        except Exception:
                             try:
-                                await page.evaluate("el => el.click()", btn)
-                            except Exception:
-                                try:
-                                    await btn.click(force=True, no_wait_after=True, timeout=5000)
-                                except Exception as be:
-                                    logger.warning(f"Account button click warning: {be}")
-                            try:
-                                await page.wait_for_url(lambda u: "accountchooser" not in u, timeout=8000)
-                            except Exception:
-                                await page.wait_for_timeout(2000)
-                            break
-                    except Exception:
-                        continue
+                                await btn.click(force=True, no_wait_after=True, timeout=5000)
+                            except Exception as be:
+                                logger.warning(f"Account button click warning: {be}")
+                        try:
+                            await page.wait_for_url(lambda u: "accountchooser" not in u, timeout=8000)
+                        except Exception:
+                            await page.wait_for_timeout(2000)
+                except Exception:
+                    pass
 
             # 4. Google ServiceLogin in progress -> wait for redirect
             current_url = page.url

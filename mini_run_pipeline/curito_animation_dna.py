@@ -703,11 +703,11 @@ CURITO_GENOME_LIBRARY: Dict[str, CuritoGenome] = {
         category=CATEGORY_SCENE_ASSET_BREAKDOWN,
         name="Scene 5: 3D Studio Showcase Z-Depth Cutout (0:10-0:14)",
         dna_snippet=(
-            "Isolated cutout of modern white Porsche 911 with driver door ajar centered in lower third over perspective floor ellipse, "
-            "high-key overhead softbox casting gradient reflection lines along shoulder panels, car translating subtly toward viewer, "
-            "headline 'Iconic Design' scaled large across upper-mid third sliding behind the car roof demonstrating physical Z-depth layering"
+            "Isolated cutout of precision mechanical dual-beam balance instrument centered in lower third over perspective floor ellipse, "
+            "high-key overhead softbox casting gradient reflection lines along polished brass bevels, instrument translating subtly toward viewer, "
+            "headline scaled large across upper-mid third sliding behind the vertical fulcrum pillar demonstrating physical Z-depth layering"
         ),
-        tags=["scene_5", "studio_showcase", "car_cutout", "door_ajar", "z_depth", "overhead_softbox", "porsche_ref"],
+        tags=["scene_5", "studio_showcase", "balance_scale", "mechanical_cutout", "z_depth", "overhead_softbox", "editorial_ref"],
         subfamily=FAMILY_SCENE_BREAKDOWN,
         archetype="editorial_luxury",
     ),
@@ -717,10 +717,10 @@ CURITO_GENOME_LIBRARY: Dict[str, CuritoGenome] = {
         name="Scene 6: Triptych Halftone Stagger Slide (0:14-0:17)",
         dna_snippet=(
             "Three-column vertical backdrop strips with halftone screen textures creating back-contrast, full-width side-profile cutout "
-            "of Porsche GT3 RS with carbon wing in foreground with rim lighting on roofline, columns stagger-sliding down by 30px, "
-            "foreground vehicle sliding left-to-right into frame with hard snap deceleration"
+            "of high-precision horological escapement mechanism in foreground with rim lighting on gear teeth, columns stagger-sliding down by 30px, "
+            "foreground mechanism sliding left-to-right into frame with hard snap deceleration"
         ),
-        tags=["scene_6", "triptych", "halftone", "stagger_slide", "gt3_rs", "side_profile", "porsche_ref"],
+        tags=["scene_6", "triptych", "halftone", "stagger_slide", "escapement", "side_profile", "editorial_ref"],
         subfamily=FAMILY_SCENE_BREAKDOWN,
         archetype="editorial_luxury",
     ),
@@ -729,11 +729,11 @@ CURITO_GENOME_LIBRARY: Dict[str, CuritoGenome] = {
         category=CATEGORY_SCENE_ASSET_BREAKDOWN,
         name="Scene 7: Top-Down Vertical Drive (0:18-0:21)",
         dna_snippet=(
-            "Isolated bird's-eye orthographic cut of white Porsche GT3 RS with carbon bonnet stripes and massive wing, four corner framing ticks, "
-            "orthographic top-down lighting casting clean even drop shadow on both sides of chassis, words 'This isn't Just A car It's a Statement' "
-            "positioned orthogonally around vehicle hull, vehicle driving vertically along Y-axis from center to top edge as surrounding text reveals sequentially"
+            "Isolated bird's-eye orthographic cut of micro-machined Geneva indexing mechanism with precision radial slots, four corner framing ticks, "
+            "orthographic top-down lighting casting clean even drop shadow on both sides of chassis, "
+            "indexing wheel driving vertically along Y-axis from center to top edge as surrounding geometry locks into detent"
         ),
-        tags=["scene_7", "top_down", "vertical_drive", "orthographic", "bonnet_stripes", "orthogonal_text", "porsche_ref"],
+        tags=["scene_7", "top_down", "vertical_drive", "orthographic", "geneva_indexer", "radial_slots", "editorial_ref"],
         subfamily=FAMILY_SCENE_BREAKDOWN,
         archetype="editorial_luxury",
     ),
@@ -742,11 +742,11 @@ CURITO_GENOME_LIBRARY: Dict[str, CuritoGenome] = {
         category=CATEGORY_SCENE_ASSET_BREAKDOWN,
         name="Scene 8: Brand Lockup & Aerodynamic Sweep (0:21-0:23)",
         dna_snippet=(
-            "Center-locked brand identity featuring vector 'Porsche' logotype and italic subtext 'There is no Substitute', "
+            "Center-locked editorial monogram identity and delicate italic subtext, "
             "aerodynamic curved vector ribbon sweeping across frame from top-right to bottom-center with dynamic whip-pan settle, "
             "high-contrast black typography with soft ambient occlusion drop shadow against pure off-white (#ECECEC) canvas"
         ),
-        tags=["scene_8", "brand_lockup", "logotype", "aero_ribbon", "whip_pan_settle", "substitute", "porsche_ref"],
+        tags=["scene_8", "brand_lockup", "logotype", "aero_ribbon", "whip_pan_settle", "editorial_ref"],
         subfamily=FAMILY_SCENE_BREAKDOWN,
         archetype="editorial_luxury",
     ),
@@ -1263,6 +1263,28 @@ ENTRANCE_TREATMENT_REGISTRY: Dict[str, EntranceTreatment] = {
         ],
         archetype="editorial_luxury",
     ),
+    # ── ET-06 ─────────────────────────────────────────────────────────────────
+    "optical_rack_focus_bokeh_accretion": EntranceTreatment(
+        id="optical_rack_focus_bokeh_accretion",
+        name="Optical Rack-Focus Reveal & Anamorphic Bokeh Accretion (S-Tier)",
+        dna_snippet=(
+            "The scene opens on an unpopulated, pristine graphic canvas in extreme optical defocus. "
+            "At frame 0, an ultra-wide aperture anamorphic cinema lens (f/1.2 equivalent) stops down from total defocus "
+            "(blur: 36px, brightness: 1.6) into tack-sharp clarity as the hero asset elevates upward along the Y-axis "
+            "with steep power4.out cubic deceleration and directional motion blur, resolving into locked centroid position "
+            "with shallow depth-of-field stratification, followed by a breathing micro-drift hold from 1.8s to 4.5s, "
+            "and resolving into an optical defocus dissolve outro past 4.5s"
+        ),
+        tags=[
+            "entrance", "rack_focus", "anamorphic", "bokeh", "dof", "stratification",
+            "f1.2", "bottom_up", "breathing_hold", "defocus_outro", "s_tier"
+        ],
+        use_cases=[
+            "High-cinema prestige, editorial documentaries, optical revelation moments",
+            "Complex micro-machined assemblies, precision optics, horological mechanisms, tungsten instrumentation",
+        ],
+        archetype="editorial_documentary",
+    ),
 }
 
 
@@ -1543,7 +1565,7 @@ class CuritoPromptStitcher:
             is_curito_paper = False
         else:
             # Auto: detect from metaphor, genomes, or tags
-            curito_cues = {"curito", "porsche", "editorial", "paper", "white", "swiss", "canvas", "75", "design"}
+            curito_cues = {"curito", "editorial", "paper", "white", "swiss", "canvas", "design", "typography", "monologue"}
             metaphor_words = set(re.findall(r"\w+", subject_metaphor.lower()))
             if metaphor_words.intersection(curito_cues) or any(g.archetype == "editorial_luxury" for g in [vis_genome, lit_genome, scene_genome]):
                 is_curito_paper = True
