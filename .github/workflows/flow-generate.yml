@@ -47,3 +47,4 @@ jobs:
             docs/mini_run_studio/flow_clips/*.mp4
             docs/mini_run_studio/flow_clips/*.receipt.json
             docs/mini_run_studio/flow_clips/*.json
+            scratch/*.png

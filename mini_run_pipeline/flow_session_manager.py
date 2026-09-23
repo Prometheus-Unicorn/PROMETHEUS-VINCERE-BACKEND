@@ -106,7 +106,30 @@ class FlowSessionValidator:
                 current_url = page.url
                 logger.info(f"Navigated after create click: {current_url}")
 
-        if "accounts.google.com" in current_url or "signin" in current_url:
+        if "accountchooser" in current_url:
+            logger.info("Landed on Google Account Chooser. Attempting automatic account selection...")
+            account_selectors = [
+                "[data-email*='ipsasummagnitudo'], [data-identifier*='ipsasummagnitudo']",
+                "div:has-text('ipsasummagnitudo@gmail.com'), li:has-text('ipsasummagnitudo@gmail.com')",
+                "[data-email], [data-identifier]",
+                "div[role='link']:has(div[data-email])",
+                "li:has([data-email])",
+                "ul li:first-child",
+            ]
+            for sel in account_selectors:
+                try:
+                    btn = await page.wait_for_selector(sel, timeout=3000)
+                    if btn:
+                        logger.info(f"Found account item with selector '{sel}', clicking...")
+                        await btn.click()
+                        await page.wait_for_timeout(8000)
+                        current_url = page.url
+                        logger.info(f"Navigated after account selection: {current_url}")
+                        break
+                except Exception:
+                    continue
+
+        if ("accounts.google.com" in current_url or "signin" in current_url) and "accountchooser" not in current_url:
             scratch_dir = REPO_ROOT / "scratch"
             scratch_dir.mkdir(parents=True, exist_ok=True)
             screenshot_path = scratch_dir / "flow_auth_challenge.png"
