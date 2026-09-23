@@ -260,6 +260,8 @@ class GoogleFlowServerClient:
                 "--ignore-gpu-blocklist",
                 "--enable-gpu-rasterization",
                 "--disable-blink-features=AutomationControlled",
+                "--disable-web-security",
+                "--allow-running-insecure-content",
                 "--dns-result-order=ipv4first",
             ]
             if sys.platform == "win32":
@@ -277,6 +279,7 @@ class GoogleFlowServerClient:
                 "user_data_dir": str(self.config.profile_dir.resolve()),
                 "headless": self.config.headless,
                 "args": browser_args,
+                "accept_downloads": True,
                 "viewport": {
                     "width": self.config.viewport_width,
                     "height": self.config.viewport_height,
@@ -289,6 +292,27 @@ class GoogleFlowServerClient:
                 context = await p.chromium.launch_persistent_context(**launch_kwargs)
                 try:
                     page = context.pages[0] if context.pages else await context.new_page()
+
+                    # CDP download directory setup for direct file stream writing
+                    try:
+                        cdp = await context.new_cdp_session(page)
+                        await cdp.send("Page.setDownloadBehavior", {
+                            "behavior": "allow",
+                            "downloadPath": str(output_path.parent.resolve()),
+                        })
+                    except Exception as cdp_err:
+                        logger.debug(f"CDP download behavior: {cdp_err}")
+
+                    # Browser download event listener
+                    async def on_download(download):
+                        try:
+                            logger.info(f"Browser download event received: {download.suggested_filename}")
+                            await download.save_as(str(output_path))
+                            logger.info(f"Saved download to {output_path}")
+                        except Exception as dl_err:
+                            logger.warning(f"Download save_as failed: {dl_err}")
+
+                    page.on("download", on_download)
 
                     # Network media response sniffer
                     sniffed_media_urls: List[str] = []

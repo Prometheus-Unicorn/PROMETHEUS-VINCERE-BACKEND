@@ -705,10 +705,14 @@ def extract_and_synthesize_curito_prompt(
 
     # Model priority: highest capability first, graceful fallback to faster variants.
     # Model priority: gemini-3.8-flash (highest-tier, near-instantaneous reasoning)
-    # with automatic fallback to gemini-2.5-flash.
+    # with automatic fallback across the full Gemini family: 3.7-flash -> 3.5-flash -> 2.5-flash -> 2.5-flash-lite -> 2.5-pro.
     PREFERRED_MODELS = [
         "gemini-3.8-flash",
+        "gemini-3.7-flash",
+        "gemini-3.5-flash",
         "gemini-2.5-flash",
+        "gemini-2.5-flash-lite",
+        "gemini-2.5-pro",
     ]
     if model_name in PREFERRED_MODELS:
         candidate_models = PREFERRED_MODELS[PREFERRED_MODELS.index(model_name):]

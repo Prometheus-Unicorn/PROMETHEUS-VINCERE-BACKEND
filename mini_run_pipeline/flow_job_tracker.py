@@ -86,9 +86,22 @@ class FlowJobTracker:
             for v in videos:
                 src = await v.get_attribute("src")
                 if src and src not in initial_sources:
-                    if "blob:" in src or "storage.googleapis" in src or "http" in src:
+                    if "blob:" in src or "storage.googleapis" in src or "flow" in src or "googlevideo" in src or "http" in src:
                         logger.info(f"[{elapsed}s] Verified new video asset detected: {src[:75]}...")
                         return src
+
+            # Fallback DOM property check for currentSrc / src set via JS
+            try:
+                dom_vids = await page.evaluate('''() => {
+                    return Array.from(document.querySelectorAll('video')).map(v => v.src || v.currentSrc).filter(Boolean);
+                }''')
+                for d_src in dom_vids:
+                    if d_src and d_src not in initial_sources:
+                        if "blob:" in d_src or "storage.googleapis" in d_src or "flow" in d_src or "googlevideo" in d_src or "http" in d_src:
+                            logger.info(f"[{elapsed}s] Verified new video asset detected via DOM property: {d_src[:75]}...")
+                            return d_src
+            except Exception:
+                pass
 
             # Extract percentage progress from UI cards
             progress_pct = await page.evaluate('''() => {
@@ -104,6 +117,14 @@ class FlowJobTracker:
 
             if progress_pct:
                 logger.info(f"[{elapsed}s] Google Flow Render Progress: {progress_pct}")
+                if progress_pct == "100%":
+                    # Render complete on Google Flow servers: activate card to mount video in DOM
+                    await asyncio.sleep(2.0)
+                    try:
+                        await page.mouse.dblclick(300, 200)
+                        await asyncio.sleep(1.0)
+                    except Exception:
+                        pass
             elif elapsed % 20 == 0:
                 logger.info(f"[{elapsed}s] Waiting for generative render queue...")
 
@@ -136,43 +157,90 @@ class FlowVideoDownloader:
     ) -> Dict[str, Any]:
         """Downloads the video file and validates its physical attributes."""
         dest_path = Path(dest_path)
-        dest_path.parent.mkdir(parents=True, exist_ok=True)
+        dest_dir = dest_path.parent
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        existing_mp4s = set(dest_dir.glob("*.mp4"))
 
         logger.info(f"Downloading video to {dest_path}...")
 
-        # 1. Try download button and handle 720p dropdown menu
-        downloaded = False
-        dl_btn = await page.query_selector(
-            "button:has-text('Download'), [aria-label*='download' i], button:has(mat-icon:has-text('download'))"
-        )
-        if dl_btn:
-            try:
-                await dl_btn.click()
-                await page.wait_for_timeout(1000)
+        # If dest_path was already populated by background download listener, verify directly
+        if dest_path.exists() and dest_path.stat().st_size > 50000:
+            downloaded = True
+        else:
+            downloaded = False
 
-                # Look for 720p menu item in popover / dropdown
-                dl_720p = await page.query_selector(
-                    "[role='menuitem']:has-text('720p'), button:has-text('720p'), button:has-text('Original size')"
-                )
-                if dl_720p and await dl_720p.is_visible():
-                    logger.info("Found 720p Original size option, initiating browser download...")
-                    async with page.expect_download(timeout=20000) as dl_info:
-                        await dl_720p.click()
-                    dl = await dl_info.value
-                    await dl.save_as(str(dest_path))
-                    downloaded = True
-                    logger.info("Downloaded via 720p menu browser download event.")
-                else:
-                    async with page.expect_download(timeout=10000) as dl_info:
-                        await dl_btn.click()
-                    dl = await dl_info.value
-                    await dl.save_as(str(dest_path))
-                    downloaded = True
-                    logger.info("Downloaded directly via toolbar download button.")
-            except Exception as dl_err:
-                logger.warning(f"Browser download event failed or timed out: {dl_err}")
+        # 1. Try download button (editor view or card toolbar)
+        if not downloaded:
+            dl_btn = await page.query_selector(
+                "button[aria-label*='Download' i], [mattooltip*='Download' i], button:has(mat-icon:has-text('download')), [role='menuitem']:has-text('Download'), button:has-text('Download')"
+            )
+            if not dl_btn:
+                # If still on grid, activate newest card to open editor view
+                try:
+                    await page.mouse.dblclick(300, 200)
+                    await page.wait_for_timeout(2000)
+                    dl_btn = await page.query_selector(
+                        "button[aria-label*='Download' i], [mattooltip*='Download' i], button:has(mat-icon:has-text('download')), [role='menuitem']:has-text('Download'), button:has-text('Download')"
+                    )
+                except Exception:
+                    pass
 
-        # 2. Try sniffed media URLs from network stream
+            if dl_btn:
+                try:
+                    await dl_btn.click()
+                    await page.wait_for_timeout(1000)
+
+                    # Look for 720p menu item in popover / dropdown
+                    dl_720p = await page.query_selector(
+                        "[role='menuitem']:has-text('720p'), button:has-text('720p'), button:has-text('Original size'), [role='menuitem']:has-text('Original')"
+                    )
+                    if dl_720p and await dl_720p.is_visible():
+                        logger.info("Found 720p Original size option, clicking...")
+                        try:
+                            async with page.expect_download(timeout=10000) as dl_info:
+                                await dl_720p.click()
+                            dl = await dl_info.value
+                            await dl.save_as(str(dest_path))
+                            downloaded = True
+                            logger.info("Downloaded via 720p menu browser download event.")
+                        except Exception:
+                            # If expect_download times out, CDP or stream download handler picks it up
+                            pass
+                    else:
+                        try:
+                            async with page.expect_download(timeout=5000) as dl_info:
+                                await dl_btn.click()
+                            dl = await dl_info.value
+                            await dl.save_as(str(dest_path))
+                            downloaded = True
+                            logger.info("Downloaded directly via toolbar download button.")
+                        except Exception:
+                            pass
+                except Exception as dl_err:
+                    logger.warning(f"Browser download button trigger: {dl_err}")
+
+        # 2. Check for CDP-saved files in dest_dir
+        if not downloaded or not dest_path.exists() or dest_path.stat().st_size == 0:
+            for _ in range(12):
+                cr_files = list(dest_dir.glob("*.crdownload"))
+                if cr_files:
+                    await asyncio.sleep(0.5)
+                    continue
+                new_mp4s = [f for f in dest_dir.glob("*.mp4") if f != dest_path and f not in existing_mp4s]
+                if not new_mp4s:
+                    new_mp4s = [f for f in dest_dir.glob("*.mp4") if f != dest_path and f.stat().st_size > 10000]
+                if new_mp4s:
+                    newest = max(new_mp4s, key=lambda f: f.stat().st_mtime)
+                    if newest.stat().st_size > 10000:
+                        import shutil
+                        if newest != dest_path:
+                            shutil.copy(newest, dest_path)
+                        downloaded = True
+                        logger.info(f"Retrieved CDP-downloaded file: {newest.name} ({dest_path.stat().st_size:,} bytes)")
+                        break
+                await asyncio.sleep(0.2)
+
+        # 3. Try sniffed media URLs from network stream
         if not downloaded or not dest_path.exists() or dest_path.stat().st_size == 0:
             if sniffed_media_urls:
                 logger.info(f"Attempting download from {len(sniffed_media_urls)} network-sniffed media URLs...")
@@ -189,7 +257,7 @@ class FlowVideoDownloader:
                     except Exception as s_err:
                         logger.warning(f"Failed fetching sniffed URL {url[:60]}: {s_err}")
 
-        # 3. Fallback: Context HTTP request fetch with video_url
+        # 4. Fallback: Context HTTP request fetch with video_url
         if not downloaded or not dest_path.exists() or dest_path.stat().st_size == 0:
             if video_url:
                 try:
@@ -203,7 +271,7 @@ class FlowVideoDownloader:
                 except Exception as req_err:
                     logger.warning(f"Context request fetch failed: {req_err}")
 
-        # 4. Deterministic verification
+        # 5. Deterministic verification
         if not dest_path.exists() or dest_path.stat().st_size == 0:
             raise FileNotFoundError(f"Failed saving video to {dest_path}")
 

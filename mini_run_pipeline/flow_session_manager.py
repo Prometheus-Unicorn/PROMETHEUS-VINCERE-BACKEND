@@ -27,8 +27,9 @@ class FlowProcessManager:
     """Manages Chrome processes, cleans stale SingletonLock files, and sanitizes state."""
 
     @staticmethod
-    def cleanup_stale_locks(profile_dir: Path) -> None:
+    def cleanup_stale_locks(profile_dir: Path | str) -> None:
         """Removes orphaned Chromium lock files that cause ProcessSingleton crashes."""
+        profile_dir = Path(profile_dir)
         lock_names = ["SingletonLock", "SingletonSocket", "SingletonCookie"]
         for name in lock_names:
             lock_file = profile_dir / name

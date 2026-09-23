@@ -136,6 +136,39 @@ class TestFlowJobTracker(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(meta["height"], 1280)
         mock_dl_720p.click.assert_called_once()
 
+    @patch("mini_run_pipeline.flow_job_tracker.cv2.VideoCapture")
+    async def test_video_downloader_cdp_file_retrieval(self, mock_cv2):
+        mock_cap = MagicMock()
+        mock_cap.isOpened.return_value = True
+        mock_cap.get.side_effect = lambda prop: {
+            cv2.CAP_PROP_FRAME_WIDTH: 720,
+            cv2.CAP_PROP_FRAME_HEIGHT: 1280,
+            cv2.CAP_PROP_FPS: 24.0,
+            cv2.CAP_PROP_FRAME_COUNT: 192,
+        }.get(prop, 0)
+        mock_cv2.return_value = mock_cap
+
+        mock_page = MagicMock()
+        mock_page.query_selector = AsyncMock(return_value=None)
+        mock_page.wait_for_timeout = AsyncMock()
+
+        # Simulate CDP writing a new mp4 file into the folder
+        cdp_file = self.temp_dir / "cdp_downloaded_render.mp4"
+        cdp_file.write_bytes(b"cdp-stream-bytes" * 5000)
+
+        dest_file = self.temp_dir / "final_target.mp4"
+        meta = await FlowVideoDownloader.download_and_verify(
+            page=mock_page,
+            video_url="",
+            dest_path=dest_file,
+            context=MagicMock(),
+        )
+        self.assertTrue(dest_file.exists())
+        self.assertEqual(meta["width"], 720)
+        self.assertEqual(meta["height"], 1280)
+        self.assertEqual(dest_file.stat().st_size, cdp_file.stat().st_size)
+
 
 if __name__ == "__main__":
     unittest.main()
+
