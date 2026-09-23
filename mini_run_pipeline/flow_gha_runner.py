@@ -253,6 +253,12 @@ def main() -> None:
         auth_key_hex=auth_key,
     )
 
+    # Synchronize fresh repository cookies into profile directory if present
+    repo_cookies = REPO_ROOT / "config" / "flow_cookies.json"
+    if repo_cookies.exists():
+        shutil.copyfile(repo_cookies, profile_dir / "flow_cookies.json")
+        logger.info(f"Synchronized fresh authentication cookies to {profile_dir / 'flow_cookies.json'}")
+
     # Ingest transcript
     if args.transcript_json and Path(args.transcript_json).exists():
         with open(args.transcript_json, "r", encoding="utf-8") as f:
