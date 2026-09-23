@@ -353,6 +353,14 @@ class GoogleFlowServerClient:
                     page.on("response", on_response)
 
                     # Step 3: Resilient Navigation
+                    # Hydrate domain cookies and session root first
+                    logger.info("Establishing Google Flow domain session...")
+                    try:
+                        await page.goto("https://flow.google.com/", timeout=45000, wait_until="commit")
+                        await asyncio.sleep(5.0)
+                    except Exception as e_root:
+                        logger.warning(f"Root domain navigation warning: {e_root}")
+
                     logger.info(f"Navigating to workspace: {self.config.workspace_url}")
                     for attempt in range(1, 4):
                         try:
