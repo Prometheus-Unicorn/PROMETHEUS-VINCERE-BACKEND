@@ -11,6 +11,8 @@ import {editTypographyStyleIdSchema} from "./edit-sessions/types";
 import type {EditSessionManager} from "./edit-sessions/service";
 import type {EditSessionStore} from "./edit-sessions/store";
 import type {R2TransferService} from "./integrations/r2";
+import {sanitizeSegment} from "./integrations/r2";
+import {resolveAuthScope, SecurityViolationError} from "./gateway/security";
 import {createJosephUploadPipeline, type JosephUploadPipeline} from "./upload/joseph-upload-pipeline";
 import type {JosephProfile} from "./director/orchestrator";
 
@@ -67,6 +69,14 @@ const buildSessionUrls = (sessionId: string): {
 };
 
 const createProcessErrorResponse = (error: unknown): {statusCode: number; body: {error: string}} => {
+  if (error instanceof SecurityViolationError) {
+    return {
+      statusCode: 403,
+      body: {
+        error: error.message
+      }
+    };
+  }
   const message = error instanceof Error ? error.message : String(error);
   const statusCode = error instanceof QueueBacklogLimitError || error instanceof QueueConfigurationError || /not configured/i.test(message) ? 503 : 400;
   return {
@@ -239,15 +249,28 @@ export const registerUploadRoutes = async (
   app.post("/api/upload-url", async (req, reply) => {
     try {
       const input = uploadUrlRequestSchema.parse((req.body ?? {}) as UploadUrlRequest);
-      const result = await r2Service.createUploadUrl(input);
+      const authScope = resolveAuthScope(req.headers.authorization);
+
+      // ANTI-IDOR / ANTI-PARAMETER-TAMPERING:
+      // Derive userId strictly from verified session if authenticated.
+      // Explicitly ignore and override any client/model-suggested userId parameter.
+      const effectiveUserId = authScope.authenticated
+        ? authScope.userId
+        : (input.userId ? sanitizeSegment(input.userId, "anonymous") : "anonymous");
+
+      const result = await r2Service.createUploadUrl({
+        ...input,
+        userId: effectiveUserId
+      });
       reply.code(201);
       return {
         ...result,
         method: "PUT"
       };
     } catch (error) {
+      const isSecurity = error instanceof SecurityViolationError;
       const message = error instanceof Error ? error.message : String(error);
-      reply.code(/not configured/i.test(message) ? 503 : 400);
+      reply.code(isSecurity ? 403 : (/not configured/i.test(message) ? 503 : 400));
       return {
         error: message
       };
@@ -257,6 +280,22 @@ export const registerUploadRoutes = async (
   app.post("/api/process", async (req, reply) => {
     try {
       const input = processRequestSchema.parse(req.body ?? {});
+      const authScope = resolveAuthScope(req.headers.authorization);
+
+      // ANTI-IDOR / ANTI-PARAMETER-TAMPERING:
+      // Derive userId and tenantId strictly from verified session if authenticated.
+      const effectiveUserId = authScope.authenticated
+        ? authScope.userId
+        : (input.userId ? sanitizeSegment(input.userId, "anonymous") : null);
+
+      // If authenticated, prevent cross-user key access (e.g. attempting to process uploads/victim/...)
+      if (authScope.authenticated && input.key.startsWith("uploads/")) {
+        const expectedPrefix = `uploads/${authScope.userId}/`;
+        if (!input.key.startsWith(expectedPrefix)) {
+          throw new SecurityViolationError("Access denied: Cannot access or process storage assets belonging to another user.");
+        }
+      }
+
       const bucket = input.bucket?.trim() || env.R2_UPLOAD_BUCKET.trim();
       if (bucket !== env.R2_UPLOAD_BUCKET.trim()) {
         throw new Error(`bucket must match the configured upload bucket (${env.R2_UPLOAD_BUCKET.trim()}).`);
@@ -274,7 +313,8 @@ export const registerUploadRoutes = async (
           source: "r2",
           r2Bucket: bucket,
           r2Key: input.key,
-          r2UserId: input.userId ?? null,
+          r2UserId: effectiveUserId,
+          r2TenantId: authScope.authenticated ? authScope.tenantId : null,
           r2ContentType: input.contentType ?? null,
           r2MediaUrl: publicMediaUrl
         }

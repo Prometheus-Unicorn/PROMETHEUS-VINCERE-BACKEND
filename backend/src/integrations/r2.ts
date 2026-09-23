@@ -52,9 +52,12 @@ export type R2TransferService = {
 
 const trimTrailingSlash = (value: string): string => value.replace(/\/+$/, "");
 
-const sanitizeSegment = (value: string, fallback: string): string => {
+export const sanitizeSegment = (value: string, fallback: string): string => {
   const cleaned = value.trim().replace(/[^a-zA-Z0-9._-]/g, "_");
-  return cleaned.length > 0 ? cleaned : fallback;
+  if (!cleaned || cleaned === ".." || cleaned === "." || cleaned.includes("..")) {
+    return fallback;
+  }
+  return cleaned;
 };
 
 const sanitizeFileName = (value: string): string => {
