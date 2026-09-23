@@ -101,8 +101,11 @@ class FlowSessionValidator:
             logger.info("Landed on /about, attempting to click 'Create with Google Flow'...")
             create_btn = await page.query_selector("button:has-text('Create with Google Flow'), a:has-text('Create with Google Flow')")
             if create_btn:
-                await create_btn.click()
-                await page.wait_for_timeout(5000)
+                try:
+                    await create_btn.click(no_wait_after=True, timeout=5000)
+                except Exception as ce:
+                    logger.warning(f"Create button click warning: {ce}")
+                await page.wait_for_timeout(6000)
                 current_url = page.url
                 logger.info(f"Navigated after create click: {current_url}")
 
@@ -121,7 +124,10 @@ class FlowSessionValidator:
                     btn = await page.wait_for_selector(sel, timeout=3000)
                     if btn:
                         logger.info(f"Found account item with selector '{sel}', clicking...")
-                        await btn.click()
+                        try:
+                            await btn.click(no_wait_after=True, timeout=5000)
+                        except Exception as be:
+                            logger.warning(f"Account button click warning: {be}")
                         await page.wait_for_timeout(8000)
                         current_url = page.url
                         logger.info(f"Navigated after account selection: {current_url}")
