@@ -216,8 +216,9 @@ export const getRenderJobStatusTool: ToolDefinition<
     }
 
     // ANTI-IDOR ENFORCEMENT:
-    // Verify that the requesting tenant owns this job before exposing status
-    if (ctx.authenticated && record.tenantId !== ctx.tenantId) {
+    // Verify that the requesting tenant owns this job before exposing status.
+    // Prevent unauthenticated or cross-tenant access to tenant-scoped jobs.
+    if (record.tenantId !== ctx.tenantId || (!ctx.authenticated && record.tenantId !== "tenant_sandbox_default")) {
       throw new SecurityViolationError("Access denied: You do not have authorization to view this job record.");
     }
 

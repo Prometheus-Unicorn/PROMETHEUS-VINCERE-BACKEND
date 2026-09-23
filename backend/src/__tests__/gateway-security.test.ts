@@ -71,6 +71,12 @@ describe("Prometheus Gateway Security & Isolation Engine", () => {
     await expect(
       getRenderJobStatusTool.execute({ jobId: created.jobId }, tenantB)
     ).rejects.toThrow(SecurityViolationError);
+
+    // Unauthenticated guest attempts to read Tenant A's job -> MUST ALSO FAIL WITH SECURITY VIOLATION
+    const unauthenticatedGuest = resolveAuthScope(undefined);
+    await expect(
+      getRenderJobStatusTool.execute({ jobId: created.jobId }, unauthenticatedGuest)
+    ).rejects.toThrow(SecurityViolationError);
   });
 
   // 3. UNRESTRICTED PATH TRAVERSAL DEFENSE TEST
