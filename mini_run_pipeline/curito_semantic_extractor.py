@@ -597,9 +597,30 @@ _RESPONSE_SCHEMA: Dict[str, Any] = {
 }
 
 
-# ---------------------------------------------------------------------------
-# Execution Function
-# ---------------------------------------------------------------------------
+def _parse_llm_json(raw_text: str) -> Any:
+    """Robustly isolates and parses JSON from an LLM response regardless of markdown fences or commentary."""
+    cleaned = raw_text.strip()
+    if cleaned.startswith("```"):
+        parts = cleaned.split("```")
+        if len(parts) >= 2:
+            cleaned = parts[1]
+            if cleaned.startswith("json"):
+                cleaned = cleaned[4:]
+    start_brace = cleaned.find("{")
+    start_bracket = cleaned.find("[")
+    if start_brace != -1 and (start_bracket == -1 or start_brace < start_bracket):
+        start_idx = start_brace
+        end_idx = cleaned.rfind("}")
+    elif start_bracket != -1:
+        start_idx = start_bracket
+        end_idx = cleaned.rfind("]")
+    else:
+        start_idx = -1
+        end_idx = -1
+    if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+        cleaned = cleaned[start_idx : end_idx + 1]
+    return json.loads(cleaned)
+
 
 def extract_and_synthesize_curito_prompt(
     transcript_chunks: List[Dict[str, Any]],
@@ -755,13 +776,8 @@ def extract_and_synthesize_curito_prompt(
     if not res_json:
         raise RuntimeError(f"All semantic extraction model attempts failed: {last_err}")
 
-    raw_text = res_json["candidates"][0]["content"]["parts"][0]["text"].strip()
-    if raw_text.startswith("```"):
-        raw_text = raw_text.split("```")[1]
-        if raw_text.startswith("json"):
-            raw_text = raw_text[4:]
-        raw_text = raw_text.strip()
-    extracted = json.loads(raw_text)
+    raw_text = res_json["candidates"][0]["content"]["parts"][0]["text"]
+    extracted = _parse_llm_json(raw_text)
     if isinstance(extracted, list) and len(extracted) > 0:
         extracted = extracted[0]
 
@@ -826,13 +842,8 @@ def extract_and_synthesize_curito_prompt(
                     print(f"Refinement attempt with {active_model} returned HTTP {resp.status_code}", flush=True)
                     continue
                 refine_res = resp.json()
-                raw_text = refine_res["candidates"][0]["content"]["parts"][0]["text"].strip()
-                if raw_text.startswith("```"):
-                    raw_text = raw_text.split("```")[1]
-                    if raw_text.startswith("json"):
-                        raw_text = raw_text[4:]
-                    raw_text = raw_text.strip()
-                refined_extracted = json.loads(raw_text)
+                raw_text = refine_res["candidates"][0]["content"]["parts"][0]["text"]
+                refined_extracted = _parse_llm_json(raw_text)
                 if isinstance(refined_extracted, list) and len(refined_extracted) > 0:
                     refined_extracted = refined_extracted[0]
                 new_prompt = refined_extracted.get("assembled_diffusion_prompt", "")
