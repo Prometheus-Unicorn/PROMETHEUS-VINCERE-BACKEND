@@ -11,6 +11,7 @@ import type {EditSessionEvent, EditSessionManager} from "./service";
 import type {EditSessionStore} from "./store";
 import type {JosephProfile} from "../director/orchestrator";
 import type {JosephUploadPipeline} from "../upload/joseph-upload-pipeline";
+import {resolveAuthScope, SecurityViolationError} from "../gateway/security";
 
 const writeSseEvent = (reply: FastifyReply, event: EditSessionEvent): void => {
   reply.raw.write(`event: ${event.type}\n`);
@@ -20,6 +21,36 @@ const writeSseEvent = (reply: FastifyReply, event: EditSessionEvent): void => {
 export const resolveSseAccessControlOrigin = (originHeader?: string | null): string | null => {
   const trimmed = originHeader?.trim() ?? "";
   return trimmed.length > 0 ? trimmed : null;
+};
+
+export const assertSessionOwnership = (
+  session: {metadata?: Record<string, unknown>},
+  authorizationHeader?: string
+): void => {
+  const sessionTenantId = typeof session.metadata?.tenantId === "string"
+    ? session.metadata.tenantId
+    : typeof session.metadata?.r2TenantId === "string"
+      ? session.metadata.r2TenantId
+      : null;
+
+  const sessionUserId = typeof session.metadata?.userId === "string"
+    ? session.metadata.userId
+    : typeof session.metadata?.r2UserId === "string"
+      ? session.metadata.r2UserId
+      : null;
+
+  if (sessionTenantId || sessionUserId) {
+    const authScope = resolveAuthScope(authorizationHeader);
+    if (!authScope.authenticated) {
+      throw new SecurityViolationError("Access denied: Authentication required to access this edit session.");
+    }
+    if (sessionTenantId && authScope.tenantId !== sessionTenantId) {
+      throw new SecurityViolationError("Access denied: You do not have authorization to access this edit session.");
+    }
+    if (sessionUserId && authScope.userId !== sessionUserId) {
+      throw new SecurityViolationError("Access denied: You do not have authorization to access this edit session.");
+    }
+  }
 };
 
 export const registerEditSessionRoutes = async (
@@ -114,6 +145,7 @@ export const registerEditSessionRoutes = async (
         throw new Error("pipeline='joseph' requires an explicit josephProfile.");
       }
       const pipelineJobId = `${pipeline}:${runNonce}`;
+      const authScope = resolveAuthScope(req.headers.authorization);
       const session = await manager.createSession({
         sourceFilename,
         captionProfileId: fields.captionProfileId,
@@ -125,7 +157,10 @@ export const registerEditSessionRoutes = async (
           uploadedFromBrowser: Boolean(uploadedFilePath),
           sourceDisplayName: sourceFilename,
           pipeline,
-          pipelineJobId
+          pipelineJobId,
+          ...(authScope.authenticated
+            ? {userId: authScope.userId, tenantId: authScope.tenantId}
+            : {})
         }
       });
 
@@ -212,7 +247,18 @@ export const registerEditSessionRoutes = async (
 
   app.post("/api/edit-sessions", async (req, reply) => {
     try {
-      const session = await manager.createSession(req.body);
+      const authScope = resolveAuthScope(req.headers.authorization);
+      const rawBody = (req.body as Record<string, unknown> | null | undefined) ?? {};
+      const metadata = (rawBody.metadata as Record<string, unknown> | null | undefined) ?? {};
+      const session = await manager.createSession({
+        ...rawBody,
+        metadata: {
+          ...metadata,
+          ...(authScope.authenticated
+            ? {userId: authScope.userId, tenantId: authScope.tenantId}
+            : {})
+        }
+      });
       reply.code(201);
       return {
         ...session,
@@ -226,7 +272,8 @@ export const registerEditSessionRoutes = async (
         }
       };
     } catch (error) {
-      reply.code(400);
+      const isSecurity = error instanceof SecurityViolationError;
+      reply.code(isSecurity ? 403 : 400);
       return {
         error: error instanceof Error ? error.message : String(error)
       };
@@ -236,11 +283,14 @@ export const registerEditSessionRoutes = async (
   app.post("/api/edit-sessions/:id/upload-complete", async (req, reply) => {
     try {
       const params = req.params as {id: string};
+      const existing = await manager.getSession(params.id);
+      assertSessionOwnership(existing, req.headers.authorization);
       const session = await manager.completeUpload(params.id, req.body);
       reply.code(202);
       return session;
     } catch (error) {
-      reply.code(400);
+      const isSecurity = error instanceof SecurityViolationError;
+      reply.code(isSecurity ? 403 : 400);
       return {
         error: error instanceof Error ? error.message : String(error)
       };
@@ -250,11 +300,14 @@ export const registerEditSessionRoutes = async (
   app.post("/api/edit-sessions/:id/preview/start", async (req, reply) => {
     try {
       const params = req.params as {id: string};
+      const existing = await manager.getSession(params.id);
+      assertSessionOwnership(existing, req.headers.authorization);
       const session = await manager.startPreview(params.id, req.body);
       reply.code(202);
       return session;
     } catch (error) {
-      reply.code(400);
+      const isSecurity = error instanceof SecurityViolationError;
+      reply.code(isSecurity ? 403 : 400);
       return {
         error: error instanceof Error ? error.message : String(error)
       };
@@ -264,9 +317,12 @@ export const registerEditSessionRoutes = async (
   app.get("/api/edit-sessions/:id/preview", async (req, reply) => {
     try {
       const params = req.params as {id: string};
+      const session = await manager.getSession(params.id);
+      assertSessionOwnership(session, req.headers.authorization);
       return await manager.getPreview(params.id);
     } catch (error) {
-      reply.code(404);
+      const isSecurity = error instanceof SecurityViolationError;
+      reply.code(isSecurity ? 403 : 404);
       return {
         error: error instanceof Error ? error.message : String(error)
       };
@@ -276,11 +332,14 @@ export const registerEditSessionRoutes = async (
   app.get("/api/edit-sessions/:id/preview-manifest", async (req, reply) => {
     try {
       const params = req.params as {id: string};
+      const session = await manager.getSession(params.id);
+      assertSessionOwnership(session, req.headers.authorization);
       return await manager.getPreviewManifest(params.id, {
         fontBaseUrl: resolveRequestOrigin(req)
       });
     } catch (error) {
-      reply.code(404);
+      const isSecurity = error instanceof SecurityViolationError;
+      reply.code(isSecurity ? 403 : 404);
       return {
         error: error instanceof Error ? error.message : String(error)
       };
@@ -291,6 +350,7 @@ export const registerEditSessionRoutes = async (
     try {
       const params = req.params as {id: string};
       const session = await manager.getSession(params.id);
+      assertSessionOwnership(session, req.headers.authorization);
       const manifestPath = typeof session.metadata.josephManifestPath === "string"
         ? session.metadata.josephManifestPath.trim()
         : "";
@@ -317,7 +377,8 @@ export const registerEditSessionRoutes = async (
       reply.header("Cache-Control", "no-store");
       return previewManifest;
     } catch (error) {
-      reply.code(404);
+      const isSecurity = error instanceof SecurityViolationError;
+      reply.code(isSecurity ? 403 : 404);
       return {
         error: error instanceof Error ? error.message : String(error)
       };
@@ -328,6 +389,7 @@ export const registerEditSessionRoutes = async (
     try {
       const params = req.params as {id: string};
       const session = await manager.getSession(params.id);
+      assertSessionOwnership(session, req.headers.authorization);
       const renderJobId = typeof session.metadata.josephRenderJobId === "string"
         ? session.metadata.josephRenderJobId.trim()
         : "";
@@ -336,7 +398,8 @@ export const registerEditSessionRoutes = async (
       }
       return reply.redirect(`/api/v1/render/jobs/${encodeURIComponent(renderJobId)}`);
     } catch (error) {
-      reply.code(404);
+      const isSecurity = error instanceof SecurityViolationError;
+      reply.code(isSecurity ? 403 : 404);
       return {
         error: error instanceof Error ? error.message : String(error)
       };
@@ -346,12 +409,15 @@ export const registerEditSessionRoutes = async (
   app.get("/api/edit-sessions/:id/preview-artifact", async (req, reply) => {
     try {
       const params = req.params as {id: string};
+      const session = await manager.getSession(params.id);
+      assertSessionOwnership(session, req.headers.authorization);
       const asset = await manager.getPreviewArtifact(params.id);
       reply.header("Content-Type", asset.contentType);
       reply.header("Cache-Control", "no-store");
       return reply.send(createReadStream(asset.filePath));
     } catch (error) {
-      reply.code(404);
+      const isSecurity = error instanceof SecurityViolationError;
+      reply.code(isSecurity ? 403 : 404);
       return {
         error: error instanceof Error ? error.message : String(error)
       };
@@ -361,9 +427,12 @@ export const registerEditSessionRoutes = async (
   app.get("/api/edit-sessions/:id/status", async (req, reply) => {
     try {
       const params = req.params as {id: string};
-      return await manager.getSession(params.id);
+      const session = await manager.getSession(params.id);
+      assertSessionOwnership(session, req.headers.authorization);
+      return session;
     } catch (error) {
-      reply.code(404);
+      const isSecurity = error instanceof SecurityViolationError;
+      reply.code(isSecurity ? 403 : 404);
       return {
         error: error instanceof Error ? error.message : String(error)
       };
@@ -373,11 +442,14 @@ export const registerEditSessionRoutes = async (
   app.post("/api/edit-sessions/:id/render", async (req, reply) => {
     try {
       const params = req.params as {id: string};
+      const existing = await manager.getSession(params.id);
+      assertSessionOwnership(existing, req.headers.authorization);
       const session = await manager.startRender(params.id, req.body);
       reply.code(202);
       return session;
     } catch (error) {
-      reply.code(400);
+      const isSecurity = error instanceof SecurityViolationError;
+      reply.code(isSecurity ? 403 : 400);
       return {
         error: error instanceof Error ? error.message : String(error)
       };
@@ -387,9 +459,12 @@ export const registerEditSessionRoutes = async (
   app.get("/api/edit-sessions/:id/render-status", async (req, reply) => {
     try {
       const params = req.params as {id: string};
+      const session = await manager.getSession(params.id);
+      assertSessionOwnership(session, req.headers.authorization);
       return await manager.getRenderStatus(params.id);
     } catch (error) {
-      reply.code(404);
+      const isSecurity = error instanceof SecurityViolationError;
+      reply.code(isSecurity ? 403 : 404);
       return {
         error: error instanceof Error ? error.message : String(error)
       };
@@ -399,11 +474,13 @@ export const registerEditSessionRoutes = async (
   app.get("/api/edit-sessions/:id/events", async (req: FastifyRequest, reply) => {
     const params = req.params as {id: string};
     try {
-      await manager.getSession(params.id);
-    } catch {
-      reply.code(404);
+      const session = await manager.getSession(params.id);
+      assertSessionOwnership(session, req.headers.authorization);
+    } catch (error) {
+      const isSecurity = error instanceof SecurityViolationError;
+      reply.code(isSecurity ? 403 : 404);
       return {
-        error: "Session not found."
+        error: isSecurity ? error.message : "Session not found."
       };
     }
 

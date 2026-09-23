@@ -19,7 +19,8 @@ import {buildModelRoutingTable} from "./model-routing";
 import {LocalPreviewRunner, type LocalPreviewRunnerDependencies} from "./local-preview-runner";
 import {EditSessionManager, type EditSessionDependencies} from "./edit-sessions/service";
 import {EditSessionStore} from "./edit-sessions/store";
-import {registerEditSessionRoutes} from "./edit-sessions/routes";
+import {registerEditSessionRoutes, assertSessionOwnership} from "./edit-sessions/routes";
+import {SecurityViolationError} from "./gateway/security";
 import {createR2TransferService, type R2TransferService} from "./integrations/r2";
 import {registerUploadRoutes} from "./upload-routes";
 import {createJosephUploadPipeline, type JosephUploadPipeline} from "./upload/joseph-upload-pipeline";
@@ -523,6 +524,9 @@ export const createBackendApp = async ({
   app.get("/api/edit-sessions/:id/source", async (req, reply) => {
     try {
       const params = req.params as {id: string};
+      const session = await editSessions.getSession(params.id);
+      assertSessionOwnership(session, req.headers.authorization);
+
       const asset = await editSessions.getSourceMediaAsset(params.id);
       const rangeHeader = typeof req.headers.range === "string" ? req.headers.range : null;
 
@@ -551,6 +555,12 @@ export const createBackendApp = async ({
       reply.header("Content-Range", `bytes ${start}-${end}/${asset.fileSizeBytes}`);
       return reply.send(createReadStream(asset.filePath, {start, end}));
     } catch (error) {
+      if (error instanceof SecurityViolationError) {
+        reply.code(403);
+        return {
+          error: error.message
+        };
+      }
       const message = error instanceof Error ? error.message : String(error);
       reply.code(/not found/i.test(message) ? 404 : 400);
       return {
