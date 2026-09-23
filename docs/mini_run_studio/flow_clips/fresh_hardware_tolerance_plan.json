@@ -1,0 +1,70 @@
+{
+  "semantic_entity_action_mapping": {
+    "action_verb": "lock",
+    "manner_adverb": "firmly with authoritative mechanical clamping",
+    "thematic_target": "physical foundation",
+    "hero_physical_artifact": "A heavy industrial dual-throw knife switch snapping down into solid copper busbar jaws"
+  },
+  "selected_inflection": {
+    "chunk_index": 3,
+    "time_range": "11.80s - 15.50s",
+    "start_sec": 11.8,
+    "end_sec": 15.5,
+    "spoken_phrase": "Get the physical foundation locked first",
+    "inflection_rationale": "This phrase encapsulates the core message of establishing a stable, precise base, using the definitive action of 'locking' to signify finality and critical importance.",
+    "emotional_tone": "Ruthless Precision / Finality"
+  },
+  "scene_plot_temporal_grace": {
+    "narrative_beat_context": "The scene opens on an unpopulated canvas, then the heavy industrial knife switch dynamically emerges into view. It settles into position, poised for action. As the speaker utters 'locked first', the lever arm snaps down with high-torque authority, rigidly engaging the busbar jaws. The scene holds this locked, stable state with subtle micro-drift as the monologue concludes.",
+    "pre_roll_grace_sec": 2.5,
+    "sync_hit_sec": 3.0,
+    "post_roll_grace_sec": 2.5,
+    "total_veo_duration_sec": 6.0,
+    "editorial_timeline_window": {
+      "scene_start_sec": 10.5,
+      "scene_end_sec": 16.5,
+      "total_scene_grace_sec": 6.0
+    },
+    "scene_plot_description": "The heavy industrial knife switch dynamically emerges from the bottom of the frame during the first 1.5 seconds, decelerating into its central, poised position. At precisely 3.0 seconds, synchronized with the word 'locked', the lever arm snaps down with decisive force, engaging the copper busbar jaws. The mechanism remains rigidly locked for the remaining 2.5 seconds, conveying stability and finality."
+  },
+  "visual_plate_schema": {
+    "focal_subject_and_perspective": "A heavy industrial dual-throw knife switch, spatially locked 45-degree isometric studio view.",
+    "materiality_and_surface": "Solid copper busbar jaws, polished blackened carbon steel lever arm, micro-chamfered edges, high-precision machined surfaces, subtle brushed metal texture.",
+    "canvas_and_textured_background": "Pristine matte off-white graphic canvas with a micro-stippled technical coordinate dot grid, reserving the upper 45% as clean negative space.",
+    "lighting_and_shadow_physics": "Dramatic high-contrast raked lighting from the upper left, casting sharp, defined shadows. Floating ambient occlusion volume providing spatial depth without anchoring to physical furniture.",
+    "camera_and_rendering_spec": "85mm lens, spatially locked fixed-tripod camera, constrained single-axis downward arc rotation of the lever arm, strict rigid-body topological permanence of all components, zero geometric morphing, zero 180-degree yaw flipping, zero perspective inversion, native 24fps cinema cadence.",
+    "entrance_kinematic_treatment": "The scene opens on an unpopulated pristine graphic canvas. The heavy industrial knife switch dynamically emerges from submerged off-screen coordinates Y: +120% viewport, propelled upward along the vertical axis with a steep power4.out cubic deceleration curve, decelerating sharply into its locked centroid position during 0.0s - 1.5s."
+  },
+  "assembled_diffusion_prompt": "A heavy industrial dual-throw knife switch, spatially locked 45-degree isometric studio view. Solid copper busbar jaws, polished blackened carbon steel lever arm, micro-chamfered edges, high-precision machined surfaces, subtle brushed metal texture. Pristine matte off-white graphic canvas with a micro-stippled technical coordinate dot grid, reserving the upper 45% as clean negative space. Dramatic high-contrast raked lighting from the upper left, casting sharp, defined shadows. Floating ambient occlusion volume providing spatial depth without anchoring to physical furniture. 85mm lens, spatially locked fixed-tripod camera, constrained single-axis downward arc rotation of the lever arm. Strict rigid-body topological permanence of all components, zero geometric morphing, zero 180-degree yaw flipping, zero perspective inversion, native 24fps cinema cadence. The asset strictly obeys classical rigid-body physics as a single cohesive solid topological manifold with zero ghosted duplication, zero mesh fission, and all UV surface coordinates pinned to the rigid geometry throughout motion. The scene opens on an unpopulated pristine graphic canvas. The heavy industrial knife switch dynamically emerges from submerged off-screen coordinates Y: +120% viewport, propelled upward along the vertical axis with a steep power4.out cubic deceleration curve, decelerating sharply into its locked centroid position during 0.0s - 1.5s. The lever arm then snaps down with high-torque authority into the copper busbar jaws at 3.0s, creating a decisive mechanical lock, with directional motion streaks on the moving lever arm, while stationary elements remain sharp, conveying high-torque authority (slow_shutter_motion_blur).",
+  "negative_prompt": "doubling, duplicate mesh, split silhouette, ghosting, asset duplication, UV sliding, texture swimming, UV seam tear, unphysical merging, snapping back, 180-degree flip, yaw flip, choppy rotation, perspective inversion, orientation swap, reversing direction, morphing geometry, warping metal, changing teeth, shifting bitting, mutating parts, melting, table, tabletop, desk, furniture, countertop, wooden desk, office room, floorboards, text, words, typography, UI elements, buttons, screen, monitor",
+  "selected_background_treatment_id": "modern_swiss_museum_poster",
+  "selected_motion_treatment_id": "slow_shutter_motion_blur",
+  "selected_entrance_treatment_id": "vertical_bottom_emergence",
+  "downstream_remotion_overlay": {
+    "primary_headline": "PHYSICAL FOUNDATION",
+    "secondary_italic_subline": "Precision at Scale",
+    "target_sync_offset_sec": 3.0,
+    "overlay_placement_zone": "upper third",
+    "svg_graphic_elements": [
+      "Figma dashed frame",
+      "corner starbursts"
+    ]
+  },
+  "initial_draft_prompt": "A heavy industrial dual-throw knife switch, spatially locked 45-degree isometric studio view. Solid copper busbar jaws, polished blackened carbon steel lever arm, micro-chamfered edges, high-precision machined surfaces, subtle brushed metal texture. Pristine matte off-white graphic canvas with a micro-stippled technical coordinate dot grid, reserving the upper 45% as clean negative space. Dramatic high-contrast raked lighting from the upper left, casting sharp, defined shadows. Floating ambient occlusion volume providing spatial depth without anchoring to physical furniture. 85mm lens, spatially locked fixed-tripod camera, constrained single-axis downward arc rotation of the lever arm, strict rigid-body topological permanence of all components, zero geometric morphing, zero 180-degree yaw flipping, zero perspective inversion, native 24fps cinema cadence. The scene opens on an unpopulated pristine graphic canvas. The heavy industrial knife switch dynamically emerges from submerged off-screen coordinates Y: +120% viewport, propelled upward along the vertical axis with a steep power4.out cubic deceleration curve, decelerating sharply into its locked centroid position during 0.0s - 1.5s. The lever arm then snaps down with high-torque authority into the copper busbar jaws at 3.0s, creating a decisive mechanical lock, with directional motion streaks on the moving lever arm, while stationary elements remain sharp, conveying high-torque authority (slow_shutter_motion_blur).",
+  "critique_violations_fixed": [
+    "VIOLATION (Unitary Physics & Anti-Duplication): Prompt lacks explicit unitary manifold / anti-ghosting physics specification (e.g., 'zero ghosted duplication, zero mesh fission, single cohesive solid topological manifold with pinned UV surface coordinates')."
+  ],
+  "critique_iterations_run": 1,
+  "policy_critique": {
+    "passed": true,
+    "flaws": [],
+    "score": 1.0
+  },
+  "treatment_audit": {
+    "passed": true,
+    "flaws": [],
+    "selected_background_treatment_id": "modern_swiss_museum_poster",
+    "selected_motion_treatment_id": "slow_shutter_motion_blur",
+    "selected_entrance_treatment_id": "vertical_bottom_emergence"
+  }
+}

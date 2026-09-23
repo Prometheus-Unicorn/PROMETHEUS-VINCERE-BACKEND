@@ -1,0 +1,104 @@
+{
+  "video": "fresh_hardware_clamp_flow_720p.mp4",
+  "fileSizeBytes": 1069919,
+  "width": 720,
+  "height": 1280,
+  "aspectRatio": "9:16",
+  "fps": 24.0,
+  "frameCount": 192,
+  "durationSec": 8.0,
+  "gates": {
+    "aspectRatioGate": "PASS",
+    "cadenceGate": "PASS",
+    "durationGate": "PASS",
+    "shadowCrushGate": "FAIL",
+    "maxShadowClippedPct": 2.5017,
+    "overallVerdict": "FAIL"
+  },
+  "frames": [
+    {
+      "timestampSec": 0.25,
+      "frameIndex": 6,
+      "keyframePath": "frame_0.25s_f006.png",
+      "shadowClippedPct": 0.0036,
+      "highlightClippedPct": 0.0002,
+      "meanLuminance": 193.09,
+      "stdLuminance": 65.98,
+      "upperNegativeSpaceVariance": 5616.0,
+      "upperNegativeSpaceMean": 147.32,
+      "bottomSubmergedVariance": 258.66
+    },
+    {
+      "timestampSec": 0.5,
+      "frameIndex": 12,
+      "keyframePath": "frame_0.50s_f012.png",
+      "shadowClippedPct": 0.4358,
+      "highlightClippedPct": 0.0,
+      "meanLuminance": 185.35,
+      "stdLuminance": 69.78,
+      "upperNegativeSpaceVariance": 6437.47,
+      "upperNegativeSpaceMean": 138.04,
+      "bottomSubmergedVariance": 301.94
+    },
+    {
+      "timestampSec": 1.0,
+      "frameIndex": 24,
+      "keyframePath": "frame_1.00s_f024.png",
+      "shadowClippedPct": 0.3461,
+      "highlightClippedPct": 0.0092,
+      "meanLuminance": 162.76,
+      "stdLuminance": 77.54,
+      "upperNegativeSpaceVariance": 5648.36,
+      "upperNegativeSpaceMean": 130.54,
+      "bottomSubmergedVariance": 3331.81
+    },
+    {
+      "timestampSec": 1.5,
+      "frameIndex": 36,
+      "keyframePath": "frame_1.50s_f036.png",
+      "shadowClippedPct": 2.5017,
+      "highlightClippedPct": 0.0066,
+      "meanLuminance": 161.34,
+      "stdLuminance": 82.91,
+      "upperNegativeSpaceVariance": 6476.93,
+      "upperNegativeSpaceMean": 127.3,
+      "bottomSubmergedVariance": 3498.72
+    },
+    {
+      "timestampSec": 3.0,
+      "frameIndex": 72,
+      "keyframePath": "frame_3.00s_f072.png",
+      "shadowClippedPct": 0.2215,
+      "highlightClippedPct": 0.0038,
+      "meanLuminance": 163.76,
+      "stdLuminance": 79.93,
+      "upperNegativeSpaceVariance": 5733.79,
+      "upperNegativeSpaceMean": 146.33,
+      "bottomSubmergedVariance": 4907.62
+    },
+    {
+      "timestampSec": 5.0,
+      "frameIndex": 120,
+      "keyframePath": "frame_5.00s_f120.png",
+      "shadowClippedPct": 0.5792,
+      "highlightClippedPct": 0.0036,
+      "meanLuminance": 159.87,
+      "stdLuminance": 81.76,
+      "upperNegativeSpaceVariance": 6149.99,
+      "upperNegativeSpaceMean": 134.4,
+      "bottomSubmergedVariance": 4576.91
+    },
+    {
+      "timestampSec": 7.5,
+      "frameIndex": 180,
+      "keyframePath": "frame_7.50s_f180.png",
+      "shadowClippedPct": 0.5115,
+      "highlightClippedPct": 0.0046,
+      "meanLuminance": 160.09,
+      "stdLuminance": 81.8,
+      "upperNegativeSpaceVariance": 6171.25,
+      "upperNegativeSpaceMean": 134.18,
+      "bottomSubmergedVariance": 4534.11
+    }
+  ]
+}
