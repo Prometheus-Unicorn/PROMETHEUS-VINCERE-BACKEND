@@ -1163,6 +1163,156 @@ def select_motion_treatment(
 
 
 # ---------------------------------------------------------------------------
+# Canonical Entrance Treatment Registry (Anti-Static-Duck Policy)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class EntranceTreatment:
+    """A canonical entrance-into-view kinematic treatment for the hero diffusion asset."""
+    id: str
+    name: str
+    dna_snippet: str                  # Core kinematic clause describing entrance from unpopulated canvas
+    tags: List[str] = field(default_factory=list)
+    use_cases: List[str] = field(default_factory=list)
+    archetype: str = "editorial_luxury"
+
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+
+ENTRANCE_TREATMENT_REGISTRY: Dict[str, EntranceTreatment] = {
+    # ── ET-01 ─────────────────────────────────────────────────────────────────
+    "vertical_bottom_emergence": EntranceTreatment(
+        id="vertical_bottom_emergence",
+        name="Vertical Bottom-Up Emergence (S-Tier Deceleration)",
+        dna_snippet=(
+            "The scene opens on an unpopulated, pristine graphic canvas. At frame 0, the hero asset initiates from a "
+            "fully submerged off-screen position below the lower frame boundary (Y: +120% viewport) and is propelled "
+            "upward along the vertical axis with a steep power4.out cubic deceleration curve spanning 0.0s to 1.2s, "
+            "decelerating sharply into its locked centroid position with an expanding ambient occlusion contact shadow"
+        ),
+        tags=["entrance", "bottom_up", "vertical", "emergence", "deceleration", "power4", "s_tier"],
+        use_cases=[
+            "High-authority corporate or analytical inflection moments",
+            "Monolithic, weighted mechanical assets (balances, scales, heavy blocks)",
+            "Default entrance treatment for maximum structural impact",
+        ],
+        archetype="high_impact",
+    ),
+    # ── ET-02 ─────────────────────────────────────────────────────────────────
+    "lateral_friction_slide": EntranceTreatment(
+        id="lateral_friction_slide",
+        name="Lateral Friction Slide (Dossier Reveal)",
+        dna_snippet=(
+            "The scene opens on an unpopulated, clean graphic canvas. At frame 0, the hero asset enters horizontally "
+            "from the outer frame flank at maximum initial velocity with zero ease-in, sliding across the surface "
+            "against 70% simulated physical friction before braking and locking cleanly into its centroid position at 1.2s"
+        ),
+        tags=["entrance", "lateral", "slide", "friction", "velocity", "dossier"],
+        use_cases=[
+            "Investigative, algorithmic, or fast-paced decision frameworks",
+            "Linear mechanisms, rail switches, slide rules, Vernier calipers",
+        ],
+        archetype="investigative_editorial",
+    ),
+    # ── ET-03 ─────────────────────────────────────────────────────────────────
+    "slapdrop_bounce": EntranceTreatment(
+        id="slapdrop_bounce",
+        name="Slap-Drop with Contact Bounce",
+        dna_snippet=(
+            "The scene opens on an unpopulated graphic canvas. At frame 0, the hero asset drops into frame along the "
+            "Z-axis with exponential decrescendo from above, executing a 2-frame 3% scale squash on impact with a "
+            "subtle contact bounce and pendulum settle by 1.2s, anchoring firmly into place"
+        ),
+        tags=["entrance", "slapdrop", "bounce", "drop", "impact", "squash"],
+        use_cases=[
+            "Decisive verdicts, finality, hard-hitting conclusions ('something has to win')",
+            "Tungsten weights, stamps, anvils, knife switches slamming shut",
+        ],
+        archetype="editorial_vox",
+    ),
+    # ── ET-04 ─────────────────────────────────────────────────────────────────
+    "off_axis_3d_swing": EntranceTreatment(
+        id="off_axis_3d_swing",
+        name="3D Off-Axis Hinged Swing",
+        dna_snippet=(
+            "The scene opens on an unpopulated canvas. At frame 0, the hero asset swings into view from an off-screen "
+            "pivot pinned to the outer frame edge, rotating dynamically in 3D perspective from 80 degrees off-axis "
+            "down to 0 degrees, projecting dynamic elevation shadows tracking Z-distance before locking into position at 1.3s"
+        ),
+        tags=["entrance", "3d", "swing", "hinged", "rotation", "perspective"],
+        use_cases=[
+            "Dimensional shifts, perspective changes, architectural reveals",
+            "Hinged gates, lever assemblies, compasses, Geneva arms",
+        ],
+        archetype="editorial_vox",
+    ),
+    # ── ET-05 ─────────────────────────────────────────────────────────────────
+    "polarizing_bevel_elevation": EntranceTreatment(
+        id="polarizing_bevel_elevation",
+        name="Polarizing Bevel Forward Elevation",
+        dna_snippet=(
+            "The scene opens on an unpopulated canvas. At frame 0, the hero asset elevates forward along the Z-axis "
+            "from the backdrop surface, rising into the focal plane with chamfered metallic bevel borders catching "
+            "specular edge highlights and casting expanding ambient occlusion shadows as it locks into position at 1.2s"
+        ),
+        tags=["entrance", "elevation", "z_axis", "bevel", "chamfer", "specular"],
+        use_cases=[
+            "Luxury, refinement, precision engineering, Swiss watchmaking themes",
+            "High-finish brass, titanium, or micro-machined instrument clusters",
+        ],
+        archetype="editorial_luxury",
+    ),
+}
+
+
+def select_entrance_treatment(
+    treatment_id: Optional[str] = None,
+    use_case_hint: str = "",
+    tags: Optional[List[str]] = None,
+    registry: Optional[Dict[str, EntranceTreatment]] = None,
+) -> EntranceTreatment:
+    """Select the most contextually appropriate entrance treatment.
+
+    Args:
+        treatment_id: Explicit ID if known ('vertical_bottom_emergence', etc.).
+        use_case_hint: Free-text description of the scene / transcript theme.
+        tags: Optional semantic tags to match.
+        registry: Optional registry override; defaults to ENTRANCE_TREATMENT_REGISTRY.
+
+    Returns:
+        The best-matching EntranceTreatment, defaulting to vertical_bottom_emergence.
+    """
+    reg = registry or ENTRANCE_TREATMENT_REGISTRY
+    if treatment_id and treatment_id in reg:
+        return reg[treatment_id]
+
+    if not use_case_hint and not tags:
+        return reg["vertical_bottom_emergence"]
+
+    hint_tokens = set(re.findall(r"\w+", use_case_hint.lower()))
+    tag_tokens = {t.lower() for t in (tags or [])}
+    query = hint_tokens | tag_tokens
+
+    best_id = "vertical_bottom_emergence"
+    best_score = -1
+
+    for entry in reg.values():
+        entry_tokens = {t.lower() for t in entry.tags}
+        entry_tokens |= set(re.findall(r"\w+", entry.name.lower()))
+        entry_tokens |= set(re.findall(r"\w+", entry.id.lower()))
+        for uc in entry.use_cases:
+            entry_tokens |= set(re.findall(r"\w+", uc.lower()))
+        overlap = len(query & entry_tokens)
+        if overlap > best_score:
+            best_score = overlap
+            best_id = entry.id
+
+    return reg[best_id]
+
+
+
+# ---------------------------------------------------------------------------
 # Mathematical Timestamp & Word-Sync Calculator
 # ---------------------------------------------------------------------------
 
@@ -1356,6 +1506,7 @@ class CuritoPromptStitcher:
         model: str = "Veo 3.1 - Fast",
         aspect_ratio: str = "9:16",
         aesthetic: str = "auto",
+        entrance_treatment: Optional[str] = None,
     ) -> CuritoStitchedPrompt:
         """Stitch genomes together adhering strictly to the proven 6-part Google Flow structure:
         [Subject/Element] + [Action/Movement] + [Location/Background] + [Context/Lighting] + [Composition] + [Style/Cues]
@@ -1373,6 +1524,7 @@ class CuritoPromptStitcher:
             model: Target Veo / Google Flow model.
             aspect_ratio: Usually "9:16".
             aesthetic: 'auto', 'curito_editorial_paper', or 'dark_obsidian'.
+            entrance_treatment: Optional canonical entrance treatment ID from ENTRANCE_TREATMENT_REGISTRY.
         """
         genomes = selected_genomes or cls.select_genomes_by_theme(word_sync.target_words)
 
@@ -1407,8 +1559,14 @@ class CuritoPromptStitcher:
             )
 
         # 2. Action / Movement (Incorporating word-sync timing trigger & sentiment blend shape)
+        if entrance_treatment:
+            et = select_entrance_treatment(treatment_id=entrance_treatment)
+            scene_dna = et.dna_snippet
+        else:
+            scene_dna = scene_genome.dna_snippet
+
         action = (
-            f"{scene_genome.dna_snippet}, timed so that at +{word_sync.sync_offset_sec:.1f}s into the sequence "
+            f"{scene_dna}, timed so that at +{word_sync.sync_offset_sec:.1f}s into the sequence "
             f"the asset achieves locked contact bounce and physical impact synchronously with the cue words "
             f"'{word_sync.target_phrase}'"
         )

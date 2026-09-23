@@ -211,6 +211,28 @@ class DiffusionPromptPolicyCritic:
         if not has_neg_space:
             flaws.append("VIOLATION (Layer Separation): Prompt lacks explicit negative space reservation for downstream motion graphics.")
 
+        # 12. Dynamic Entrance Kinematic Treatment Check (Anti-Static-Duck Policy)
+        has_entrance = any(w in lowered for w in [
+            "animates into view", "emerges", "rises", "slides into", "enters", "swings in",
+            "propelled upward", "initiates from", "drawn into frame", "submerged off-screen",
+            "defocus crystallization", "entrance", "slap-drop", "friction slide", "bottom-up emergence",
+            "elevates forward", "sliding from", "upward travel", "rises into", "enters horizontally",
+            "unpopulated", "off-screen position"
+        ])
+        has_static_duck = any(w in lowered for w in [
+            "sits suspended from frame 0", "rests at center frame from frame 0",
+            "already present at frame 0", "stationary at center from frame 0",
+            "sitting at center", "sits at center frame from the start",
+            "resting on center frame from the beginning"
+        ])
+        if not has_entrance or has_static_duck:
+            flaws.append(
+                "VIOLATION (Entrance Kinematics): Prompt lacks an explicit dynamic entrance-into-view treatment. "
+                "Hero asset must not sit statically on screen from frame zero like a static duck; it must dynamically "
+                "animate/enter into view (e.g., vertical bottom emergence from submerged Y coordinates, lateral friction slide, "
+                "or 3D hinged swing) over the initial 0.0s - 1.5s."
+            )
+
         passed = len(flaws) == 0
         score = max(0.0, 1.0 - (len(flaws) * 0.12))
         return {
@@ -233,9 +255,17 @@ class DiffusionPromptPolicyCritic:
         "slow_shutter_motion_blur",
     }
 
+    VALID_ENTRANCE_TREATMENT_IDS = {
+        "vertical_bottom_emergence",
+        "lateral_friction_slide",
+        "slapdrop_bounce",
+        "off_axis_3d_swing",
+        "polarizing_bevel_elevation",
+    }
+
     @classmethod
     def audit_treatment_ids(cls, response: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate that Gemini returned valid background and motion treatment IDs.
+        """Validate that Gemini returned valid background, motion, and entrance treatment IDs.
 
         Args:
             response: The parsed Gemini response dict.
@@ -246,12 +276,14 @@ class DiffusionPromptPolicyCritic:
                 "flaws": List[str],
                 "selected_background_treatment_id": str,
                 "selected_motion_treatment_id": str,
+                "selected_entrance_treatment_id": str,
             }
         """
         flaws = []
 
         bg_id = response.get("selected_background_treatment_id", "")
         mt_id = response.get("selected_motion_treatment_id", "")
+        ent_id = response.get("selected_entrance_treatment_id")
 
         if not bg_id:
             flaws.append(
@@ -281,11 +313,28 @@ class DiffusionPromptPolicyCritic:
             )
             mt_id = "defocus_blur"
 
+        if ent_id is not None:
+            if not ent_id:
+                flaws.append(
+                    "VIOLATION (Treatment Registry): 'selected_entrance_treatment_id' is empty. "
+                    "Must be one of: " + ", ".join(sorted(cls.VALID_ENTRANCE_TREATMENT_IDS))
+                )
+                ent_id = "vertical_bottom_emergence"
+            elif ent_id not in cls.VALID_ENTRANCE_TREATMENT_IDS:
+                flaws.append(
+                    f"VIOLATION (Treatment Registry): Unknown entrance treatment ID '{ent_id}'. "
+                    "Must be one of: " + ", ".join(sorted(cls.VALID_ENTRANCE_TREATMENT_IDS))
+                )
+                ent_id = "vertical_bottom_emergence"
+        else:
+            ent_id = "vertical_bottom_emergence"
+
         return {
             "passed": len(flaws) == 0,
             "flaws": flaws,
             "selected_background_treatment_id": bg_id,
             "selected_motion_treatment_id": mt_id,
+            "selected_entrance_treatment_id": ent_id,
         }
 
 
@@ -355,13 +404,14 @@ MANDATORY OPERATING POLICIES:
      - Never permit an asset or any of its sub-components to double up, split into ghost silhouettes, or fragment into multiple copies that later artificially merge or snap back.
      - The asset must strictly obey natural classical rigid-body physics as a single cohesive solid topological manifold: zero UV texture sliding across seams, zero mesh fission, zero ghosted duplicate silhouettes, zero unphysical cloning, and zero re-convergence artifacts. All material coordinates remain pinned to the rigid geometry throughout motion.
 
-8. STANDARD 5-ELEMENT OUTPUT SCHEMA:
-   Every diffusion prompt must strictly synthesize these 5 components into a single coherent paragraph:
+8. STANDARD 6-ELEMENT OUTPUT SCHEMA:
+   Every diffusion prompt must strictly synthesize these 6 components into a single coherent paragraph:
    - [1. Focal Subject & Perspective]: Concrete hero mechanical artifact and exact camera angle (e.g., spatially locked 45-degree isometric studio view).
    - [2. Materiality & Surface]: Textures, finishes, micro-details (e.g., hand-finished solid brass, blackened carbon steel, micro-chamfered teeth).
-   - [3. Canvas & Textured Background (Strictly No Table)]: Suspended in spatial-temporal space against a graphic canvas featuring subtle halftone dot patterning, fine 35mm film grain, and explicit negative space reservation (#ECECEC matte paper, neutral void).
+   - [3. Canvas & Textured Background (Strictly No Table)]: Pristine unpopulated graphic canvas at frame 0 featuring subtle halftone dot patterning, fine 35mm film grain, and explicit negative space reservation (#ECECEC matte paper, neutral void).
    - [4. Lighting & Shadow Physics]: Illumination quality, directional softness, and floating ambient occlusion volume providing spatial depth without furniture contact.
    - [5. Camera & Kinematic Permanence Spec]: Spatially locked fixed-tripod camera (zero orbit), 1-DoF constrained axial rotation, strict rigid-body topological permanence, zero 180-degree yaw flipping, native 24fps cinema cadence.
+   - [6. Dynamic Entrance Kinematic Spec]: Dynamic entrance from unpopulated canvas during 0.0s - 1.5s (e.g. vertical bottom emergence from submerged off-screen coordinates Y: +120%, or lateral friction slide, or 3D hinged swing) decelerating into locked centroid position before the sync hit. ZERO static ducks sitting stationary from frame 0!
 
 9. BACKGROUND TREATMENT SELECTION (SELECT BY ID — NEVER HARDCODE):
    The diffusion prompt MUST specify one of the four canonical background treatments from the BACKGROUND_TREATMENT_REGISTRY. Select the ID that best matches the transcript's semantic tone and the hero artifact's material character. IDs and their appropriate use-cases:
@@ -378,6 +428,17 @@ MANDATORY OPERATING POLICIES:
     - "bokeh_blur" → Background depth-of-field isolation. Use when background texture (newspaper collage, sunlight canvas) risks competing with the hero artifact. Foreground tack-sharp, background dissolved into large bokeh coronas.
     - "slow_shutter_motion_blur" → Dynamic mechanical kinetics: fast rotation, lever snaps, beam sweeps, Geneva indexing at speed. Directional motion streaks on fast-moving elements, stationary elements remain sharp. Conveys high-torque authority.
     Output the selected ID in the field "selected_motion_treatment_id". Append the corresponding dna_snippet as an additive optics clause at the end of the assembled diffusion prompt (before any negative prompt separation).
+
+11. MANDATORY DYNAMIC ENTRANCE-INTO-VIEW TREATMENT (ZERO FRAME-ZERO STATIC DUCKS):
+    The hero asset MUST NOT sit statically on screen at frame 0.0s like a stationary prop or 'sitting duck'.
+    The scene MUST open on an unpopulated/pristine graphic canvas, and the hero asset must dynamically animate into view during the initial 0.0s to 1.5s phase before the sync hit.
+    Select one of the five canonical entrance treatments from ENTRANCE_TREATMENT_REGISTRY:
+    - "vertical_bottom_emergence" → DEFAULT. Initiates submerged below lower frame boundary (Y: +120% viewport), propelled upward along vertical axis with steep power4.out cubic deceleration curve, decelerating sharply into locked centroid position.
+    - "lateral_friction_slide" → Enters horizontally from outer frame flank at high initial velocity with zero ease-in, sliding across the surface against 70% physical friction before braking into centroid position.
+    - "slapdrop_bounce" → Drops into frame along Z-axis with exponential decrescendo from above, executing a 2-frame 3% scale squash on impact with subtle contact bounce and pendulum settle.
+    - "off_axis_3d_swing" → Pinned pivot anchor at outer edge, swinging in with dynamic 3D perspective from 80 degrees off-axis down to 0 degrees before locking.
+    - "polarizing_bevel_elevation" → Elevates forward along Z-axis into frame with chamfered metallic bevel borders catching edge highlights.
+    Output the selected ID in "selected_entrance_treatment_id". Incorporate its dynamic entrance description into the [6. Dynamic Entrance Kinematic Spec] and ensure the assembled diffusion prompt explicitly narrates the transition from unpopulated canvas to dynamic entrance into position.
 """
 
 
@@ -444,6 +505,7 @@ _RESPONSE_SCHEMA: Dict[str, Any] = {
                 "canvas_and_floor": {"type": "STRING"},
                 "lighting_and_shadow_physics": {"type": "STRING"},
                 "camera_and_rendering_spec": {"type": "STRING"},
+                "entrance_kinematic_treatment": {"type": "STRING"},
             },
             "required": [
                 "focal_subject_and_perspective",
@@ -451,6 +513,7 @@ _RESPONSE_SCHEMA: Dict[str, Any] = {
                 "canvas_and_floor",
                 "lighting_and_shadow_physics",
                 "camera_and_rendering_spec",
+                "entrance_kinematic_treatment",
             ],
         },
         "assembled_diffusion_prompt": {"type": "STRING"},
@@ -472,6 +535,15 @@ _RESPONSE_SCHEMA: Dict[str, Any] = {
                 "Must be exactly one of: 'defocus_blur', 'gaussian_blur', 'bokeh_blur', "
                 "'slow_shutter_motion_blur'. "
                 "Default: 'defocus_blur'. Select based on the kinetic class of the hero artifact's movement."
+            ),
+        },
+        "selected_entrance_treatment_id": {
+            "type": "STRING",
+            "description": (
+                "ID of the selected canonical entrance treatment from ENTRANCE_TREATMENT_REGISTRY. "
+                "Must be exactly one of: 'vertical_bottom_emergence', 'lateral_friction_slide', "
+                "'slapdrop_bounce', 'off_axis_3d_swing', 'polarizing_bevel_elevation'. "
+                "Default: 'vertical_bottom_emergence'. Select based on artifact structure and narrative force."
             ),
         },
         "downstream_remotion_overlay": {
@@ -503,6 +575,7 @@ _RESPONSE_SCHEMA: Dict[str, Any] = {
         "veo_duration_seconds",
         "selected_background_treatment_id",
         "selected_motion_treatment_id",
+        "selected_entrance_treatment_id",
         "downstream_remotion_overlay",
     ],
 }
@@ -534,13 +607,17 @@ def extract_and_synthesize_curito_prompt(
         + "\n\nDeconstruct the speech using NLP Entity-Action-Manner extraction. "
         "Select the single most powerful inflection moment. Transduce the spoken metaphor into an iconic, "
         "tactile, high-tier mechanical hero artifact—NEVER a generic geometric block or mass. "
+        "MANDATORY DYNAMIC ENTRANCE-INTO-VIEW: The scene MUST open on an unpopulated, pristine graphic canvas at 0.0s. "
+        "The hero asset must NEVER sit statically on screen at frame zero like a static duck. "
+        "The prompt must explicitly describe the hero asset's dynamic entrance into view (e.g. vertical bottom emergence from submerged Y coordinates, "
+        "lateral friction slide, or 3D hinged swing) over 0.0s - 1.5s decelerating into locked centroid position before the sync hit. "
         "THE BACKGROUND MUST BE A SPATIAL-TEMPORAL TEXTURED GRAPHIC CANVAS (featuring subtle halftone dot screening, "
         "fine 35mm film grain, or micro-stippling). ABSOLUTELY NO TABLES, NO TABLETOPS, NO DESKS, NO FURNITURE PLACEMENT. "
         "CAMERA & KINEMATIC DISCIPLINE: The camera MUST be a spatially locked fixed-tripod 45-degree isometric view (NO camera orbiting/revolving). "
         "The asset must have a constrained 1-DoF rotational axis with strict rigid-body topological permanence "
         "(teeth, bitting profile, and mechanical detents remain rigidly oriented without 180-degree yaw flipping, morphing, or perspective inversion). "
         "Define the scene plot temporal grace envelope (pre-roll grace, sync hit on spoken trigger, post-roll stability). "
-        "Synthesize the diffusion prompt conforming to the 5-element schema. Zero typography."
+        "Synthesize the diffusion prompt conforming to the 6-element schema. Zero typography."
     )
 
     json_spec = """{
@@ -577,12 +654,14 @@ def extract_and_synthesize_curito_prompt(
     "materiality_and_surface": "materials, finishes, micro-details (e.g., hand-finished solid brass, blackened carbon steel)",
     "canvas_and_textured_background": "spatial-temporal graphic canvas with subtle halftone dot screening or fine film grain, reserving upper 45% negative space (strictly no table/furniture)",
     "lighting_and_shadow_physics": "illumination quality and floating ambient occlusion volume providing depth",
-    "camera_and_rendering_spec": "lens (85mm), spatially locked tripod, 1-DoF constrained axial rotation, rigid-body topological permanence, zero 180-degree yaw flipping, 24fps"
+    "camera_and_rendering_spec": "lens (85mm), spatially locked tripod, 1-DoF constrained axial rotation, rigid-body topological permanence, zero 180-degree yaw flipping, 24fps",
+    "entrance_kinematic_treatment": "dynamic entrance from unpopulated canvas during 0.0s - 1.5s (e.g. vertical bottom emergence from submerged Y coords, lateral friction slide, or 3D hinged swing) decelerating into locked centroid position"
   },
-  "assembled_diffusion_prompt": "Single synthesized prompt paragraph combining the 5 elements with concrete hero artifact, spatial-temporal halftone/grain background (no table), locked tripod camera, rigid-body permanence, and the selected motion treatment optics clause appended at the end",
+  "assembled_diffusion_prompt": "Single synthesized prompt paragraph combining the 6 elements with concrete hero artifact, dynamic entrance kinematics (0.0s-1.5s from unpopulated canvas), spatial-temporal halftone/grain background (no table), locked tripod camera, rigid-body permanence, and the selected motion treatment optics clause appended at the end",
   "negative_prompt": "doubling, duplicate mesh, split silhouette, ghosting, asset duplication, UV sliding, texture swimming, UV seam tear, unphysical merging, snapping back, 180-degree flip, yaw flip, choppy rotation, perspective inversion, orientation swap, reversing direction, morphing geometry, warping metal, changing teeth, shifting bitting, mutating parts, melting, table, tabletop, desk, furniture, countertop, wooden desk, office room, floorboards, text, words, typography, UI elements, buttons, screen, monitor",
   "selected_background_treatment_id": "one of: halftone_raster_canvas | luxury_editorial_sunlight_canvas | newspaper_collage_deconstructed | modern_swiss_museum_poster",
   "selected_motion_treatment_id": "one of: defocus_blur | gaussian_blur | bokeh_blur | slow_shutter_motion_blur",
+  "selected_entrance_treatment_id": "one of: vertical_bottom_emergence | lateral_friction_slide | slapdrop_bounce | off_axis_3d_swing | polarizing_bevel_elevation",
   "downstream_remotion_overlay": {
     "primary_headline": "UPPERCASE HEADLINE",
     "secondary_italic_subline": "Italic serif phrase",
@@ -695,7 +774,8 @@ def extract_and_synthesize_curito_prompt(
             "4. Kinematics must enforce 1-DoF constrained axial rotation with strict rigid-body topological permanence (ZERO 180-degree yaw flips, zero morphing).\n"
             "5. Ensure manner dynamics (rotational torque, decelerating engagement, mechanical locked-state).\n"
             "6. Ensure zero typography, zero 2D UI elements, and explicit upper negative space reservation.\n"
-            "7. Do NOT place quotes inside the assembled_diffusion_prompt string.\n"
+            "7. Ensure explicit dynamic entrance-into-view kinematics from an unpopulated canvas (e.g. vertical bottom emergence from submerged Y coordinates, lateral friction slide, or 3D hinged swing) over 0.0s - 1.5s. ZERO static ducks sitting stationary from frame 0.\n"
+            "8. Do NOT place quotes inside the assembled_diffusion_prompt string.\n"
             "Return the updated, fully compliant JSON matching the complete schema and preserving all metadata fields."
         )
 
