@@ -37,7 +37,7 @@ if not logger.handlers:
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_PROFILE = REPO_ROOT / "config" / "flow_browser_profile"
-DEFAULT_WORKSPACE_URL = "https://flow.google.com/project/0431f510-bbad-4c90-8157-f1723008eea3"
+DEFAULT_WORKSPACE_URL = "https://flow.google.com/project/847e1afb-3351-417f-ba65-a546af6ea7bf"
 
 
 def resolve_browser_executable(custom_path: Optional[str] = None) -> Optional[str]:
@@ -352,8 +352,8 @@ class GoogleFlowServerClient:
                     logger.info(f"Navigating to workspace: {self.config.workspace_url}")
                     for attempt in range(1, 4):
                         try:
-                            await page.goto(self.config.workspace_url, timeout=45000, wait_until="domcontentloaded")
-                            await asyncio.sleep(5.0)
+                            await page.goto(self.config.workspace_url, timeout=45000, wait_until="commit")
+                            await asyncio.sleep(6.0)
                             break
                         except Exception as nav_err:
                             if attempt == 3:

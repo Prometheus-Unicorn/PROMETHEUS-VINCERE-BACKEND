@@ -253,6 +253,21 @@ def main() -> None:
         auth_key_hex=auth_key,
     )
 
+    # Purge stale Chrome Account Manager database and SQLite cookies from legacy profile
+    # that mark the account as 'Signed out', allowing CDP cookie injection to authenticate cleanly.
+    for stale_item in [
+        profile_dir / "Default" / "Account Web Data",
+        profile_dir / "Default" / "Account Web Data-journal",
+        profile_dir / "Default" / "Network" / "Cookies",
+        profile_dir / "Default" / "Network" / "Cookies-journal",
+    ]:
+        if stale_item.exists():
+            try:
+                stale_item.unlink()
+                logger.info(f"Purged stale session blocker: {stale_item.name}")
+            except Exception:
+                pass
+
     # Synchronize fresh repository cookies into profile directory if present
     repo_cookies = REPO_ROOT / "config" / "flow_cookies.json"
     if repo_cookies.exists():
