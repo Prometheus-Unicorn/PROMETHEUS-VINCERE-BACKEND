@@ -255,6 +255,7 @@ class GoogleFlowServerClient:
 
             # Step 2: Launch persistent context with cross-platform browser resolution
             resolved_chrome = resolve_browser_executable(self.config.chrome_path)
+            logger.info(f"Resolved browser executable: {resolved_chrome}")
             browser_args = [
                 "--enable-webgl",
                 "--ignore-gpu-blocklist",
@@ -335,6 +336,7 @@ class GoogleFlowServerClient:
                     for attempt in range(1, 4):
                         try:
                             await page.goto(self.config.workspace_url, timeout=45000, wait_until="domcontentloaded")
+                            await asyncio.sleep(5.0)
                             break
                         except Exception as nav_err:
                             if attempt == 3:

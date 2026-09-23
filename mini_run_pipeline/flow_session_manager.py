@@ -88,14 +88,32 @@ class FlowSessionValidator:
     """Validates session health, checks for Google sign-in challenges, and diagnoses issues."""
 
     @staticmethod
-    async def validate_session_active(page: Page, timeout_ms: int = 15000) -> bool:
+    async def validate_session_active(page: Page, timeout_ms: int = 25000) -> bool:
         """Checks if the workspace is active or if Google redirected to sign-in."""
         current_url = page.url
+        try:
+            title = await page.title()
+        except Exception:
+            title = "unknown"
+        logger.info(f"Validating session... Current URL: {current_url}, Title: {title}")
+
+        if "/about" in current_url:
+            logger.info("Landed on /about, attempting to click 'Create with Google Flow'...")
+            create_btn = await page.query_selector("button:has-text('Create with Google Flow'), a:has-text('Create with Google Flow')")
+            if create_btn:
+                await create_btn.click()
+                await page.wait_for_timeout(5000)
+                current_url = page.url
+                logger.info(f"Navigated after create click: {current_url}")
+
         if "accounts.google.com" in current_url or "signin" in current_url:
             scratch_dir = REPO_ROOT / "scratch"
             scratch_dir.mkdir(parents=True, exist_ok=True)
             screenshot_path = scratch_dir / "flow_auth_challenge.png"
-            await page.screenshot(path=str(screenshot_path))
+            try:
+                await page.screenshot(path=str(screenshot_path), timeout=5000)
+            except Exception as se:
+                logger.warning(f"Diagnostic screenshot failed: {se}")
             raise PermissionError(
                 f"Google Flow session expired or redirected to sign-in: {current_url}. "
                 f"Diagnostic screenshot saved to {screenshot_path}"
@@ -103,7 +121,7 @@ class FlowSessionValidator:
 
         try:
             await page.wait_for_selector(
-                "div.ProseMirror, .prosemirror-editor, canvas, app-root",
+                "div.ProseMirror, .prosemirror-editor, canvas, app-root, [contenteditable='true'], [role='main']",
                 timeout=timeout_ms,
             )
             return True
@@ -111,7 +129,10 @@ class FlowSessionValidator:
             scratch_dir = REPO_ROOT / "scratch"
             scratch_dir.mkdir(parents=True, exist_ok=True)
             screenshot_path = scratch_dir / "flow_hydration_failed.png"
-            await page.screenshot(path=str(screenshot_path))
+            try:
+                await page.screenshot(path=str(screenshot_path), timeout=5000)
+            except Exception as se:
+                logger.warning(f"Hydration screenshot failed: {se}")
             raise TimeoutError(
                 f"Workspace hydration timed out. URL: {page.url}. "
                 f"Screenshot: {screenshot_path}"
