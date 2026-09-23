@@ -46,10 +46,10 @@ class CuritoSemanticExtractorAuditTests(unittest.TestCase):
         self.assertEqual(res["selected_background_treatment_id"], "modern_swiss_museum_poster")
         self.assertEqual(res["selected_motion_treatment_id"], "slow_shutter_motion_blur")
 
-    def test_curito_default_model_is_gemini_2_5_pro(self):
-        """Curito semantic extractor defaults to gemini-2.5-pro for highest-capability prompt transduction."""
+    def test_curito_default_model_is_gemini_3_8_flash(self):
+        """Curito semantic extractor defaults to gemini-3.8-flash for high-tier instantaneous prompt transduction."""
         from mini_run_pipeline.curito_semantic_extractor import DEFAULT_MODEL
-        self.assertEqual(DEFAULT_MODEL, "gemini-2.5-pro")
+        self.assertEqual(DEFAULT_MODEL, "gemini-3.8-flash")
 
 
 if __name__ == "__main__":

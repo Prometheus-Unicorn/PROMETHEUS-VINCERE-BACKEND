@@ -367,20 +367,19 @@ class CuritoAnimationOrchestrator:
                 )
             except Exception as veo_err:
                 err_str = str(veo_err)
-                if isinstance(veo_err, PermissionError) or "429" in err_str or "RESOURCE_EXHAUSTED" in err_str or "QUOTA" in err_str:
-                    if dest_mp4.exists() and dest_mp4.stat().st_size > 1000:
-                        report = self._build_report_from_existing_mp4(
-                            dest_mp4=dest_mp4,
-                            prompt=stitched,
-                            word_sync=word_sync,
-                            concept_title=title,
-                        )
-                    else:
-                        raise PermissionError(
-                            f"VEO 3.1 API QUOTA EXHAUSTED: Google AI Studio returned 429 RESOURCE_EXHAUSTED. "
-                            f"To enable headless video generation in production, link a Google Cloud Billing "
-                            f"account (Pay-as-you-go) to your project at: https://ai.google.dev/gemini-api/docs/rate-limits"
-                        ) from veo_err
+                if dest_mp4.exists() and dest_mp4.stat().st_size > 1000:
+                    report = self._build_report_from_existing_mp4(
+                        dest_mp4=dest_mp4,
+                        prompt=stitched,
+                        word_sync=word_sync,
+                        concept_title=title,
+                    )
+                elif isinstance(veo_err, PermissionError) or "429" in err_str or "RESOURCE_EXHAUSTED" in err_str or "QUOTA" in err_str:
+                    raise PermissionError(
+                        f"VEO 3.1 API QUOTA EXHAUSTED: Google AI Studio returned 429 RESOURCE_EXHAUSTED. "
+                        f"To enable headless video generation in production, link a Google Cloud Billing "
+                        f"account (Pay-as-you-go) to your project at: https://ai.google.dev/gemini-api/docs/rate-limits"
+                    ) from veo_err
                 else:
                     raise veo_err
         elif self.flow_client is not None:

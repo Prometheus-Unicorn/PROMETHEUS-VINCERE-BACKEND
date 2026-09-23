@@ -24,6 +24,9 @@ import os
 import re
 import time
 import urllib.request
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util import Retry
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -55,7 +58,7 @@ def _get_api_key() -> str:
     raise RuntimeError("GOOGLE_AI_STUDIO_API_KEY / GEMINI_API_KEY is not configured.")
 
 
-DEFAULT_MODEL = os.getenv("GOOGLE_AI_MODEL", "gemini-2.5-pro")
+DEFAULT_MODEL = os.getenv("GOOGLE_AI_MODEL", "gemini-3.8-flash")
 
 # ---------------------------------------------------------------------------
 # Policy Self-Critique Gate (Adversarial Linter)
@@ -310,6 +313,12 @@ MANDATORY OPERATING POLICIES:
       - For 'Step-by-step progress / indexing' -> A Swiss hardened steel Geneva drive indexing one slot and locking rigidly against a convex cam.
    - STRICT ANTI-KEY BITTING DIRECTIVE:
      - Avoid keys with thin, asymmetric serrated teeth (bitting). In latent video diffusion, thin key blades and asymmetric teeth induce acute epipolar ambiguity, resulting in 180-degree yaw flips and geometric melting. Favor volumetric, planar, and well-anchored mechanisms (scales, track switches, knife switches, Geneva drives, valves).
+   - STRICT ANTI-NOTABLE PERSON & CELEBRITY TRANSDUCTION DIRECTIVE (SAFETY GUARDRAIL):
+     - Never describe human faces, heads, or recognizable living public figures (e.g. Elon Musk, Sam Altman, Jeff Bezos, Mark Zuckerberg). Prompts containing public figure likenesses trigger Google's safety classifier and are rejected upstream.
+     - When speech references leaders, corporations, or monopolistic entities (e.g. Meta, Amazon, Apple, Google, Microsoft, OpenAI):
+       a) Transduce them into minimalist 3D architectural monoliths with laser-etched geometric emblems.
+       b) Or high-precision physical mechanical gear trains, dual-beam balance scales, or monolithic subterranean copper/gold busbars.
+       c) Preserve the intellectual conflict through physical force, torque, and material dominance—never human portraits.
 
 2. THE SPATIAL-TEMPORAL TEXTURED CANVAS (STRICT NO-TABLE POLICY):
    - Never position the asset on top of a table, desk, countertop, room floor, or any piece of furniture. Domestic/office furniture destroys editorial prestige.
@@ -600,15 +609,10 @@ def extract_and_synthesize_curito_prompt(
     }
 
     # Model priority: highest capability first, graceful fallback to faster variants.
-    # gemini-2.5-pro is the highest-quality Gemini model available on the API.
-    # gemini-2.5-pro-exp-03-25 / gemini-2.5-pro-preview-06-05 are experimental/preview
-    # variants with the same intelligence tier — useful if stable endpoint is rate-limited.
-    # gemini-2.5-flash is the fast/affordable fallback for when pro is unavailable.
+    # Model priority: gemini-3.8-flash (highest-tier, near-instantaneous reasoning)
+    # with automatic fallback to gemini-2.5-flash.
     PREFERRED_MODELS = [
-        "gemini-2.5-pro",
-        "gemini-2.5-pro-exp-03-25",
-        "gemini-2.5-pro-preview-06-05",
-        "gemini-2.5-flash-preview-05-20",
+        "gemini-3.8-flash",
         "gemini-2.5-flash",
     ]
     if model_name in PREFERRED_MODELS:
@@ -622,24 +626,30 @@ def extract_and_synthesize_curito_prompt(
     last_err = None
     res_json = None
 
+    session = requests.Session()
+    retries = Retry(total=3, backoff_factor=1.5, status_forcelist=[500, 502, 503, 504])
+    session.mount("https://", HTTPAdapter(max_retries=retries))
+
     for active_model in candidate_models:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{active_model}:generateContent?key={api_key}"
-        for attempt in range(2):
-            try:
-                print(f"Connecting to {active_model} (attempt {attempt + 1}/2)...", flush=True)
-                req = urllib.request.Request(
-                    url,
-                    data=json.dumps(payload).encode("utf-8"),
-                    headers={"Content-Type": "application/json"}
-                )
-                with urllib.request.urlopen(req, timeout=45) as resp:
-                    res_json = json.loads(resp.read().decode("utf-8"))
-                if res_json:
-                    break
-            except Exception as e:
-                last_err = e
-                print(f"Attempt {attempt + 1} with {active_model} failed: {e}", flush=True)
-                time.sleep(2)
+        try:
+            print(f"Connecting to {active_model} via robust session...", flush=True)
+            resp = session.post(
+                url,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=90,
+            )
+            if resp.status_code == 200:
+                res_json = resp.json()
+                print(f"Successfully received semantic extraction plan from {active_model}!", flush=True)
+                break
+            else:
+                last_err = RuntimeError(f"HTTP {resp.status_code}: {resp.text[:180]}")
+                print(f"Model {active_model} returned HTTP {resp.status_code}, falling through to next model...", flush=True)
+        except Exception as e:
+            last_err = e
+            print(f"Model {active_model} connection error ({e}), falling through to next model...", flush=True)
         if res_json:
             break
 
@@ -685,7 +695,8 @@ def extract_and_synthesize_curito_prompt(
             "4. Kinematics must enforce 1-DoF constrained axial rotation with strict rigid-body topological permanence (ZERO 180-degree yaw flips, zero morphing).\n"
             "5. Ensure manner dynamics (rotational torque, decelerating engagement, mechanical locked-state).\n"
             "6. Ensure zero typography, zero 2D UI elements, and explicit upper negative space reservation.\n"
-            "Return the updated, fully compliant JSON matching the schema."
+            "7. Do NOT place quotes inside the assembled_diffusion_prompt string.\n"
+            "Return the updated, fully compliant JSON matching the complete schema and preserving all metadata fields."
         )
 
         refine_payload = {
@@ -705,13 +716,16 @@ def extract_and_synthesize_curito_prompt(
         for active_model in candidate_models:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{active_model}:generateContent?key={api_key}"
             try:
-                req = urllib.request.Request(
+                resp = session.post(
                     url,
-                    data=json.dumps(refine_payload).encode("utf-8"),
-                    headers={"Content-Type": "application/json"}
+                    json=refine_payload,
+                    headers={"Content-Type": "application/json"},
+                    timeout=90,
                 )
-                with urllib.request.urlopen(req, timeout=45) as resp:
-                    refine_res = json.loads(resp.read().decode("utf-8"))
+                if resp.status_code != 200:
+                    print(f"Refinement attempt with {active_model} returned HTTP {resp.status_code}", flush=True)
+                    continue
+                refine_res = resp.json()
                 raw_text = refine_res["candidates"][0]["content"]["parts"][0]["text"].strip()
                 if raw_text.startswith("```"):
                     raw_text = raw_text.split("```")[1]
@@ -723,10 +737,11 @@ def extract_and_synthesize_curito_prompt(
                     refined_extracted = refined_extracted[0]
                 new_prompt = refined_extracted.get("assembled_diffusion_prompt", "")
                 new_audit = DiffusionPromptPolicyCritic.audit_prompt(new_prompt)
-                refined_extracted["initial_draft_prompt"] = prompt
-                refined_extracted["critique_violations_fixed"] = audit.get("flaws", [])
-                refined_extracted["critique_iterations_run"] = critique_iterations
-                extracted = refined_extracted
+                extracted.update(refined_extracted)
+                extracted["assembled_diffusion_prompt"] = new_prompt
+                extracted["initial_draft_prompt"] = prompt
+                extracted["critique_violations_fixed"] = audit.get("flaws", [])
+                extracted["critique_iterations_run"] = critique_iterations
                 audit = new_audit
                 prompt = new_prompt
                 refined_success = True
