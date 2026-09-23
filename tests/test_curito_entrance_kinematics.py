@@ -131,6 +131,22 @@ class TestCuritoEntranceKinematics(unittest.TestCase):
         res = DiffusionPromptPolicyCritic.audit_prompt(compliant_prompt)
         self.assertTrue(res["passed"], f"Expected compliant prompt to pass but got flaws: {res['flaws']}")
 
+    def test_audit_prompt_handles_negated_forbidden_terms(self):
+        """Negated terms like 'no camera orbit' and 'no table' must not trigger policy violations."""
+        prompt = (
+            "The scene opens on an unpopulated, pristine graphic canvas with subtle halftone dot screening, "
+            "reserving upper 45% as clean negative space, with absolutely no table or domestic furniture. "
+            "At frame 0, a high-precision dual-throw knife switch with heavy copper blades initiates from "
+            "submerged off-screen position Y: +120% and is propelled upward along vertical axis, animates into view "
+            "with steep power4.out cubic deceleration into locked centroid position by 1.2s. "
+            "Solid copper busbars and blackened carbon steel. Warm diffuse overhead wash with floating ambient occlusion. "
+            "Spatially locked fixed-tripod 45-degree isometric view with absolutely no camera orbit and zero revolving camera motion. "
+            "Constrained 1-DoF single-axis downward rotation, strict rigid-body topological permanence, single cohesive mesh, "
+            "zero 180-degree yaw flipping, zero ghosting, 24fps native cadence. Snapping down into busbar jaws with rotational torque."
+        )
+        res = DiffusionPromptPolicyCritic.audit_prompt(prompt)
+        self.assertTrue(res["passed"], f"Expected negated prompt to pass cleanly but got flaws: {res['flaws']}")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -106,6 +106,13 @@ class DiffusionPromptPolicyCritic:
     TIMECODE_REGEX = re.compile(r"(\+\d+(\.\d+)?s|\b\d+-frame\b|timed to the beat|at \d+s)", re.IGNORECASE)
 
     @classmethod
+    def _is_negated(cls, text: str, match_start: int) -> bool:
+        """Checks if a term occurrence is explicitly negated in the prompt."""
+        preceding = text[max(0, match_start - 30):match_start]
+        negation_tokens = ["no ", "zero ", "without ", "never ", "avoid ", "not ", "no compound "]
+        return any(neg in preceding for neg in negation_tokens)
+
+    @classmethod
     def audit_prompt(cls, prompt_text: str) -> Dict[str, Any]:
         """Adversarially audits a diffusion prompt against mandatory policies.
         
@@ -142,13 +149,19 @@ class DiffusionPromptPolicyCritic:
 
         # 4. Anti-Blob & Tangible Physical Metaphor Check
         for term in cls.FORBIDDEN_ABSTRACT_BLOB_TERMS:
-            if term in lowered:
-                flaws.append(f"VIOLATION (Anti-Blob): Prompt relies on lazy abstract mass '{term}' instead of a tangible, iconic hero artifact.")
+            matches = list(re.finditer(r"\b" + re.escape(term) + r"\b", lowered))
+            for m in matches:
+                if not cls._is_negated(lowered, m.start()):
+                    flaws.append(f"VIOLATION (Anti-Blob): Prompt relies on lazy abstract mass '{term}' instead of a tangible, iconic hero artifact.")
+                    break
 
         # 5. Table & Furniture Check (Strict No-Table Requirement)
         for term in cls.FORBIDDEN_TABLE_TERMS:
-            if re.search(r"\b" + re.escape(term) + r"\b", lowered):
-                flaws.append(f"VIOLATION (No-Table): Prompt places asset on domestic/office furniture '{term}'. Must be rendered in spatial-temporal space against a textured graphic background.")
+            matches = list(re.finditer(r"\b" + re.escape(term) + r"\b", lowered))
+            for m in matches:
+                if not cls._is_negated(lowered, m.start()):
+                    flaws.append(f"VIOLATION (No-Table): Prompt places asset on domestic/office furniture '{term}'. Must be rendered in spatial-temporal space against a textured graphic background.")
+                    break
 
         # 6. Recognizable Hero Artifact Verification
         has_hero_artifact = any(w in lowered for w in [
@@ -173,8 +186,11 @@ class DiffusionPromptPolicyCritic:
 
         # 8. Rigid-Body Permanence & Camera Rig Discipline Check (Anti-Yaw-Flip Rule)
         for term in cls.FORBIDDEN_COMPOUND_CAMERA_TERMS:
-            if term in lowered:
-                flaws.append(f"VIOLATION (Camera Discipline): Prompt specifies compound camera move '{term}'. Camera must be fixed/locked tripod or pure 1-axis linear push to prevent 6-DoF 180-degree yaw flips.")
+            matches = list(re.finditer(r"\b" + re.escape(term) + r"\b", lowered))
+            for m in matches:
+                if not cls._is_negated(lowered, m.start()):
+                    flaws.append(f"VIOLATION (Camera Discipline): Prompt specifies compound camera move '{term}'. Camera must be fixed/locked tripod or pure 1-axis linear push to prevent 6-DoF 180-degree yaw flips.")
+                    break
 
         has_rigid_stability = any(w in lowered for w in [
             "rigid-body", "fixed axis", "locked axis", "invariant", "topological permanence",
