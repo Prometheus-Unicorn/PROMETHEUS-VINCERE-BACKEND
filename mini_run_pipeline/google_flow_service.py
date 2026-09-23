@@ -41,44 +41,16 @@ DEFAULT_WORKSPACE_URL = "https://flow.google.com/project/847e1afb-3351-417f-ba65
 
 
 def resolve_browser_executable(custom_path: Optional[str] = None) -> Optional[str]:
-    """Dynamically resolves the Chrome/Chromium binary across Windows, Linux, and GHA runners."""
-    if custom_path:
-        if Path(custom_path).exists() or shutil.which(custom_path):
-            return str(custom_path)
+    """Dynamically resolves custom Chrome binary if requested, else defaults to Playwright's Chromium."""
+    if custom_path and (Path(custom_path).exists() or shutil.which(custom_path)):
+        return str(custom_path)
 
     env_path = os.environ.get("CHROME_PATH") or os.environ.get("BROWSER_PATH")
-    if env_path:
-        if Path(env_path).exists() or shutil.which(env_path):
-            return str(env_path)
+    if env_path and (Path(env_path).exists() or shutil.which(env_path)):
+        return str(env_path)
 
-    if sys.platform == "win32":
-        win_candidates = [
-            r"C:\Program Files\Google\Chrome\Application\chrome.exe",
-            r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
-            os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe"),
-        ]
-        for cand in win_candidates:
-            if Path(cand).exists():
-                return str(cand)
-    elif sys.platform.startswith("linux") or sys.platform == "darwin":
-        linux_candidates = [
-            "google-chrome",
-            "google-chrome-stable",
-            "chromium",
-            "chromium-browser",
-            "/usr/bin/google-chrome",
-            "/usr/bin/google-chrome-stable",
-            "/usr/bin/chromium",
-            "/usr/bin/chromium-browser",
-        ]
-        for cand in linux_candidates:
-            resolved = shutil.which(cand)
-            if resolved:
-                return str(resolved)
-            if Path(cand).exists():
-                return str(cand)
-
-    # None falls back to Playwright's bundled Chromium
+    # None falls back to Playwright's bundled Chromium which cleanly supports CDP cookie injection
+    # and avoids host Chrome AppBound encryption restrictions on Windows.
     return None
 
 
@@ -262,13 +234,9 @@ class GoogleFlowServerClient:
                 "--ignore-gpu-blocklist",
                 "--enable-gpu-rasterization",
                 "--disable-blink-features=AutomationControlled",
-                "--disable-web-security",
-                "--allow-running-insecure-content",
                 "--dns-result-order=ipv4first",
                 "--no-first-run",
                 "--no-default-browser-check",
-                "--disable-sync",
-                "--disable-features=AppBoundEncryptionProvider,AppBoundEncryption",
             ]
             if sys.platform == "win32":
                 browser_args.extend(["--use-gl=angle", "--use-angle=d3d11"])
