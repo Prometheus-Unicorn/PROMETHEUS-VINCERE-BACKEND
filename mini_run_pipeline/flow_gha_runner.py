@@ -243,15 +243,25 @@ def main() -> None:
     args = parser.parse_args()
 
     auth_key = os.environ.get("FLOW_AUTH_KEY")
-    if not auth_key:
-        raise RuntimeError("FLOW_AUTH_KEY environment variable is required.")
-
     profile_dir = REPO_ROOT / "config" / "flow_browser_profile"
-    hydrate_browser_profile(
-        enc_path=REPO_ROOT / args.enc_bundle,
-        target_dir=profile_dir,
-        auth_key_hex=auth_key,
-    )
+    enc_path = REPO_ROOT / args.enc_bundle
+    repo_cookies = REPO_ROOT / "config" / "flow_cookies.json"
+
+    if auth_key and enc_path.exists():
+        try:
+            hydrate_browser_profile(
+                enc_path=enc_path,
+                target_dir=profile_dir,
+                auth_key_hex=auth_key,
+            )
+        except Exception as hyd_err:
+            logger.warning(f"Profile hydration failed ({hyd_err}), falling back to direct cookie injection.")
+            profile_dir.mkdir(parents=True, exist_ok=True)
+    elif repo_cookies.exists():
+        logger.info(f"Using repository flow_cookies.json directly for authentication.")
+        profile_dir.mkdir(parents=True, exist_ok=True)
+    else:
+        raise RuntimeError("Neither valid FLOW_AUTH_KEY with encrypted bundle nor config/flow_cookies.json is available.")
 
     # Purge stale Chrome Account Manager database and SQLite cookies from legacy profile
     # that mark the account as 'Signed out', allowing CDP cookie injection to authenticate cleanly.

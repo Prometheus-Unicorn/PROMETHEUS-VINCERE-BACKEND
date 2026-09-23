@@ -10,27 +10,29 @@ on:
 
 jobs:
   generate-flow-video:
-    runs-on: windows-latest
+    runs-on: [self-hosted, Windows]
     timeout-minutes: 20
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+        continue-on-error: true
 
       - name: Install dependencies
         run: |
-          pip install pywin32 cryptography playwright boto3 opencv-python-headless numpy requests google-genai
-          playwright install chromium
+          python -m pip install --upgrade pywin32 cryptography playwright boto3 opencv-python-headless numpy requests google-genai
+          python -m playwright install chromium
 
       - name: Run Headless Google Flow Generation & Hostile Critique
         env:
           FLOW_AUTH_KEY: ${{ secrets.FLOW_AUTH_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          FLOW_PROXY_URL: ${{ secrets.FLOW_PROXY_URL }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}

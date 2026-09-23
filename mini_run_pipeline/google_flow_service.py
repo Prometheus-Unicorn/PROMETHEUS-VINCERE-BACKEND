@@ -97,6 +97,7 @@ class FlowServiceConfig:
     viewport_width: int = 1440
     viewport_height: int = 900
     expected_account: str = "ipsasummagnitudo@gmail.com"
+    proxy_url: Optional[str] = field(default_factory=lambda: os.environ.get("FLOW_PROXY_URL"))
 
 
 @dataclass
@@ -292,6 +293,9 @@ class GoogleFlowServerClient:
             }
             if resolved_chrome:
                 launch_kwargs["executable_path"] = resolved_chrome
+            if self.config.proxy_url:
+                launch_kwargs["proxy"] = {"server": self.config.proxy_url}
+                logger.info(f"Routing browser traffic via proxy: {self.config.proxy_url.split('@')[-1]}")
 
             async with async_playwright() as p:
                 context = await p.chromium.launch_persistent_context(**launch_kwargs)

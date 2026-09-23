@@ -18,7 +18,7 @@ class TestGoogleFlowService(unittest.IsolatedAsyncioTestCase):
         config = FlowServiceConfig()
         self.assertTrue(config.headless)
         self.assertEqual(config.expected_account, "ipsasummagnitudo@gmail.com")
-        self.assertIn("0431f510-bbad-4c90-8157-f1723008eea3", config.workspace_url)
+        self.assertIn("847e1afb-3351-417f-ba65-a546af6ea7bf", config.workspace_url)
 
     async def test_prompt_injector_fast_insert(self):
         mock_page = MagicMock()
