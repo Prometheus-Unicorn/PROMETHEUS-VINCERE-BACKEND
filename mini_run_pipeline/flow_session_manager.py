@@ -44,25 +44,39 @@ class FlowProcessManager:
 
     @staticmethod
     def kill_stale_chrome_processes(profile_dir: Path) -> int:
-        """Kills any zombie chrome.exe processes using the profile directory."""
+        """Kills any zombie chrome processes using the profile directory across Windows and POSIX."""
         killed = 0
-        if sys.platform != "win32":
-            return killed
+        profile_str = str(profile_dir)
 
-        profile_str = str(profile_dir).replace("\\", "\\\\")
-        cmd = f'wmic process where "name=\'chrome.exe\' and commandline like \'%{profile_str}%\'" get processid'
-        try:
-            out = subprocess.check_output(cmd, shell=True, text=True, stderr=subprocess.DEVNULL)
-            pids = [int(p.strip()) for p in out.splitlines() if p.strip().isdigit()]
-            for pid in pids:
-                try:
-                    subprocess.run(f"taskkill /F /PID {pid}", shell=True, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                    killed += 1
-                    logger.info(f"Terminated orphan Chrome process PID: {pid}")
-                except Exception:
-                    pass
-        except Exception:
-            pass
+        if sys.platform == "win32":
+            profile_win = profile_str.replace("\\", "\\\\")
+            cmd = f'wmic process where "name=\'chrome.exe\' and commandline like \'%{profile_win}%\'" get processid'
+            try:
+                out = subprocess.check_output(cmd, shell=True, text=True, stderr=subprocess.DEVNULL)
+                pids = [int(p.strip()) for p in out.splitlines() if p.strip().isdigit()]
+                for pid in pids:
+                    try:
+                        subprocess.run(f"taskkill /F /PID {pid}", shell=True, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                        killed += 1
+                        logger.info(f"Terminated orphan Chrome process PID: {pid}")
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+        else:
+            # POSIX / Linux / GHA runner
+            try:
+                out = subprocess.check_output(["pgrep", "-f", profile_str], text=True, stderr=subprocess.DEVNULL)
+                pids = [int(p.strip()) for p in out.splitlines() if p.strip().isdigit()]
+                for pid in pids:
+                    try:
+                        subprocess.run(["kill", "-9", str(pid)], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                        killed += 1
+                        logger.info(f"Terminated orphan Chrome process PID: {pid}")
+                    except Exception:
+                        pass
+            except Exception:
+                pass
 
         if killed > 0:
             time.sleep(1.0)

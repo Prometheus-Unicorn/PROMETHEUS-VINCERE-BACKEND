@@ -38,7 +38,48 @@ if not logger.handlers:
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_PROFILE = REPO_ROOT / "config" / "flow_browser_profile"
 DEFAULT_WORKSPACE_URL = "https://flow.google.com/project/0431f510-bbad-4c90-8157-f1723008eea3"
-CHROME_PATH = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+
+
+def resolve_browser_executable(custom_path: Optional[str] = None) -> Optional[str]:
+    """Dynamically resolves the Chrome/Chromium binary across Windows, Linux, and GHA runners."""
+    if custom_path:
+        if Path(custom_path).exists() or shutil.which(custom_path):
+            return str(custom_path)
+
+    env_path = os.environ.get("CHROME_PATH") or os.environ.get("BROWSER_PATH")
+    if env_path:
+        if Path(env_path).exists() or shutil.which(env_path):
+            return str(env_path)
+
+    if sys.platform == "win32":
+        win_candidates = [
+            r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+            r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+            os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe"),
+        ]
+        for cand in win_candidates:
+            if Path(cand).exists():
+                return str(cand)
+    elif sys.platform.startswith("linux") or sys.platform == "darwin":
+        linux_candidates = [
+            "google-chrome",
+            "google-chrome-stable",
+            "chromium",
+            "chromium-browser",
+            "/usr/bin/google-chrome",
+            "/usr/bin/google-chrome-stable",
+            "/usr/bin/chromium",
+            "/usr/bin/chromium-browser",
+        ]
+        for cand in linux_candidates:
+            resolved = shutil.which(cand)
+            if resolved:
+                return str(resolved)
+            if Path(cand).exists():
+                return str(cand)
+
+    # None falls back to Playwright's bundled Chromium
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -50,7 +91,7 @@ class FlowServiceConfig:
     """Configuration for headless Google Flow automation service."""
     workspace_url: str = DEFAULT_WORKSPACE_URL
     profile_dir: Path = DEFAULT_PROFILE
-    chrome_path: str = CHROME_PATH
+    chrome_path: Optional[str] = None
     headless: bool = True
     timeout_sec: int = 600
     viewport_width: int = 1440
@@ -212,26 +253,40 @@ class GoogleFlowServerClient:
             FlowProcessManager.kill_stale_chrome_processes(self.config.profile_dir)
             FlowProcessManager.cleanup_stale_locks(self.config.profile_dir)
 
-            # Step 2: Launch persistent context
+            # Step 2: Launch persistent context with cross-platform browser resolution
+            resolved_chrome = resolve_browser_executable(self.config.chrome_path)
+            browser_args = [
+                "--enable-webgl",
+                "--ignore-gpu-blocklist",
+                "--enable-gpu-rasterization",
+                "--disable-blink-features=AutomationControlled",
+                "--dns-result-order=ipv4first",
+            ]
+            if sys.platform == "win32":
+                browser_args.extend(["--use-gl=angle", "--use-angle=d3d11"])
+            else:
+                browser_args.extend([
+                    "--no-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--disable-gpu-sandbox",
+                    "--use-gl=angle",
+                    "--use-angle=swiftshader",
+                ])
+
+            launch_kwargs: Dict[str, Any] = {
+                "user_data_dir": str(self.config.profile_dir.resolve()),
+                "headless": self.config.headless,
+                "args": browser_args,
+                "viewport": {
+                    "width": self.config.viewport_width,
+                    "height": self.config.viewport_height,
+                },
+            }
+            if resolved_chrome:
+                launch_kwargs["executable_path"] = resolved_chrome
+
             async with async_playwright() as p:
-                context = await p.chromium.launch_persistent_context(
-                    user_data_dir=str(self.config.profile_dir.resolve()),
-                    executable_path=self.config.chrome_path,
-                    headless=self.config.headless,
-                    args=[
-                        "--enable-webgl",
-                        "--ignore-gpu-blocklist",
-                        "--enable-gpu-rasterization",
-                        "--use-gl=angle",
-                        "--use-angle=d3d11",
-                        "--disable-blink-features=AutomationControlled",
-                        "--dns-result-order=ipv4first",
-                    ],
-                    viewport={
-                        "width": self.config.viewport_width,
-                        "height": self.config.viewport_height,
-                    },
-                )
+                context = await p.chromium.launch_persistent_context(**launch_kwargs)
                 try:
                     page = context.pages[0] if context.pages else await context.new_page()
 
