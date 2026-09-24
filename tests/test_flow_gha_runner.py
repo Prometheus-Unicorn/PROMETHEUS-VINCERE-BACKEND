@@ -102,26 +102,53 @@ class TestFlowGhaRunner(unittest.TestCase):
         res = run_hostile_critique(tmp_path / "non_existent.mp4")
         self.assertIn(res["status"], ("PASS", "FLAGGED", "SKIPPED"))
 
-    def test_resolve_auth_strategy_prefers_repo_cookies(self):
-        """Ensures repo cookies are strictly prioritized over encrypted bundle."""
+    def test_resolve_auth_strategy_prefers_cdp_live(self):
+        """Ensures active CDP session is prioritized over all file-based auth."""
+        from unittest.mock import patch
         tmp_path = Path(self.test_dir)
         repo_cookies = tmp_path / "flow_cookies.json"
         repo_cookies.write_text("[]", encoding="utf-8")
         enc_bundle = tmp_path / "flow_auth_bundle.enc"
         enc_bundle.write_bytes(b"mock_encrypted_data")
 
-        # When repo cookies exist, return repo_cookies even if enc_bundle and auth_key are present
-        res = resolve_auth_strategy(repo_cookies=repo_cookies, enc_path=enc_bundle, auth_key="abcdef123456")
+        with patch("mini_run_pipeline.google_flow_service.is_cdp_endpoint_alive", return_value=True):
+            res = resolve_auth_strategy(
+                repo_cookies=repo_cookies,
+                enc_path=enc_bundle,
+                auth_key="abcdef123456",
+                cdp_url="http://127.0.0.1:9222",
+            )
+            self.assertEqual(res, "cdp_live")
+
+    def test_resolve_auth_strategy_prefers_repo_cookies(self):
+        """Ensures repo cookies are strictly prioritized over encrypted bundle when CDP is absent."""
+        tmp_path = Path(self.test_dir)
+        repo_cookies = tmp_path / "flow_cookies.json"
+        repo_cookies.write_text("[]", encoding="utf-8")
+        enc_bundle = tmp_path / "flow_auth_bundle.enc"
+        enc_bundle.write_bytes(b"mock_encrypted_data")
+
+        res = resolve_auth_strategy(
+            repo_cookies=repo_cookies,
+            enc_path=enc_bundle,
+            auth_key="abcdef123456",
+            cdp_url="http://127.0.0.1:65534",
+        )
         self.assertEqual(res, "repo_cookies")
 
     def test_resolve_auth_strategy_falls_back_to_bundle(self):
-        """Ensures fallback to encrypted bundle when repo cookies are absent."""
+        """Ensures fallback to encrypted bundle when repo cookies and CDP are absent."""
         tmp_path = Path(self.test_dir)
         repo_cookies = tmp_path / "absent_cookies.json"
         enc_bundle = tmp_path / "flow_auth_bundle.enc"
         enc_bundle.write_bytes(b"mock_encrypted_data")
 
-        res = resolve_auth_strategy(repo_cookies=repo_cookies, enc_path=enc_bundle, auth_key="abcdef123456")
+        res = resolve_auth_strategy(
+            repo_cookies=repo_cookies,
+            enc_path=enc_bundle,
+            auth_key="abcdef123456",
+            cdp_url="http://127.0.0.1:65534",
+        )
         self.assertEqual(res, "enc_bundle")
 
     def test_resolve_auth_strategy_raises_when_neither(self):
@@ -131,7 +158,12 @@ class TestFlowGhaRunner(unittest.TestCase):
         enc_bundle = tmp_path / "absent_bundle.enc"
 
         with self.assertRaises(RuntimeError):
-            resolve_auth_strategy(repo_cookies=repo_cookies, enc_path=enc_bundle, auth_key=None)
+            resolve_auth_strategy(
+                repo_cookies=repo_cookies,
+                enc_path=enc_bundle,
+                auth_key=None,
+                cdp_url="http://127.0.0.1:65534",
+            )
 
 
 if __name__ == "__main__":

@@ -235,14 +235,23 @@ def run_hostile_critique(mp4_path: Path) -> Dict[str, Any]:
         return {"status": "SKIPPED", "error": str(exc)}
 
 
-def resolve_auth_strategy(repo_cookies: Path, enc_path: Path, auth_key: Optional[str]) -> str:
-    """Resolves authentication source, strictly prioritizing fresh cookies over stale profile bundles."""
-    if repo_cookies.exists():
+def resolve_auth_strategy(
+    repo_cookies: Path,
+    enc_path: Path,
+    auth_key: Optional[str],
+    cdp_url: Optional[str] = None,
+) -> str:
+    """Resolves authentication source, strictly prioritizing live CDP session -> fresh cookies -> encrypted bundle."""
+    from mini_run_pipeline.google_flow_service import is_cdp_endpoint_alive
+    target_cdp = cdp_url or os.environ.get("FLOW_CDP_URL", "http://127.0.0.1:9222")
+    if is_cdp_endpoint_alive(target_cdp):
+        return "cdp_live"
+    elif repo_cookies.exists():
         return "repo_cookies"
     elif auth_key and enc_path.exists():
         return "enc_bundle"
     else:
-        raise RuntimeError("Neither valid config/flow_cookies.json nor valid FLOW_AUTH_KEY with encrypted bundle is available.")
+        raise RuntimeError("Neither active CDP endpoint, valid config/flow_cookies.json, nor valid FLOW_AUTH_KEY with encrypted bundle is available.")
 
 
 def main() -> None:
@@ -259,7 +268,10 @@ def main() -> None:
 
     hydrated = False
     strategy = resolve_auth_strategy(repo_cookies=repo_cookies, enc_path=enc_path, auth_key=auth_key)
-    if strategy == "repo_cookies":
+    if strategy == "cdp_live":
+        logger.info("Active native Chrome CDP session detected. Using live authenticated session directly.")
+        profile_dir.mkdir(parents=True, exist_ok=True)
+    elif strategy == "repo_cookies":
         logger.info("Using repository flow_cookies.json directly for authentication.")
         profile_dir.mkdir(parents=True, exist_ok=True)
     elif strategy == "enc_bundle":
@@ -301,11 +313,12 @@ def main() -> None:
             except Exception:
                 pass
 
-    # Synchronize fresh repository cookies into profile directory if present
-    repo_cookies = REPO_ROOT / "config" / "flow_cookies.json"
-    if repo_cookies.exists():
-        shutil.copyfile(repo_cookies, profile_dir / "flow_cookies.json")
-        logger.info(f"Synchronized fresh authentication cookies to {profile_dir / 'flow_cookies.json'}")
+    # Synchronize fresh repository cookies into profile directory if present (non-CDP mode only)
+    if strategy != "cdp_live":
+        repo_cookies = REPO_ROOT / "config" / "flow_cookies.json"
+        if repo_cookies.exists():
+            shutil.copyfile(repo_cookies, profile_dir / "flow_cookies.json")
+            logger.info(f"Synchronized fresh authentication cookies to {profile_dir / 'flow_cookies.json'}")
 
     # Ingest transcript
     if args.transcript_json and Path(args.transcript_json).exists():
