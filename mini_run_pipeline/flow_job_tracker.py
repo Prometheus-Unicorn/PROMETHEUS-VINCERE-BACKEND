@@ -38,6 +38,44 @@ class FlowJobTracker:
         return sources
 
     @staticmethod
+    async def resolve_credit_approval(page: Page) -> Optional[str]:
+        """Detects and clicks 'Always approve' or 'Approve' credit gates in Flow session."""
+        try:
+            # First try evaluating in DOM to find text node and closest clickable element
+            clicked = await page.evaluate('''() => {
+                for (const text of ['Always approve', 'Approve']) {
+                    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+                    let node;
+                    while (node = walker.nextNode()) {
+                        const val = (node.nodeValue || '').trim();
+                        if (val === text || (val.includes(text) && val.length < text.length + 15)) {
+                            const btn = node.parentElement ? (node.parentElement.closest('button, [role="button"], div[tabindex], div') || node.parentElement) : null;
+                            if (btn && btn.offsetParent !== null) {
+                                btn.click();
+                                return text;
+                            }
+                        }
+                    }
+                }
+                return null;
+            }''')
+            if clicked in ("Always approve", "Approve"):
+                return clicked
+        except Exception:
+            pass
+
+        # Fallback to Playwright get_by_text locators
+        for text_target in ["Always approve", "Approve"]:
+            try:
+                loc = page.get_by_text(text_target, exact=False).first
+                if await loc.is_visible(timeout=500):
+                    await loc.click(force=True)
+                    return text_target
+            except Exception:
+                pass
+        return None
+
+    @staticmethod
     async def wait_for_new_video(
         page: Page,
         initial_sources: Set[str],
@@ -62,11 +100,9 @@ class FlowJobTracker:
                 await asyncio.sleep(2.0)
 
             # Check for credit approval modal
-            approve_btn = await page.query_selector("button:has-text('Always approve'), button:has-text('Approve')")
-            if approve_btn and await approve_btn.is_visible():
-                btn_txt = (await approve_btn.inner_text()).strip()
-                logger.info(f"[{elapsed}s] Credit approval gate detected: Clicking '{btn_txt}'...")
-                await approve_btn.click()
+            approved_text = await FlowJobTracker.resolve_credit_approval(page)
+            if approved_text:
+                logger.info(f"[{elapsed}s] Credit approval gate detected & resolved: Clicked '{approved_text}'")
                 await asyncio.sleep(2.0)
 
             # Check for fatal agent error cards in session

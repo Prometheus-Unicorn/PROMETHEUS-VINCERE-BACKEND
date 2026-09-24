@@ -186,7 +186,15 @@ class FlowPromptInjector:
                 await page.mouse.click(box["x"] + box["width"] + 25, box["y"] + (box["height"] / 2))
             await page.keyboard.press("Enter")
 
-        logger.info("Generation dispatch executed.")
+        logger.info("Generation dispatch executed. Checking for instant credit approval...")
+        from .flow_job_tracker import FlowJobTracker
+        for _ in range(8):
+            await page.wait_for_timeout(1000)
+            approved = await FlowJobTracker.resolve_credit_approval(page)
+            if approved:
+                logger.info(f"Instant credit approval resolved: Clicked '{approved}'")
+                await page.wait_for_timeout(1500)
+                break
 
 
 from .flow_job_tracker import FlowJobTracker, FlowVideoDownloader
