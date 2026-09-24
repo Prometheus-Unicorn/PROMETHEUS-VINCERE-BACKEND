@@ -289,11 +289,7 @@ class GoogleFlowServerClient:
         async with self._instance_lock:
             logger.info(f"Lock acquired. Initiating generation job for output: {output_path.name}")
             
-            # Step 1: Process sanitization
-            FlowProcessManager.kill_stale_chrome_processes(self.config.profile_dir)
-            FlowProcessManager.cleanup_stale_locks(self.config.profile_dir)
-
-            # Step 2: Connection Strategy: Active CDP -> Dedicated Profile Chrome -> Persistent Context
+            # Step 1: Connection Strategy: Active CDP -> Dedicated Profile Chrome -> Persistent Context
             cdp_target = self.config.cdp_url or "http://127.0.0.1:9222"
             dedicated_proc: Optional[subprocess.Popen] = None
             is_cdp_mode = False
@@ -314,6 +310,10 @@ class GoogleFlowServerClient:
                             is_cdp_mode = True
                             logger.info(f"Dedicated native Chrome CDP online at {cdp_target}.")
                             break
+
+            if not is_cdp_mode:
+                FlowProcessManager.kill_stale_chrome_processes(self.config.profile_dir)
+                FlowProcessManager.cleanup_stale_locks(self.config.profile_dir)
 
             resolved_chrome = resolve_browser_executable(self.config.chrome_path)
             logger.info(f"Resolved browser executable: {resolved_chrome}")
