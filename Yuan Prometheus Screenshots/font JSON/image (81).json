@@ -1,0 +1,144 @@
+{
+  "filename": "image (81).json",
+  "profile_id": "image (81)",
+  "profile_name": "Cinematic_Reel_Style_Didone_Editorial_Accent_Dot",
+  "version": "1.0.0",
+  "cranial_spec": {
+    "alignment": "center",
+    "dominant_zone": "cranial_crown",
+    "head_framing": {
+      "x": 0.5,
+      "y": 0.25,
+      "width": 0.25,
+      "height": 0.35,
+      "headroom_ratio": 0.25
+    },
+    "text_relationship": "center_chest_or_supra_cranial",
+    "suitable_word_counts": [
+      3,
+      4
+    ],
+    "character_count_range": [
+      17,
+      29
+    ]
+  },
+  "metadata": {
+    "target_aspect_ratio": "9:16",
+    "overall_mood": "High luxury film aesthetic, two-tone modern sans kicker with Didone editorial serif and accent period",
+    "casing_strategy": "mixed",
+    "total_word_count": 3,
+    "total_character_count": 19,
+    "per_word_character_counts": [
+      {
+        "word": "Cinematic",
+        "character_count": 9
+      },
+      {
+        "word": "Reel",
+        "character_count": 4
+      },
+      {
+        "word": "Style.",
+        "character_count": 6
+      }
+    ],
+    "treatment_system": "precision_font_tracing_and_overlap",
+    "treatment_notes": "High fidelity extraction from img742_06_cinematic_reel_style.png. Retains subtle bevels, radiant blooms, iridescence, and exact font tracing overlap geometry.",
+    "paired_image": "image (81).png",
+    "mixed_fonts_verified": true,
+    "mixfont_extracted_at": "2026-09-24T10:00:00Z"
+  },
+  "layout_rules": {
+    "horizontal_alignment": "center",
+    "vertical_position": "center",
+    "upper_cranial_y_percent": 18.0,
+    "behind_subject_depth": false,
+    "scrim_overlay": {
+      "enabled": false
+    }
+  },
+  "typography_layers": [
+    {
+      "layer_name": "kicker_cinematic_reel",
+      "role": "secondary_clause",
+      "raw_text": "Cinematic Reel",
+      "font_classification": "Two-Tone Modern Bold Sans",
+      "font_family": "Montserrat",
+      "matched_font_candidates": [
+        "Montserrat",
+        "Altone Trial",
+        "Inter"
+      ],
+      "font_style": {
+        "weight": 700,
+        "style": "normal",
+        "casing": "normal",
+        "color": "#D4FF00",
+        "size_px_base": 36,
+        "letter_spacing_em": -0.01,
+        "line_height": 1.0,
+        "vertical_margin_top_px": 0
+      },
+      "effects": {
+        "shadow": "0 2px 8px rgba(0,0,0,0.8)"
+      },
+      "font_tracing": {
+        "overlap_mode": "bi_color_kicker",
+        "notes": "'Cinematic' in Lime (#D4FF00), 'Reel' in Muted Grey (#A0A0A0)"
+      },
+      "sample_text": "Cinematic Reel",
+      "word_count": 2,
+      "character_count": 13,
+      "per_word_character_counts": [
+        {
+          "word": "Cinematic",
+          "character_count": 9
+        },
+        {
+          "word": "Reel",
+          "character_count": 4
+        }
+      ]
+    },
+    {
+      "layer_name": "hero_didone_style_dot",
+      "role": "hero_keyword",
+      "raw_text": "Style.",
+      "font_classification": "High Contrast Didone Editorial Serif Italic with Yellow Dot",
+      "font_family": "Bodoni Moda",
+      "matched_font_candidates": [
+        "Bodoni Moda",
+        "SenzaBella",
+        "Playfair Display"
+      ],
+      "font_style": {
+        "weight": 600,
+        "style": "italic",
+        "casing": "capitalize",
+        "color": "#FFFFFF",
+        "size_px_base": 78,
+        "letter_spacing_em": -0.02,
+        "line_height": 0.9,
+        "vertical_margin_top_px": -10
+      },
+      "effects": {
+        "shadow": "0 6px 18px rgba(0,0,0,0.85)"
+      },
+      "font_tracing": {
+        "overlap_mode": "ascender_nesting_and_accent_period",
+        "vertical_overlap_px": -10,
+        "notes": "Ascender of 't' nests under upper kicker; distinctive yellow accent dot terminates baseline"
+      },
+      "sample_text": "Style.",
+      "word_count": 1,
+      "character_count": 6,
+      "per_word_character_counts": [
+        {
+          "word": "Style.",
+          "character_count": 6
+        }
+      ]
+    }
+  ]
+}

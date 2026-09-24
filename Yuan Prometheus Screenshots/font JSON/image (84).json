@@ -1,0 +1,119 @@
+{
+  "filename": "image (84).json",
+  "profile_id": "image (84)",
+  "profile_name": "Highlight_2_Dashed_Inspector_Bounding_Box",
+  "version": "1.0.0",
+  "cranial_spec": {
+    "alignment": "center",
+    "dominant_zone": "cranial_crown",
+    "head_framing": {
+      "x": 0.5,
+      "y": 0.25,
+      "width": 0.25,
+      "height": 0.35,
+      "headroom_ratio": 0.25
+    },
+    "text_relationship": "center_chest_or_supra_cranial",
+    "suitable_word_counts": [
+      2,
+      3
+    ],
+    "character_count_range": [
+      8,
+      20
+    ]
+  },
+  "metadata": {
+    "target_aspect_ratio": "9:16",
+    "overall_mood": "Analytical technical showcase, clean white modern sans in a red dashed inspector callout box",
+    "casing_strategy": "mixed",
+    "total_word_count": 2,
+    "total_character_count": 10,
+    "per_word_character_counts": [
+      {
+        "word": "Highlight",
+        "character_count": 9
+      },
+      {
+        "word": "2",
+        "character_count": 1
+      }
+    ],
+    "treatment_system": "precision_font_tracing_and_overlap",
+    "treatment_notes": "High fidelity extraction from img744_03_highlight_2.png. Retains subtle bevels, radiant blooms, iridescence, and exact font tracing overlap geometry.",
+    "paired_image": "image (84).png",
+    "mixed_fonts_verified": true,
+    "mixfont_extracted_at": "2026-09-24T10:00:00Z"
+  },
+  "layout_rules": {
+    "horizontal_alignment": "center",
+    "vertical_position": "center",
+    "upper_cranial_y_percent": 18.0,
+    "behind_subject_depth": false,
+    "scrim_overlay": {
+      "enabled": false
+    }
+  },
+  "typography_layers": [
+    {
+      "layer_name": "hero_highlight_2",
+      "role": "hero_keyword",
+      "raw_text": "Highlight 2",
+      "font_classification": "Clean Modern Geometric Sans",
+      "font_family": "Inter",
+      "matched_font_candidates": [
+        "Inter",
+        "Montserrat",
+        "Altone Trial"
+      ],
+      "font_style": {
+        "weight": 700,
+        "style": "normal",
+        "casing": "title",
+        "color": "#FFFFFF",
+        "size_px_base": 46,
+        "letter_spacing_em": -0.01,
+        "line_height": 1.0,
+        "vertical_margin_top_px": 0
+      },
+      "effects": {
+        "shadow": "0 2px 8px rgba(0,0,0,0.8)"
+      },
+      "font_tracing": {
+        "overlap_mode": "enclosed_bounding_box",
+        "notes": "Text centered inside dashed technical bounding box annotation"
+      },
+      "sample_text": "Highlight 2",
+      "word_count": 2,
+      "character_count": 10,
+      "per_word_character_counts": [
+        {
+          "word": "Highlight",
+          "character_count": 9
+        },
+        {
+          "word": "2",
+          "character_count": 1
+        }
+      ]
+    }
+  ],
+  "annotations": [
+    {
+      "type": "dashed_bounding_box",
+      "target": "phrase",
+      "stroke_color": "#FF2A2A",
+      "stroke_width_px": 2,
+      "stroke_dash_array": [
+        4,
+        4
+      ],
+      "padding_px": [
+        6,
+        14
+      ],
+      "border_radius_px": 4,
+      "glow": "0 0 10px rgba(255,42,42,0.4)"
+    }
+  ]
+}

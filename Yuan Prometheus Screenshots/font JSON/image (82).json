@@ -1,0 +1,137 @@
+{
+  "filename": "image (82).json",
+  "profile_id": "image (82)",
+  "profile_name": "Super_Captions_Ultra_Bold_Geometric_Yellow_Script_Interlock",
+  "version": "1.0.0",
+  "cranial_spec": {
+    "alignment": "center",
+    "dominant_zone": "cranial_crown",
+    "head_framing": {
+      "x": 0.5,
+      "y": 0.25,
+      "width": 0.25,
+      "height": 0.35,
+      "headroom_ratio": 0.25
+    },
+    "text_relationship": "center_chest_or_supra_cranial",
+    "suitable_word_counts": [
+      2,
+      3
+    ],
+    "character_count_range": [
+      11,
+      23
+    ]
+  },
+  "metadata": {
+    "target_aspect_ratio": "9:16",
+    "overall_mood": "High impact social video caption title, ultra-bold white geometric sans interlocked with casual yellow script",
+    "casing_strategy": "mixed",
+    "total_word_count": 2,
+    "total_character_count": 13,
+    "per_word_character_counts": [
+      {
+        "word": "Super",
+        "character_count": 5
+      },
+      {
+        "word": "Captions",
+        "character_count": 8
+      }
+    ],
+    "treatment_system": "precision_font_tracing_and_overlap",
+    "treatment_notes": "High fidelity extraction from img745_04_super_captions.png. Retains subtle bevels, radiant blooms, iridescence, and exact font tracing overlap geometry.",
+    "paired_image": "image (82).png",
+    "mixed_fonts_verified": true,
+    "mixfont_extracted_at": "2026-09-24T10:00:00Z"
+  },
+  "layout_rules": {
+    "horizontal_alignment": "center",
+    "vertical_position": "center",
+    "upper_cranial_y_percent": 18.0,
+    "behind_subject_depth": false,
+    "scrim_overlay": {
+      "enabled": false
+    }
+  },
+  "typography_layers": [
+    {
+      "layer_name": "base_sans_super",
+      "role": "primary_focus_word",
+      "raw_text": "Super",
+      "font_classification": "Ultra Bold Geometric Block Sans",
+      "font_family": "LEMON MILK",
+      "matched_font_candidates": [
+        "LEMON MILK",
+        "Montserrat",
+        "Bebas Neue"
+      ],
+      "font_style": {
+        "weight": 900,
+        "style": "normal",
+        "casing": "capitalize",
+        "color": "#FFFFFF",
+        "size_px_base": 92,
+        "letter_spacing_em": -0.04,
+        "line_height": 1.0,
+        "vertical_margin_top_px": 0
+      },
+      "effects": {
+        "shadow": "0 6px 20px rgba(0,0,0,0.8)"
+      },
+      "font_tracing": {
+        "overlap_mode": "base_plate_interlock",
+        "notes": "Massive structural white geometric backdrop"
+      },
+      "sample_text": "Super",
+      "word_count": 1,
+      "character_count": 5,
+      "per_word_character_counts": [
+        {
+          "word": "Super",
+          "character_count": 5
+        }
+      ]
+    },
+    {
+      "layer_name": "overlay_script_captions",
+      "role": "accent",
+      "raw_text": "Captions",
+      "font_classification": "Vibrant Yellow Casual Cursive Script",
+      "font_family": "Dancing Script",
+      "matched_font_candidates": [
+        "Dancing Script",
+        "Alex Brush",
+        "Rhegina Darling"
+      ],
+      "font_style": {
+        "weight": 700,
+        "style": "italic",
+        "casing": "capitalize",
+        "color": "#FFC107",
+        "size_px_base": 72,
+        "letter_spacing_em": 0.01,
+        "line_height": 0.9,
+        "vertical_margin_top_px": -46
+      },
+      "effects": {
+        "shadow": "0 4px 14px rgba(0,0,0,0.6)",
+        "glow": "0 0 12px rgba(255,193,7,0.45)"
+      },
+      "font_tracing": {
+        "overlap_mode": "center_interlock_wrap",
+        "vertical_overlap_px": -46,
+        "notes": "Capital 'C' wraps around 'u' and 'p' of 'Super'; crossbar of 't' cuts through belly of 'p' and 'e'"
+      },
+      "sample_text": "Captions",
+      "word_count": 1,
+      "character_count": 8,
+      "per_word_character_counts": [
+        {
+          "word": "Captions",
+          "character_count": 8
+        }
+      ]
+    }
+  ]
+}

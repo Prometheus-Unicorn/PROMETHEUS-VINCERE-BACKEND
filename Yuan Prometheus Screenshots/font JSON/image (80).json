@@ -1,0 +1,162 @@
+{
+  "filename": "image (80).json",
+  "profile_id": "image (80)",
+  "profile_name": "All_You_Need_Is_CapCut_Lime_Iridescent_Hero",
+  "version": "1.0.0",
+  "cranial_spec": {
+    "alignment": "center",
+    "dominant_zone": "cranial_crown",
+    "head_framing": {
+      "x": 0.5,
+      "y": 0.25,
+      "width": 0.25,
+      "height": 0.35,
+      "headroom_ratio": 0.25
+    },
+    "text_relationship": "center_chest_or_supra_cranial",
+    "suitable_word_counts": [
+      5,
+      6
+    ],
+    "character_count_range": [
+      16,
+      28
+    ]
+  },
+  "metadata": {
+    "target_aspect_ratio": "9:16",
+    "overall_mood": "Viral tutorial headline, neutral clean sans kicker with giant iridescent lime-green hero display",
+    "casing_strategy": "mixed",
+    "total_word_count": 5,
+    "total_character_count": 18,
+    "per_word_character_counts": [
+      {
+        "word": "All",
+        "character_count": 3
+      },
+      {
+        "word": "you",
+        "character_count": 3
+      },
+      {
+        "word": "need",
+        "character_count": 4
+      },
+      {
+        "word": "is",
+        "character_count": 2
+      },
+      {
+        "word": "CapCut",
+        "character_count": 6
+      }
+    ],
+    "treatment_system": "precision_font_tracing_and_overlap",
+    "treatment_notes": "High fidelity extraction from img742_05_all_you_need_is_capcut.png. Retains subtle bevels, radiant blooms, iridescence, and exact font tracing overlap geometry.",
+    "paired_image": "image (80).png",
+    "mixed_fonts_verified": true,
+    "mixfont_extracted_at": "2026-09-24T10:00:00Z"
+  },
+  "layout_rules": {
+    "horizontal_alignment": "center",
+    "vertical_position": "center",
+    "upper_cranial_y_percent": 18.0,
+    "behind_subject_depth": false,
+    "scrim_overlay": {
+      "enabled": false
+    }
+  },
+  "typography_layers": [
+    {
+      "layer_name": "kicker_all_you_need_is",
+      "role": "secondary_clause",
+      "raw_text": "All you need is",
+      "font_classification": "Clean Neutral Modern Sans",
+      "font_family": "Inter",
+      "matched_font_candidates": [
+        "Inter",
+        "Montserrat"
+      ],
+      "font_style": {
+        "weight": 600,
+        "style": "normal",
+        "casing": "normal",
+        "color": "#FFFFFF",
+        "size_px_base": 24,
+        "letter_spacing_em": 0.0,
+        "line_height": 1.0,
+        "vertical_margin_top_px": 0
+      },
+      "effects": {
+        "shadow": "0 2px 6px rgba(0,0,0,0.8)"
+      },
+      "font_tracing": {
+        "overlap_mode": "negative_space_nesting",
+        "notes": "Nestled neatly into negative space above the shoulder of 'CapCut'"
+      },
+      "sample_text": "All you need is",
+      "word_count": 4,
+      "character_count": 12,
+      "per_word_character_counts": [
+        {
+          "word": "All",
+          "character_count": 3
+        },
+        {
+          "word": "you",
+          "character_count": 3
+        },
+        {
+          "word": "need",
+          "character_count": 4
+        },
+        {
+          "word": "is",
+          "character_count": 2
+        }
+      ]
+    },
+    {
+      "layer_name": "hero_lime_capcut",
+      "role": "hero_keyword",
+      "raw_text": "CapCut",
+      "font_classification": "Massive Bold Display Sans with Iridescent Lime Gradient",
+      "font_family": "Montserrat",
+      "matched_font_candidates": [
+        "Montserrat",
+        "Altone Trial",
+        "LEMON MILK"
+      ],
+      "font_style": {
+        "weight": 900,
+        "style": "normal",
+        "casing": "normal",
+        "color": "#CCFF00",
+        "size_px_base": 82,
+        "letter_spacing_em": -0.04,
+        "line_height": 0.9,
+        "vertical_margin_top_px": -2
+      },
+      "effects": {
+        "gradient": "linear-gradient(135deg, #E5FF4D 0%, #B8F500 50%, #70DB00 100%)",
+        "shadow": "0 10px 24px rgba(0,0,0,0.85)",
+        "glow": "0 0 16px rgba(184,245,0,0.5)",
+        "bevel": true
+      },
+      "font_tracing": {
+        "overlap_mode": "giant_anchor_shelf",
+        "vertical_overlap_px": -2,
+        "notes": "Iridescent lime specular highlight with subtle shadow falloff on left flank"
+      },
+      "sample_text": "CapCut",
+      "word_count": 1,
+      "character_count": 6,
+      "per_word_character_counts": [
+        {
+          "word": "CapCut",
+          "character_count": 6
+        }
+      ]
+    }
+  ]
+}

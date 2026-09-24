@@ -1,0 +1,179 @@
+{
+  "filename": "image (76).json",
+  "profile_id": "image (76)",
+  "profile_name": "Nobody_Teaches_This_Zero_Leading_Tricolor_Stack",
+  "version": "1.0.0",
+  "cranial_spec": {
+    "alignment": "center",
+    "dominant_zone": "cranial_crown",
+    "head_framing": {
+      "x": 0.5,
+      "y": 0.25,
+      "width": 0.25,
+      "height": 0.35,
+      "headroom_ratio": 0.25
+    },
+    "text_relationship": "center_chest_or_supra_cranial",
+    "suitable_word_counts": [
+      3,
+      4
+    ],
+    "character_count_range": [
+      15,
+      27
+    ]
+  },
+  "metadata": {
+    "target_aspect_ratio": "9:16",
+    "overall_mood": "Authoritative brutalist education hook, zero-leading interlocking multi-tier stack",
+    "casing_strategy": "mixed",
+    "total_word_count": 3,
+    "total_character_count": 17,
+    "per_word_character_counts": [
+      {
+        "word": "Nobody",
+        "character_count": 6
+      },
+      {
+        "word": "teaches",
+        "character_count": 7
+      },
+      {
+        "word": "this",
+        "character_count": 4
+      }
+    ],
+    "treatment_system": "precision_font_tracing_and_overlap",
+    "treatment_notes": "High fidelity extraction from img741_05_nobody_teaches_this.png. Retains subtle bevels, radiant blooms, iridescence, and exact font tracing overlap geometry.",
+    "paired_image": "image (76).png",
+    "mixed_fonts_verified": true,
+    "mixfont_extracted_at": "2026-09-24T10:00:00Z"
+  },
+  "layout_rules": {
+    "horizontal_alignment": "center",
+    "vertical_position": "center",
+    "upper_cranial_y_percent": 18.0,
+    "behind_subject_depth": false,
+    "scrim_overlay": {
+      "enabled": false
+    }
+  },
+  "typography_layers": [
+    {
+      "layer_name": "top_white_nobody",
+      "role": "secondary_clause",
+      "raw_text": "Nobody",
+      "font_classification": "Ultra Bold Grotesque Sans",
+      "font_family": "Montserrat",
+      "matched_font_candidates": [
+        "Montserrat",
+        "Inter",
+        "Altone Trial"
+      ],
+      "font_style": {
+        "weight": 900,
+        "style": "normal",
+        "casing": "title",
+        "color": "#FFFFFF",
+        "size_px_base": 62,
+        "letter_spacing_em": -0.03,
+        "line_height": 0.84,
+        "vertical_margin_top_px": 0
+      },
+      "effects": {
+        "shadow": "0 4px 16px rgba(0,0,0,0.85)"
+      },
+      "font_tracing": {
+        "overlap_mode": "top_anchor_shelf",
+        "notes": "Bottom terminals of 'b' and 'o' overlap slightly into 'teaches'"
+      },
+      "sample_text": "Nobody",
+      "word_count": 1,
+      "character_count": 6,
+      "per_word_character_counts": [
+        {
+          "word": "Nobody",
+          "character_count": 6
+        }
+      ]
+    },
+    {
+      "layer_name": "mid_yellow_teaches",
+      "role": "hero_keyword",
+      "raw_text": "teaches",
+      "font_classification": "Ultra Bold Warm Yellow Grotesque",
+      "font_family": "Montserrat",
+      "matched_font_candidates": [
+        "Montserrat",
+        "Inter",
+        "Altone Trial"
+      ],
+      "font_style": {
+        "weight": 900,
+        "style": "normal",
+        "casing": "lowercase",
+        "color": "#FFC700",
+        "size_px_base": 62,
+        "letter_spacing_em": -0.03,
+        "line_height": 0.84,
+        "vertical_margin_top_px": -12
+      },
+      "effects": {
+        "shadow": "0 4px 16px rgba(0,0,0,0.85)"
+      },
+      "font_tracing": {
+        "overlap_mode": "negative_leading_sandwich",
+        "vertical_overlap_px": -12,
+        "notes": "Ascenders of 't' and 'h' in 'teaches' overlap directly into 'Nobody'"
+      },
+      "sample_text": "teaches",
+      "word_count": 1,
+      "character_count": 7,
+      "per_word_character_counts": [
+        {
+          "word": "teaches",
+          "character_count": 7
+        }
+      ]
+    },
+    {
+      "layer_name": "bottom_white_this",
+      "role": "secondary_clause",
+      "raw_text": "this",
+      "font_classification": "Ultra Bold Grotesque Sans",
+      "font_family": "Montserrat",
+      "matched_font_candidates": [
+        "Montserrat",
+        "Inter",
+        "Altone Trial"
+      ],
+      "font_style": {
+        "weight": 900,
+        "style": "normal",
+        "casing": "lowercase",
+        "color": "#FFFFFF",
+        "size_px_base": 62,
+        "letter_spacing_em": -0.03,
+        "line_height": 0.84,
+        "vertical_margin_top_px": -12
+      },
+      "effects": {
+        "shadow": "0 4px 16px rgba(0,0,0,0.85)"
+      },
+      "font_tracing": {
+        "overlap_mode": "dot_overlap_tuck",
+        "vertical_overlap_px": -12,
+        "notes": "Dot of 'i' in 'this' nests right into lower loop of 'h' and 'e' in 'teaches'"
+      },
+      "sample_text": "this",
+      "word_count": 1,
+      "character_count": 4,
+      "per_word_character_counts": [
+        {
+          "word": "this",
+          "character_count": 4
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "filename": "image (83).json",
+  "profile_id": "image (83)",
+  "profile_name": "On_Just_One_Reel_Orange_Gradient_Giant_Display",
+  "version": "1.0.0",
+  "cranial_spec": {
+    "alignment": "center",
+    "dominant_zone": "cranial_crown",
+    "head_framing": {
+      "x": 0.5,
+      "y": 0.25,
+      "width": 0.25,
+      "height": 0.35,
+      "headroom_ratio": 0.25
+    },
+    "text_relationship": "center_chest_or_supra_cranial",
+    "suitable_word_counts": [
+      4,
+      5
+    ],
+    "character_count_range": [
+      11,
+      23
+    ]
+  },
+  "metadata": {
+    "target_aspect_ratio": "9:16",
+    "overall_mood": "High conversion organic reach hook, white sans kicker with massive warm gold/orange gradient hero",
+    "casing_strategy": "mixed",
+    "total_word_count": 4,
+    "total_character_count": 13,
+    "per_word_character_counts": [
+      {
+        "word": "On",
+        "character_count": 2
+      },
+      {
+        "word": "just",
+        "character_count": 4
+      },
+      {
+        "word": "one",
+        "character_count": 3
+      },
+      {
+        "word": "Reel",
+        "character_count": 4
+      }
+    ],
+    "treatment_system": "precision_font_tracing_and_overlap",
+    "treatment_notes": "High fidelity extraction from img744_02_on_just_one_reel.png. Retains subtle bevels, radiant blooms, iridescence, and exact font tracing overlap geometry.",
+    "paired_image": "image (83).png",
+    "mixed_fonts_verified": true,
+    "mixfont_extracted_at": "2026-09-24T10:00:00Z"
+  },
+  "layout_rules": {
+    "horizontal_alignment": "center",
+    "vertical_position": "center",
+    "upper_cranial_y_percent": 18.0,
+    "behind_subject_depth": false,
+    "scrim_overlay": {
+      "enabled": false
+    }
+  },
+  "typography_layers": [
+    {
+      "layer_name": "kicker_on_just_one",
+      "role": "secondary_clause",
+      "raw_text": "On just one",
+      "font_classification": "Clean Modern Grotesque Sans",
+      "font_family": "Inter",
+      "matched_font_candidates": [
+        "Inter",
+        "Montserrat"
+      ],
+      "font_style": {
+        "weight": 600,
+        "style": "normal",
+        "casing": "normal",
+        "color": "#FFFFFF",
+        "size_px_base": 28,
+        "letter_spacing_em": 0.0,
+        "line_height": 1.0,
+        "vertical_margin_top_px": 0
+      },
+      "effects": {
+        "shadow": "0 2px 6px rgba(0,0,0,0.8)"
+      },
+      "font_tracing": {
+        "overlap_mode": "top_flank_shelf",
+        "notes": "Nestles right atop the shoulder of capital 'R' in 'Reel'"
+      },
+      "sample_text": "On just one",
+      "word_count": 3,
+      "character_count": 9,
+      "per_word_character_counts": [
+        {
+          "word": "On",
+          "character_count": 2
+        },
+        {
+          "word": "just",
+          "character_count": 4
+        },
+        {
+          "word": "one",
+          "character_count": 3
+        }
+      ]
+    },
+    {
+      "layer_name": "hero_orange_reel",
+      "role": "hero_keyword",
+      "raw_text": "Reel",
+      "font_classification": "Giant Heavy Industrial Sans with Orange Radiant Gradient",
+      "font_family": "Anton",
+      "matched_font_candidates": [
+        "Anton",
+        "LEMON MILK",
+        "Bebas Neue"
+      ],
+      "font_style": {
+        "weight": 900,
+        "style": "normal",
+        "casing": "capitalize",
+        "color": "#FF8C00",
+        "size_px_base": 96,
+        "letter_spacing_em": -0.04,
+        "line_height": 0.88,
+        "vertical_margin_top_px": -12
+      },
+      "effects": {
+        "gradient": "linear-gradient(180deg, #FFA726 0%, #FB8C00 50%, #E65100 100%)",
+        "glow": "0 0 24px rgba(251,140,0,0.55)",
+        "shadow": "0 8px 24px rgba(0,0,0,0.85)",
+        "bevel": true
+      },
+      "font_tracing": {
+        "overlap_mode": "monolithic_anchor_interlock",
+        "vertical_overlap_px": -12,
+        "notes": "Dominant warm orange display shelf with subtle bevel specular edge"
+      },
+      "sample_text": "Reel",
+      "word_count": 1,
+      "character_count": 4,
+      "per_word_character_counts": [
+        {
+          "word": "Reel",
+          "character_count": 4
+        }
+      ]
+    }
+  ]
+}

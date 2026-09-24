@@ -1,0 +1,230 @@
+{
+  "filename": "image (85).json",
+  "profile_id": "image (85)",
+  "profile_name": "Youre_Editing_5000_Project_Wireframe_Hollow_Cobalt_Hero",
+  "version": "1.0.0",
+  "cranial_spec": {
+    "alignment": "center",
+    "dominant_zone": "cranial_crown",
+    "head_framing": {
+      "x": 0.5,
+      "y": 0.25,
+      "width": 0.25,
+      "height": 0.35,
+      "headroom_ratio": 0.25
+    },
+    "text_relationship": "center_chest_or_supra_cranial",
+    "suitable_word_counts": [
+      4,
+      5
+    ],
+    "character_count_range": [
+      24,
+      36
+    ]
+  },
+  "metadata": {
+    "target_aspect_ratio": "9:16",
+    "overall_mood": "High value client project case study, wireframe stroke backdrop with vivid cobalt blue hero",
+    "casing_strategy": "mixed",
+    "total_word_count": 4,
+    "total_character_count": 26,
+    "per_word_character_counts": [
+      {
+        "word": "You're",
+        "character_count": 6
+      },
+      {
+        "word": "editing",
+        "character_count": 7
+      },
+      {
+        "word": "$5,000",
+        "character_count": 6
+      },
+      {
+        "word": "project",
+        "character_count": 7
+      }
+    ],
+    "treatment_system": "precision_font_tracing_and_overlap",
+    "treatment_notes": "High fidelity extraction from img744_04_youre_editing_5000_project.png. Retains subtle bevels, radiant blooms, iridescence, and exact font tracing overlap geometry.",
+    "paired_image": "image (85).png",
+    "mixed_fonts_verified": true,
+    "mixfont_extracted_at": "2026-09-24T10:00:00Z"
+  },
+  "layout_rules": {
+    "horizontal_alignment": "center",
+    "vertical_position": "center",
+    "upper_cranial_y_percent": 18.0,
+    "behind_subject_depth": false,
+    "scrim_overlay": {
+      "enabled": false
+    }
+  },
+  "typography_layers": [
+    {
+      "layer_name": "bg_wireframe_stroke",
+      "role": "accent",
+      "raw_text": "POV",
+      "font_classification": "Giant Hollow Wireframe Stroke Display Sans",
+      "font_family": "Bebas Neue",
+      "matched_font_candidates": [
+        "Bebas Neue",
+        "Anton"
+      ],
+      "font_style": {
+        "weight": 900,
+        "style": "normal",
+        "casing": "uppercase",
+        "color": "transparent",
+        "size_px_base": 120,
+        "letter_spacing_em": 0.02,
+        "line_height": 0.8,
+        "vertical_margin_top_px": 0
+      },
+      "effects": {
+        "stroke": "1.5px rgba(255,255,255,0.22)",
+        "behindSubject": false
+      },
+      "font_tracing": {
+        "overlap_mode": "depth_wireframe_backdrop",
+        "z_index": 5,
+        "notes": "Hollow architectural wireframe letters form faint high-tech backdrop behind main text"
+      },
+      "sample_text": "POV",
+      "word_count": 1,
+      "character_count": 3,
+      "per_word_character_counts": [
+        {
+          "word": "POV",
+          "character_count": 3
+        }
+      ]
+    },
+    {
+      "layer_name": "kicker_youre_editing",
+      "role": "secondary_clause",
+      "raw_text": "You're editing",
+      "font_classification": "Clean Modern Grotesque Sans",
+      "font_family": "Montserrat",
+      "matched_font_candidates": [
+        "Montserrat",
+        "Inter"
+      ],
+      "font_style": {
+        "weight": 700,
+        "style": "normal",
+        "casing": "normal",
+        "color": "#FFFFFF",
+        "size_px_base": 32,
+        "letter_spacing_em": -0.01,
+        "line_height": 1.0,
+        "vertical_margin_top_px": -60
+      },
+      "effects": {
+        "shadow": "0 2px 8px rgba(0,0,0,0.85)"
+      },
+      "font_tracing": {
+        "overlap_mode": "top_shelf_center",
+        "z_index": 10,
+        "notes": "Centered above hero dollar amount"
+      },
+      "sample_text": "You're editing",
+      "word_count": 2,
+      "character_count": 13,
+      "per_word_character_counts": [
+        {
+          "word": "You're",
+          "character_count": 6
+        },
+        {
+          "word": "editing",
+          "character_count": 7
+        }
+      ]
+    },
+    {
+      "layer_name": "hero_cobalt_5000",
+      "role": "hero_keyword",
+      "raw_text": "$5,000",
+      "font_classification": "Massive Bold Sans in Electric Cobalt Blue",
+      "font_family": "Montserrat",
+      "matched_font_candidates": [
+        "Montserrat",
+        "Altone Trial",
+        "LEMON MILK"
+      ],
+      "font_style": {
+        "weight": 900,
+        "style": "normal",
+        "casing": "normal",
+        "color": "#0040FF",
+        "size_px_base": 78,
+        "letter_spacing_em": -0.03,
+        "line_height": 0.9,
+        "vertical_margin_top_px": -6
+      },
+      "effects": {
+        "gradient": "linear-gradient(180deg, #1A66FF 0%, #0033EE 100%)",
+        "glow": "0 0 22px rgba(26,102,255,0.75)",
+        "shadow": "0 6px 20px rgba(0,0,0,0.9)",
+        "bevel": true
+      },
+      "font_tracing": {
+        "overlap_mode": "electric_hero_bridge",
+        "z_index": 15,
+        "vertical_overlap_px": -6,
+        "notes": "Cobalt numeral layer bridges directly across background wireframe and footer"
+      },
+      "sample_text": "$5,000",
+      "word_count": 1,
+      "character_count": 6,
+      "per_word_character_counts": [
+        {
+          "word": "$5,000",
+          "character_count": 6
+        }
+      ]
+    },
+    {
+      "layer_name": "footer_project",
+      "role": "secondary_clause",
+      "raw_text": "project",
+      "font_classification": "Clean Modern Grotesque Sans",
+      "font_family": "Montserrat",
+      "matched_font_candidates": [
+        "Montserrat",
+        "Inter"
+      ],
+      "font_style": {
+        "weight": 700,
+        "style": "normal",
+        "casing": "lowercase",
+        "color": "#FFFFFF",
+        "size_px_base": 34,
+        "letter_spacing_em": -0.01,
+        "line_height": 1.0,
+        "vertical_margin_top_px": -8
+      },
+      "effects": {
+        "shadow": "0 2px 8px rgba(0,0,0,0.85)"
+      },
+      "font_tracing": {
+        "overlap_mode": "bottom_right_anchor",
+        "z_index": 20,
+        "vertical_overlap_px": -8,
+        "notes": "Nestled under right flank of hero amount"
+      },
+      "sample_text": "project",
+      "word_count": 1,
+      "character_count": 7,
+      "per_word_character_counts": [
+        {
+          "word": "project",
+          "character_count": 7
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,148 @@
+{
+  "filename": "image (72).json",
+  "profile_id": "image (72)",
+  "profile_name": "Animate_Your_Captions_Neon_Grotesque_Glow",
+  "version": "1.0.0",
+  "cranial_spec": {
+    "alignment": "center",
+    "dominant_zone": "cranial_crown",
+    "head_framing": {
+      "x": 0.5,
+      "y": 0.25,
+      "width": 0.25,
+      "height": 0.35,
+      "headroom_ratio": 0.25
+    },
+    "text_relationship": "center_chest_or_supra_cranial",
+    "suitable_word_counts": [
+      3,
+      4
+    ],
+    "character_count_range": [
+      17,
+      29
+    ]
+  },
+  "metadata": {
+    "target_aspect_ratio": "9:16",
+    "overall_mood": "High-energy creator dynamic, vibrant neon green punch, tight baseline overlap",
+    "casing_strategy": "mixed",
+    "total_word_count": 3,
+    "total_character_count": 19,
+    "per_word_character_counts": [
+      {
+        "word": "Animate",
+        "character_count": 7
+      },
+      {
+        "word": "your",
+        "character_count": 4
+      },
+      {
+        "word": "Captions",
+        "character_count": 8
+      }
+    ],
+    "treatment_system": "precision_font_tracing_and_overlap",
+    "treatment_notes": "High fidelity extraction from img741_01_animate_your_captions.png. Retains subtle bevels, radiant blooms, iridescence, and exact font tracing overlap geometry.",
+    "paired_image": "image (72).png",
+    "mixed_fonts_verified": true,
+    "mixfont_extracted_at": "2026-09-24T10:00:00Z"
+  },
+  "layout_rules": {
+    "horizontal_alignment": "center",
+    "vertical_position": "center",
+    "upper_cranial_y_percent": 18.0,
+    "behind_subject_depth": false,
+    "scrim_overlay": {
+      "enabled": false
+    }
+  },
+  "typography_layers": [
+    {
+      "layer_name": "prefix_animate_your",
+      "role": "secondary_clause",
+      "raw_text": "Animate your",
+      "font_classification": "Bold Modern Neo-Grotesque Sans",
+      "font_family": "Montserrat",
+      "matched_font_candidates": [
+        "Montserrat",
+        "Altone Trial",
+        "Inter"
+      ],
+      "font_style": {
+        "weight": 800,
+        "style": "normal",
+        "casing": "title",
+        "color": "#FFFFFF",
+        "size_px_base": 52,
+        "letter_spacing_em": -0.02,
+        "line_height": 1.0,
+        "vertical_margin_top_px": 0
+      },
+      "effects": {
+        "shadow": "0 4px 16px rgba(0,0,0,0.85)",
+        "behindSubject": false
+      },
+      "font_tracing": {
+        "overlap_mode": "anchor_header",
+        "tuck_direction": "base",
+        "notes": "Base white bold headline providing structural horizontal shelf"
+      },
+      "sample_text": "Animate your",
+      "word_count": 2,
+      "character_count": 11,
+      "per_word_character_counts": [
+        {
+          "word": "Animate",
+          "character_count": 7
+        },
+        {
+          "word": "your",
+          "character_count": 4
+        }
+      ]
+    },
+    {
+      "layer_name": "hero_captions",
+      "role": "hero_keyword",
+      "raw_text": "Captions",
+      "font_classification": "Bold Neo-Grotesque with Neon Bloom",
+      "font_family": "Montserrat",
+      "matched_font_candidates": [
+        "Montserrat",
+        "Altone Trial",
+        "Inter"
+      ],
+      "font_style": {
+        "weight": 800,
+        "style": "normal",
+        "casing": "capitalize",
+        "color": "#10E868",
+        "size_px_base": 64,
+        "letter_spacing_em": -0.03,
+        "line_height": 0.88,
+        "vertical_margin_top_px": -14
+      },
+      "effects": {
+        "glow": "0 0 20px rgba(16,232,104,0.7)",
+        "shadow": "0 4px 14px rgba(0,0,0,0.9)",
+        "behindSubject": false
+      },
+      "font_tracing": {
+        "overlap_mode": "negative_margin_tuck",
+        "vertical_overlap_px": -14,
+        "notes": "Ascenders of 't' and 'i' tuck under 'your', with dot of 'i' overlapping upper baseline"
+      },
+      "sample_text": "Captions",
+      "word_count": 1,
+      "character_count": 8,
+      "per_word_character_counts": [
+        {
+          "word": "Captions",
+          "character_count": 8
+        }
+      ]
+    }
+  ]
+}

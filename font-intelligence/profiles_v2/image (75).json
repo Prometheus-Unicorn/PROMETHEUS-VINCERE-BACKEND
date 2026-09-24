@@ -1,0 +1,232 @@
+{
+  "version": "typography-profile-v2",
+  "profileId": "image (75)",
+  "name": "Three_Seconds_Hook_Formula_Cyan_Calligraphic_Triad",
+  "category": "editorial",
+  "aspectCompatible": [
+    "9:16"
+  ],
+  "subjectZone": {
+    "headroomRatio": 0.25,
+    "cranialPlacementBand": "cranial_halo",
+    "safeMarginPercent": 6.0,
+    "faceAvoidanceBand": {
+      "topPercent": 25.0,
+      "bottomPercent": 60.0
+    }
+  },
+  "frameTreatment": {
+    "backgroundMaterial": "paper",
+    "materialOpacity": 0.18,
+    "grain": {
+      "opacity": 0.06
+    },
+    "vignette": {
+      "intensity": 0.12,
+      "color": "#000000"
+    }
+  },
+  "layers": [
+    {
+      "role": "accent",
+      "fontFamily": "Big Shoulders Display",
+      "fontWeight": 900,
+      "fontStyle": "normal",
+      "casing": "none",
+      "fontSizePx": 110,
+      "relativeScale": 1.0,
+      "letterSpacingEm": -0.04,
+      "lineHeightMultiplier": 0.9,
+      "anchor": {
+        "horizontal": "center",
+        "vertical": "center",
+        "offsetXPercent": 0.0,
+        "offsetYPercent": 0.0,
+        "placementZone": "chest_deck",
+        "relativeTo": "canvas"
+      },
+      "stagger": {
+        "dxPercent": 0.0,
+        "dyPercent": 0.0,
+        "rotationDeg": 0.0,
+        "scaleMultiplier": 1.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "arcWarpDeg": 0.0,
+        "skewXDeg": 0.0,
+        "skewYDeg": 0.0,
+        "stretchRatio": 1.0
+      },
+      "fill": {
+        "type": "linear_gradient",
+        "angleDeg": 180.0,
+        "stops": [
+          {
+            "color": "#00F5FF",
+            "offset": 0.0
+          },
+          {
+            "color": "#00B4D8",
+            "offset": 1.0
+          }
+        ]
+      },
+      "materiality": {
+        "opacity": 1.0,
+        "blendMode": "normal",
+        "glow": {
+          "enabled": true,
+          "blurPx": 24.0,
+          "color": "rgba(0,229,255,0.5)",
+          "intensity": 1.0,
+          "inner": false
+        }
+      },
+      "occlusion": {
+        "mode": "none",
+        "depthPlane": 0,
+        "clipBoundary": "silhouette",
+        "partialOverlapPercent": 0
+      },
+      "inlineTokenSwaps": [],
+      "candidates": [
+        {
+          "candidateFamily": "Big Shoulders Display",
+          "verified": true,
+          "classification": "serif",
+          "visualWeightConfidence": 0.95,
+          "goudyCorrectionApplied": false
+        }
+      ],
+      "zIndex": 10,
+      "behindSubject": false
+    },
+    {
+      "role": "subordinate",
+      "fontFamily": "Altone Trial",
+      "fontWeight": 700,
+      "fontStyle": "normal",
+      "casing": "title",
+      "fontSizePx": 42,
+      "relativeScale": 1.0,
+      "letterSpacingEm": 0.0,
+      "lineHeightMultiplier": 1.0,
+      "anchor": {
+        "horizontal": "center",
+        "vertical": "center",
+        "offsetXPercent": 0.0,
+        "offsetYPercent": 0.0,
+        "placementZone": "chest_deck",
+        "relativeTo": "canvas"
+      },
+      "stagger": {
+        "dxPercent": 0.0,
+        "dyPercent": 0.0,
+        "rotationDeg": 0.0,
+        "scaleMultiplier": 1.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "arcWarpDeg": 0.0,
+        "skewXDeg": 0.0,
+        "skewYDeg": 0.0,
+        "stretchRatio": 1.0
+      },
+      "fill": {
+        "type": "solid",
+        "color": "#00E5FF"
+      },
+      "materiality": {
+        "opacity": 1.0,
+        "blendMode": "normal"
+      },
+      "occlusion": {
+        "mode": "none",
+        "depthPlane": 0,
+        "clipBoundary": "silhouette",
+        "partialOverlapPercent": 0
+      },
+      "inlineTokenSwaps": [],
+      "candidates": [
+        {
+          "candidateFamily": "Altone Trial",
+          "verified": true,
+          "classification": "serif",
+          "visualWeightConfidence": 0.95,
+          "goudyCorrectionApplied": false
+        }
+      ],
+      "zIndex": 15,
+      "behindSubject": false
+    },
+    {
+      "role": "accent",
+      "fontFamily": "Dancing Script",
+      "fontWeight": 700,
+      "fontStyle": "italic",
+      "casing": "lowercase",
+      "fontSizePx": 48,
+      "relativeScale": 1.0,
+      "letterSpacingEm": 0.02,
+      "lineHeightMultiplier": 0.9,
+      "anchor": {
+        "horizontal": "center",
+        "vertical": "center",
+        "offsetXPercent": 0.0,
+        "offsetYPercent": 0.0,
+        "placementZone": "chest_deck",
+        "relativeTo": "canvas"
+      },
+      "stagger": {
+        "dxPercent": 0.0,
+        "dyPercent": 0.0,
+        "rotationDeg": 0.0,
+        "scaleMultiplier": 1.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "arcWarpDeg": 0.0,
+        "skewXDeg": 0.0,
+        "skewYDeg": 0.0,
+        "stretchRatio": 1.0
+      },
+      "fill": {
+        "type": "solid",
+        "color": "#FFFFFF"
+      },
+      "materiality": {
+        "opacity": 1.0,
+        "blendMode": "normal",
+        "glow": {
+          "enabled": true,
+          "blurPx": 10.0,
+          "color": "rgba(255,255,255,0.4)",
+          "intensity": 1.0,
+          "inner": false
+        }
+      },
+      "occlusion": {
+        "mode": "none",
+        "depthPlane": 0,
+        "clipBoundary": "silhouette",
+        "partialOverlapPercent": 0
+      },
+      "inlineTokenSwaps": [],
+      "candidates": [
+        {
+          "candidateFamily": "Dancing Script",
+          "verified": true,
+          "classification": "script",
+          "visualWeightConfidence": 0.95,
+          "goudyCorrectionApplied": false
+        }
+      ],
+      "zIndex": 20,
+      "behindSubject": false
+    }
+  ],
+  "annotations": [],
+  "metadata": {
+    "migratedFrom": "image (75).json",
+    "overallMood": "High conversion hook formula, oversized cyan numeral with fluid white calligraphic script",
+    "migrationVersion": "v2.1"
+  }
+}

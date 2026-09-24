@@ -1,0 +1,139 @@
+{
+  "filename": "image (74).json",
+  "profile_id": "image (74)",
+  "profile_name": "New_Styles_Geometric_Sans_Yellow_Cursive_Interlock",
+  "version": "1.0.0",
+  "cranial_spec": {
+    "alignment": "center",
+    "dominant_zone": "cranial_crown",
+    "head_framing": {
+      "x": 0.5,
+      "y": 0.25,
+      "width": 0.25,
+      "height": 0.35,
+      "headroom_ratio": 0.25
+    },
+    "text_relationship": "center_chest_or_supra_cranial",
+    "suitable_word_counts": [
+      2,
+      3
+    ],
+    "character_count_range": [
+      7,
+      19
+    ]
+  },
+  "metadata": {
+    "target_aspect_ratio": "9:16",
+    "overall_mood": "Modern fashion editorial, high contrast heavy sans with fluid handwritten yellow overlay",
+    "casing_strategy": "mixed",
+    "total_word_count": 2,
+    "total_character_count": 9,
+    "per_word_character_counts": [
+      {
+        "word": "New",
+        "character_count": 3
+      },
+      {
+        "word": "Styles",
+        "character_count": 6
+      }
+    ],
+    "treatment_system": "precision_font_tracing_and_overlap",
+    "treatment_notes": "High fidelity extraction from img741_03_new_styles.png. Retains subtle bevels, radiant blooms, iridescence, and exact font tracing overlap geometry.",
+    "paired_image": "image (74).png",
+    "mixed_fonts_verified": true,
+    "mixfont_extracted_at": "2026-09-24T10:00:00Z"
+  },
+  "layout_rules": {
+    "horizontal_alignment": "center",
+    "vertical_position": "center",
+    "upper_cranial_y_percent": 18.0,
+    "behind_subject_depth": false,
+    "scrim_overlay": {
+      "enabled": false
+    }
+  },
+  "typography_layers": [
+    {
+      "layer_name": "base_sans_new",
+      "role": "primary_focus_word",
+      "raw_text": "New",
+      "font_classification": "Ultra Bold Geometric Block Sans",
+      "font_family": "LEMON MILK",
+      "matched_font_candidates": [
+        "LEMON MILK",
+        "Montserrat",
+        "Bebas Neue"
+      ],
+      "font_style": {
+        "weight": 900,
+        "style": "normal",
+        "casing": "capitalize",
+        "color": "#FFFFFF",
+        "size_px_base": 88,
+        "letter_spacing_em": -0.04,
+        "line_height": 1.0,
+        "vertical_margin_top_px": 0
+      },
+      "effects": {
+        "shadow": "0 6px 20px rgba(0,0,0,0.8)",
+        "behindSubject": false
+      },
+      "font_tracing": {
+        "overlap_mode": "base_canvas_anchor",
+        "notes": "Monolithic white geometric backdrop providing contrast plate"
+      },
+      "sample_text": "New",
+      "word_count": 1,
+      "character_count": 3,
+      "per_word_character_counts": [
+        {
+          "word": "New",
+          "character_count": 3
+        }
+      ]
+    },
+    {
+      "layer_name": "overlay_script_styles",
+      "role": "accent",
+      "raw_text": "Styles",
+      "font_classification": "Casual Fluid Brush Cursive Script",
+      "font_family": "Dancing Script",
+      "matched_font_candidates": [
+        "Dancing Script",
+        "Alex Brush",
+        "Rhegina Darling"
+      ],
+      "font_style": {
+        "weight": 700,
+        "style": "italic",
+        "casing": "capitalize",
+        "color": "#FFD700",
+        "size_px_base": 68,
+        "letter_spacing_em": 0.01,
+        "line_height": 0.9,
+        "vertical_margin_top_px": -48
+      },
+      "effects": {
+        "shadow": "0 3px 12px rgba(0,0,0,0.6)",
+        "glow": "0 0 12px rgba(255,215,0,0.4)",
+        "behindSubject": false
+      },
+      "font_tracing": {
+        "overlap_mode": "horizontal_center_cross_interlock",
+        "vertical_overlap_px": -48,
+        "notes": "Ascender of 'S' loops around 'N' and 't' stem crosses middle junction of 'e' and 'w'"
+      },
+      "sample_text": "Styles",
+      "word_count": 1,
+      "character_count": 6,
+      "per_word_character_counts": [
+        {
+          "word": "Styles",
+          "character_count": 6
+        }
+      ]
+    }
+  ]
+}

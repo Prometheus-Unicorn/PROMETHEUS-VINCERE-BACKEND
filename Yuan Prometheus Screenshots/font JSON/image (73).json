@@ -1,0 +1,106 @@
+{
+  "filename": "image (73).json",
+  "profile_id": "image (73)",
+  "profile_name": "Shine_2_Warm_Gold_Display_Radiance",
+  "version": "1.0.0",
+  "cranial_spec": {
+    "alignment": "center",
+    "dominant_zone": "cranial_crown",
+    "head_framing": {
+      "x": 0.5,
+      "y": 0.25,
+      "width": 0.25,
+      "height": 0.35,
+      "headroom_ratio": 0.25
+    },
+    "text_relationship": "center_chest_or_supra_cranial",
+    "suitable_word_counts": [
+      2,
+      3
+    ],
+    "character_count_range": [
+      4,
+      16
+    ]
+  },
+  "metadata": {
+    "target_aspect_ratio": "9:16",
+    "overall_mood": "Warm radiant luxury display, vertical gold-to-orange gradient bloom",
+    "casing_strategy": "mixed",
+    "total_word_count": 2,
+    "total_character_count": 6,
+    "per_word_character_counts": [
+      {
+        "word": "Shine",
+        "character_count": 5
+      },
+      {
+        "word": "2",
+        "character_count": 1
+      }
+    ],
+    "treatment_system": "precision_font_tracing_and_overlap",
+    "treatment_notes": "High fidelity extraction from img741_02_shine_2.png. Retains subtle bevels, radiant blooms, iridescence, and exact font tracing overlap geometry.",
+    "paired_image": "image (73).png",
+    "mixed_fonts_verified": true,
+    "mixfont_extracted_at": "2026-09-24T10:00:00Z"
+  },
+  "layout_rules": {
+    "horizontal_alignment": "center",
+    "vertical_position": "center",
+    "upper_cranial_y_percent": 20.0,
+    "behind_subject_depth": false,
+    "scrim_overlay": {
+      "enabled": false
+    }
+  },
+  "typography_layers": [
+    {
+      "layer_name": "hero_shine_2",
+      "role": "hero_keyword",
+      "raw_text": "Shine 2",
+      "font_classification": "Heavy Condensed Display Sans with Radial Bloom",
+      "font_family": "Anton",
+      "matched_font_candidates": [
+        "Anton",
+        "LEMON MILK",
+        "Bebas Neue"
+      ],
+      "font_style": {
+        "weight": 900,
+        "style": "normal",
+        "casing": "title",
+        "color": "#FFC000",
+        "size_px_base": 78,
+        "letter_spacing_em": -0.03,
+        "line_height": 1.0,
+        "vertical_margin_top_px": 0
+      },
+      "effects": {
+        "gradient": "linear-gradient(180deg, #FFD000 0%, #FF6A00 65%, #FF3D00 100%)",
+        "glow": "0 0 32px rgba(255,106,0,0.65)",
+        "shadow": "0 8px 24px rgba(0,0,0,0.85)",
+        "bevel": true,
+        "behindSubject": false
+      },
+      "font_tracing": {
+        "overlap_mode": "tight_kerning_interlock",
+        "letter_spacing_em": -0.03,
+        "notes": "Numeral '2' tightly pulled into terminal curve of 'e' with radiant orange bloom"
+      },
+      "sample_text": "Shine 2",
+      "word_count": 2,
+      "character_count": 6,
+      "per_word_character_counts": [
+        {
+          "word": "Shine",
+          "character_count": 5
+        },
+        {
+          "word": "2",
+          "character_count": 1
+        }
+      ]
+    }
+  ]
+}

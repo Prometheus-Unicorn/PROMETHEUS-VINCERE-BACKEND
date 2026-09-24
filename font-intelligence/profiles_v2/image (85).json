@@ -1,0 +1,282 @@
+{
+  "version": "typography-profile-v2",
+  "profileId": "image (85)",
+  "name": "Youre_Editing_5000_Project_Wireframe_Hollow_Cobalt_Hero",
+  "category": "editorial",
+  "aspectCompatible": [
+    "9:16"
+  ],
+  "subjectZone": {
+    "headroomRatio": 0.25,
+    "cranialPlacementBand": "cranial_halo",
+    "safeMarginPercent": 6.0,
+    "faceAvoidanceBand": {
+      "topPercent": 25.0,
+      "bottomPercent": 60.0
+    }
+  },
+  "frameTreatment": {
+    "backgroundMaterial": "paper",
+    "materialOpacity": 0.18,
+    "grain": {
+      "opacity": 0.06
+    },
+    "vignette": {
+      "intensity": 0.12,
+      "color": "#000000"
+    }
+  },
+  "layers": [
+    {
+      "role": "accent",
+      "fontFamily": "Bebas Neue",
+      "fontWeight": 900,
+      "fontStyle": "normal",
+      "casing": "uppercase",
+      "fontSizePx": 120,
+      "relativeScale": 1.0,
+      "letterSpacingEm": 0.02,
+      "lineHeightMultiplier": 0.8,
+      "anchor": {
+        "horizontal": "center",
+        "vertical": "center",
+        "offsetXPercent": 0.0,
+        "offsetYPercent": 0.0,
+        "placementZone": "chest_deck",
+        "relativeTo": "canvas"
+      },
+      "stagger": {
+        "dxPercent": 0.0,
+        "dyPercent": 0.0,
+        "rotationDeg": 0.0,
+        "scaleMultiplier": 1.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "arcWarpDeg": 0.0,
+        "skewXDeg": 0.0,
+        "skewYDeg": 0.0,
+        "stretchRatio": 1.0
+      },
+      "fill": {
+        "type": "solid",
+        "color": "transparent"
+      },
+      "materiality": {
+        "opacity": 1.0,
+        "blendMode": "normal"
+      },
+      "occlusion": {
+        "mode": "none",
+        "depthPlane": 0,
+        "clipBoundary": "silhouette",
+        "partialOverlapPercent": 0
+      },
+      "inlineTokenSwaps": [],
+      "candidates": [
+        {
+          "candidateFamily": "Bebas Neue",
+          "verified": true,
+          "classification": "serif",
+          "visualWeightConfidence": 0.95,
+          "goudyCorrectionApplied": false
+        }
+      ],
+      "zIndex": 10,
+      "behindSubject": false
+    },
+    {
+      "role": "subordinate",
+      "fontFamily": "Montserrat",
+      "fontWeight": 700,
+      "fontStyle": "normal",
+      "casing": "none",
+      "fontSizePx": 32,
+      "relativeScale": 1.0,
+      "letterSpacingEm": -0.01,
+      "lineHeightMultiplier": 1.0,
+      "anchor": {
+        "horizontal": "center",
+        "vertical": "center",
+        "offsetXPercent": 0.0,
+        "offsetYPercent": 0.0,
+        "placementZone": "chest_deck",
+        "relativeTo": "canvas"
+      },
+      "stagger": {
+        "dxPercent": 0.0,
+        "dyPercent": 0.0,
+        "rotationDeg": 0.0,
+        "scaleMultiplier": 1.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "arcWarpDeg": 0.0,
+        "skewXDeg": 0.0,
+        "skewYDeg": 0.0,
+        "stretchRatio": 1.0
+      },
+      "fill": {
+        "type": "solid",
+        "color": "#FFFFFF"
+      },
+      "materiality": {
+        "opacity": 1.0,
+        "blendMode": "normal"
+      },
+      "occlusion": {
+        "mode": "none",
+        "depthPlane": 0,
+        "clipBoundary": "silhouette",
+        "partialOverlapPercent": 0
+      },
+      "inlineTokenSwaps": [],
+      "candidates": [
+        {
+          "candidateFamily": "Montserrat",
+          "verified": true,
+          "classification": "grotesque",
+          "visualWeightConfidence": 0.95,
+          "goudyCorrectionApplied": false
+        }
+      ],
+      "zIndex": 15,
+      "behindSubject": false
+    },
+    {
+      "role": "accent",
+      "fontFamily": "Montserrat",
+      "fontWeight": 900,
+      "fontStyle": "normal",
+      "casing": "none",
+      "fontSizePx": 78,
+      "relativeScale": 1.0,
+      "letterSpacingEm": -0.03,
+      "lineHeightMultiplier": 0.9,
+      "anchor": {
+        "horizontal": "center",
+        "vertical": "center",
+        "offsetXPercent": 0.0,
+        "offsetYPercent": 0.0,
+        "placementZone": "chest_deck",
+        "relativeTo": "canvas"
+      },
+      "stagger": {
+        "dxPercent": 0.0,
+        "dyPercent": 0.0,
+        "rotationDeg": 0.0,
+        "scaleMultiplier": 1.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "arcWarpDeg": 0.0,
+        "skewXDeg": 0.0,
+        "skewYDeg": 0.0,
+        "stretchRatio": 1.0
+      },
+      "fill": {
+        "type": "linear_gradient",
+        "angleDeg": 180.0,
+        "stops": [
+          {
+            "color": "#1A66FF",
+            "offset": 0.0
+          },
+          {
+            "color": "#0033EE",
+            "offset": 1.0
+          }
+        ]
+      },
+      "materiality": {
+        "opacity": 1.0,
+        "blendMode": "normal",
+        "glow": {
+          "enabled": true,
+          "blurPx": 22.0,
+          "color": "rgba(26,102,255,0.75)",
+          "intensity": 1.0,
+          "inner": false
+        }
+      },
+      "occlusion": {
+        "mode": "none",
+        "depthPlane": 0,
+        "clipBoundary": "silhouette",
+        "partialOverlapPercent": 0
+      },
+      "inlineTokenSwaps": [],
+      "candidates": [
+        {
+          "candidateFamily": "Montserrat",
+          "verified": true,
+          "classification": "serif",
+          "visualWeightConfidence": 0.95,
+          "goudyCorrectionApplied": false
+        }
+      ],
+      "zIndex": 20,
+      "behindSubject": false
+    },
+    {
+      "role": "subordinate",
+      "fontFamily": "Montserrat",
+      "fontWeight": 700,
+      "fontStyle": "normal",
+      "casing": "lowercase",
+      "fontSizePx": 34,
+      "relativeScale": 1.0,
+      "letterSpacingEm": -0.01,
+      "lineHeightMultiplier": 1.0,
+      "anchor": {
+        "horizontal": "center",
+        "vertical": "center",
+        "offsetXPercent": 0.0,
+        "offsetYPercent": 0.0,
+        "placementZone": "chest_deck",
+        "relativeTo": "canvas"
+      },
+      "stagger": {
+        "dxPercent": 0.0,
+        "dyPercent": 0.0,
+        "rotationDeg": 0.0,
+        "scaleMultiplier": 1.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "arcWarpDeg": 0.0,
+        "skewXDeg": 0.0,
+        "skewYDeg": 0.0,
+        "stretchRatio": 1.0
+      },
+      "fill": {
+        "type": "solid",
+        "color": "#FFFFFF"
+      },
+      "materiality": {
+        "opacity": 1.0,
+        "blendMode": "normal"
+      },
+      "occlusion": {
+        "mode": "none",
+        "depthPlane": 0,
+        "clipBoundary": "silhouette",
+        "partialOverlapPercent": 0
+      },
+      "inlineTokenSwaps": [],
+      "candidates": [
+        {
+          "candidateFamily": "Montserrat",
+          "verified": true,
+          "classification": "grotesque",
+          "visualWeightConfidence": 0.95,
+          "goudyCorrectionApplied": false
+        }
+      ],
+      "zIndex": 25,
+      "behindSubject": false
+    }
+  ],
+  "annotations": [],
+  "metadata": {
+    "migratedFrom": "image (85).json",
+    "overallMood": "High value client project case study, wireframe stroke backdrop with vivid cobalt blue hero",
+    "migrationVersion": "v2.1"
+  }
+}

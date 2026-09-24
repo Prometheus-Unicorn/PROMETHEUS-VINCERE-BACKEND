@@ -1,0 +1,162 @@
+{
+  "filename": "image (77).json",
+  "profile_id": "image (77)",
+  "profile_name": "Start_Collecting_Ideas_Didone_Flared_Serif_Duo",
+  "version": "1.0.0",
+  "cranial_spec": {
+    "alignment": "center",
+    "dominant_zone": "cranial_crown",
+    "head_framing": {
+      "x": 0.5,
+      "y": 0.25,
+      "width": 0.25,
+      "height": 0.35,
+      "headroom_ratio": 0.25
+    },
+    "text_relationship": "center_chest_or_supra_cranial",
+    "suitable_word_counts": [
+      5,
+      6
+    ],
+    "character_count_range": [
+      28,
+      40
+    ]
+  },
+  "metadata": {
+    "target_aspect_ratio": "9:16",
+    "overall_mood": "High fashion editorial magazine title, delicate italic Didone with flared 70s display cyan serif",
+    "casing_strategy": "mixed",
+    "total_word_count": 5,
+    "total_character_count": 30,
+    "per_word_character_counts": [
+      {
+        "word": "Start",
+        "character_count": 5
+      },
+      {
+        "word": "collecting",
+        "character_count": 10
+      },
+      {
+        "word": "ideas",
+        "character_count": 5
+      },
+      {
+        "word": "for",
+        "character_count": 3
+      },
+      {
+        "word": "EDITING",
+        "character_count": 7
+      }
+    ],
+    "treatment_system": "precision_font_tracing_and_overlap",
+    "treatment_notes": "High fidelity extraction from img741_06_start_collecting_ideas_for_editing.png. Retains subtle bevels, radiant blooms, iridescence, and exact font tracing overlap geometry.",
+    "paired_image": "image (77).png",
+    "mixed_fonts_verified": true,
+    "mixfont_extracted_at": "2026-09-24T10:00:00Z"
+  },
+  "layout_rules": {
+    "horizontal_alignment": "center",
+    "vertical_position": "center",
+    "upper_cranial_y_percent": 18.0,
+    "behind_subject_depth": false,
+    "scrim_overlay": {
+      "enabled": false
+    }
+  },
+  "typography_layers": [
+    {
+      "layer_name": "kicker_italic_serif",
+      "role": "secondary_clause",
+      "raw_text": "Start collecting ideas for",
+      "font_classification": "High Contrast Didone Editorial Serif Italic",
+      "font_family": "Bodoni Moda",
+      "matched_font_candidates": [
+        "Bodoni Moda",
+        "Playfair Display",
+        "Apple Garamond"
+      ],
+      "font_style": {
+        "weight": 500,
+        "style": "italic",
+        "casing": "normal",
+        "color": "#EEEEEE",
+        "size_px_base": 30,
+        "letter_spacing_em": 0.02,
+        "line_height": 1.1,
+        "vertical_margin_top_px": 0
+      },
+      "effects": {
+        "shadow": "0 2px 8px rgba(0,0,0,0.7)"
+      },
+      "font_tracing": {
+        "overlap_mode": "editorial_crest_align",
+        "notes": "Descender loop of 'g' in 'collecting' hovers closely over the apex of 'EDITING'"
+      },
+      "sample_text": "Start collecting ideas for",
+      "word_count": 4,
+      "character_count": 23,
+      "per_word_character_counts": [
+        {
+          "word": "Start",
+          "character_count": 5
+        },
+        {
+          "word": "collecting",
+          "character_count": 10
+        },
+        {
+          "word": "ideas",
+          "character_count": 5
+        },
+        {
+          "word": "for",
+          "character_count": 3
+        }
+      ]
+    },
+    {
+      "layer_name": "hero_flared_cyan_editing",
+      "role": "hero_keyword",
+      "raw_text": "EDITING",
+      "font_classification": "70s Flared Bold Display Serif with Cyan Gradient",
+      "font_family": "SenzaBella",
+      "matched_font_candidates": [
+        "SenzaBella",
+        "MADE Mirage",
+        "Abril Fatface"
+      ],
+      "font_style": {
+        "weight": 900,
+        "style": "normal",
+        "casing": "uppercase",
+        "color": "#00E5FF",
+        "size_px_base": 76,
+        "letter_spacing_em": -0.02,
+        "line_height": 0.9,
+        "vertical_margin_top_px": -6
+      },
+      "effects": {
+        "gradient": "linear-gradient(180deg, #00F5FF 0%, #0099CC 100%)",
+        "glow": "0 0 18px rgba(0,229,255,0.4)",
+        "shadow": "0 6px 20px rgba(0,0,0,0.85)"
+      },
+      "font_tracing": {
+        "overlap_mode": "tight_vertical_crest",
+        "vertical_overlap_px": -6,
+        "notes": "Serif flares interlock neatly with upper italic clause"
+      },
+      "sample_text": "EDITING",
+      "word_count": 1,
+      "character_count": 7,
+      "per_word_character_counts": [
+        {
+          "word": "EDITING",
+          "character_count": 7
+        }
+      ]
+    }
+  ]
+}

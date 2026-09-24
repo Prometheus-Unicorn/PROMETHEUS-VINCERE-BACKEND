@@ -1,0 +1,138 @@
+{
+  "filename": "image (78).json",
+  "profile_id": "image (78)",
+  "profile_name": "Customize_Everything_Calligraphic_Brush_Cyan_Glow_Sans",
+  "version": "1.0.0",
+  "cranial_spec": {
+    "alignment": "center",
+    "dominant_zone": "cranial_crown",
+    "head_framing": {
+      "x": 0.5,
+      "y": 0.25,
+      "width": 0.25,
+      "height": 0.35,
+      "headroom_ratio": 0.25
+    },
+    "text_relationship": "center_chest_or_supra_cranial",
+    "suitable_word_counts": [
+      2,
+      3
+    ],
+    "character_count_range": [
+      17,
+      29
+    ]
+  },
+  "metadata": {
+    "target_aspect_ratio": "9:16",
+    "overall_mood": "Sleek creative UI feature banner, slanted brush script with luminous electric cyan sans",
+    "casing_strategy": "mixed",
+    "total_word_count": 2,
+    "total_character_count": 19,
+    "per_word_character_counts": [
+      {
+        "word": "Customize",
+        "character_count": 9
+      },
+      {
+        "word": "everything",
+        "character_count": 10
+      }
+    ],
+    "treatment_system": "precision_font_tracing_and_overlap",
+    "treatment_notes": "High fidelity extraction from img742_03_customize_everything.png. Retains subtle bevels, radiant blooms, iridescence, and exact font tracing overlap geometry.",
+    "paired_image": "image (78).png",
+    "mixed_fonts_verified": true,
+    "mixfont_extracted_at": "2026-09-24T10:00:00Z"
+  },
+  "layout_rules": {
+    "horizontal_alignment": "center",
+    "vertical_position": "center",
+    "upper_cranial_y_percent": 18.0,
+    "behind_subject_depth": false,
+    "scrim_overlay": {
+      "enabled": false
+    }
+  },
+  "typography_layers": [
+    {
+      "layer_name": "top_brush_customize",
+      "role": "primary_focus_word",
+      "raw_text": "Customize",
+      "font_classification": "Dynamic Slanted Brush Calligraphy Script",
+      "font_family": "Candlescript",
+      "matched_font_candidates": [
+        "Candlescript",
+        "Dancing Script",
+        "Rhegina Darling"
+      ],
+      "font_style": {
+        "weight": 700,
+        "style": "italic",
+        "casing": "capitalize",
+        "color": "#FFFFFF",
+        "size_px_base": 64,
+        "letter_spacing_em": 0.01,
+        "line_height": 1.0,
+        "vertical_margin_top_px": 0
+      },
+      "effects": {
+        "shadow": "0 4px 14px rgba(0,0,0,0.85)"
+      },
+      "font_tracing": {
+        "overlap_mode": "script_crest_shelf",
+        "notes": "Descender loop of 'z' swings down into 'everything'"
+      },
+      "sample_text": "Customize",
+      "word_count": 1,
+      "character_count": 9,
+      "per_word_character_counts": [
+        {
+          "word": "Customize",
+          "character_count": 9
+        }
+      ]
+    },
+    {
+      "layer_name": "bottom_cyan_everything",
+      "role": "hero_keyword",
+      "raw_text": "everything",
+      "font_classification": "Electric Cyan Radiant Grotesque Sans",
+      "font_family": "Altone Trial",
+      "matched_font_candidates": [
+        "Altone Trial",
+        "Montserrat",
+        "Inter"
+      ],
+      "font_style": {
+        "weight": 800,
+        "style": "normal",
+        "casing": "lowercase",
+        "color": "#00F5FF",
+        "size_px_base": 58,
+        "letter_spacing_em": -0.02,
+        "line_height": 0.9,
+        "vertical_margin_top_px": -24
+      },
+      "effects": {
+        "gradient": "linear-gradient(180deg, #00FFFF 0%, #00A8CC 100%)",
+        "glow": "0 0 20px rgba(0,245,255,0.55)",
+        "shadow": "0 4px 16px rgba(0,0,0,0.9)"
+      },
+      "font_tracing": {
+        "overlap_mode": "negative_margin_cross_interlock",
+        "vertical_overlap_px": -24,
+        "notes": "Ascenders of 't' and 'h' in 'everything' penetrate into baseline of 'Customize'"
+      },
+      "sample_text": "everything",
+      "word_count": 1,
+      "character_count": 10,
+      "per_word_character_counts": [
+        {
+          "word": "everything",
+          "character_count": 10
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,189 @@
+{
+  "filename": "image (75).json",
+  "profile_id": "image (75)",
+  "profile_name": "Three_Seconds_Hook_Formula_Cyan_Calligraphic_Triad",
+  "version": "1.0.0",
+  "cranial_spec": {
+    "alignment": "center",
+    "dominant_zone": "cranial_crown",
+    "head_framing": {
+      "x": 0.5,
+      "y": 0.25,
+      "width": 0.25,
+      "height": 0.35,
+      "headroom_ratio": 0.25
+    },
+    "text_relationship": "center_chest_or_supra_cranial",
+    "suitable_word_counts": [
+      4,
+      5
+    ],
+    "character_count_range": [
+      17,
+      29
+    ]
+  },
+  "metadata": {
+    "target_aspect_ratio": "9:16",
+    "overall_mood": "High conversion hook formula, oversized cyan numeral with fluid white calligraphic script",
+    "casing_strategy": "mixed",
+    "total_word_count": 4,
+    "total_character_count": 19,
+    "per_word_character_counts": [
+      {
+        "word": "3",
+        "character_count": 1
+      },
+      {
+        "word": "Seconds",
+        "character_count": 7
+      },
+      {
+        "word": "hook",
+        "character_count": 4
+      },
+      {
+        "word": "formula",
+        "character_count": 7
+      }
+    ],
+    "treatment_system": "precision_font_tracing_and_overlap",
+    "treatment_notes": "High fidelity extraction from img741_04_3_seconds_hook_formula.png. Retains subtle bevels, radiant blooms, iridescence, and exact font tracing overlap geometry.",
+    "paired_image": "image (75).png",
+    "mixed_fonts_verified": true,
+    "mixfont_extracted_at": "2026-09-24T10:00:00Z"
+  },
+  "layout_rules": {
+    "horizontal_alignment": "center",
+    "vertical_position": "center",
+    "upper_cranial_y_percent": 18.0,
+    "behind_subject_depth": false,
+    "scrim_overlay": {
+      "enabled": false
+    }
+  },
+  "typography_layers": [
+    {
+      "layer_name": "hero_numeral_3",
+      "role": "hero_keyword",
+      "raw_text": "3",
+      "font_classification": "Giant Hero Display Numeral",
+      "font_family": "Big Shoulders Display",
+      "matched_font_candidates": [
+        "Big Shoulders Display",
+        "Bebas Neue",
+        "Anton"
+      ],
+      "font_style": {
+        "weight": 900,
+        "style": "normal",
+        "casing": "normal",
+        "color": "#00E5FF",
+        "size_px_base": 110,
+        "letter_spacing_em": -0.04,
+        "line_height": 0.9,
+        "vertical_margin_top_px": 0
+      },
+      "effects": {
+        "gradient": "linear-gradient(180deg, #00F5FF 0%, #00B4D8 100%)",
+        "glow": "0 0 24px rgba(0,229,255,0.5)",
+        "shadow": "0 6px 20px rgba(0,0,0,0.85)"
+      },
+      "font_tracing": {
+        "overlap_mode": "anchor_left_flank",
+        "notes": "Monolithic cyan numeral anchor creating left visual cradle"
+      },
+      "sample_text": "3",
+      "word_count": 1,
+      "character_count": 1,
+      "per_word_character_counts": [
+        {
+          "word": "3",
+          "character_count": 1
+        }
+      ]
+    },
+    {
+      "layer_name": "mid_kicker_seconds",
+      "role": "secondary_clause",
+      "raw_text": "Seconds",
+      "font_classification": "Clean Modern Cyan Sans",
+      "font_family": "Altone Trial",
+      "matched_font_candidates": [
+        "Altone Trial",
+        "Montserrat",
+        "Inter"
+      ],
+      "font_style": {
+        "weight": 700,
+        "style": "normal",
+        "casing": "capitalize",
+        "color": "#00E5FF",
+        "size_px_base": 42,
+        "letter_spacing_em": 0.0,
+        "line_height": 1.0,
+        "vertical_margin_top_px": -70
+      },
+      "effects": {
+        "shadow": "0 2px 8px rgba(0,0,0,0.8)"
+      },
+      "font_tracing": {
+        "overlap_mode": "top_right_shelf_align",
+        "notes": "Aligns to the top right shoulder of hero numeral '3'"
+      },
+      "sample_text": "Seconds",
+      "word_count": 1,
+      "character_count": 7,
+      "per_word_character_counts": [
+        {
+          "word": "Seconds",
+          "character_count": 7
+        }
+      ]
+    },
+    {
+      "layer_name": "overlay_script_hook_formula",
+      "role": "accent",
+      "raw_text": "hook formula",
+      "font_classification": "Flowing Elegant White Calligraphic Script",
+      "font_family": "Dancing Script",
+      "matched_font_candidates": [
+        "Dancing Script",
+        "Allura",
+        "Pinyon Script"
+      ],
+      "font_style": {
+        "weight": 700,
+        "style": "italic",
+        "casing": "lowercase",
+        "color": "#FFFFFF",
+        "size_px_base": 48,
+        "letter_spacing_em": 0.02,
+        "line_height": 0.9,
+        "vertical_margin_top_px": -28
+      },
+      "effects": {
+        "shadow": "0 3px 12px rgba(0,0,0,0.9)",
+        "glow": "0 0 10px rgba(255,255,255,0.4)"
+      },
+      "font_tracing": {
+        "overlap_mode": "bottom_cross_baseline_sweep",
+        "vertical_overlap_px": -28,
+        "notes": "Crossbar of 'f' and loop of 'h' sweep directly across bottom bowl of '3' and baseline of 'Seconds'"
+      },
+      "sample_text": "hook formula",
+      "word_count": 2,
+      "character_count": 11,
+      "per_word_character_counts": [
+        {
+          "word": "hook",
+          "character_count": 4
+        },
+        {
+          "word": "formula",
+          "character_count": 7
+        }
+      ]
+    }
+  ]
+}

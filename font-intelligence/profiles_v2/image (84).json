@@ -1,0 +1,94 @@
+{
+  "version": "typography-profile-v2",
+  "profileId": "image (84)",
+  "name": "Highlight_2_Dashed_Inspector_Bounding_Box",
+  "category": "tech",
+  "aspectCompatible": [
+    "9:16"
+  ],
+  "subjectZone": {
+    "headroomRatio": 0.25,
+    "cranialPlacementBand": "cranial_halo",
+    "safeMarginPercent": 6.0,
+    "faceAvoidanceBand": {
+      "topPercent": 25.0,
+      "bottomPercent": 60.0
+    }
+  },
+  "frameTreatment": {
+    "backgroundMaterial": "none",
+    "materialOpacity": 0.18,
+    "grain": {
+      "opacity": 0.06
+    },
+    "vignette": {
+      "intensity": 0.12,
+      "color": "#000000"
+    }
+  },
+  "layers": [
+    {
+      "role": "accent",
+      "fontFamily": "Inter",
+      "fontWeight": 700,
+      "fontStyle": "normal",
+      "casing": "title",
+      "fontSizePx": 46,
+      "relativeScale": 1.0,
+      "letterSpacingEm": -0.01,
+      "lineHeightMultiplier": 1.0,
+      "anchor": {
+        "horizontal": "center",
+        "vertical": "center",
+        "offsetXPercent": 0.0,
+        "offsetYPercent": 0.0,
+        "placementZone": "chest_deck",
+        "relativeTo": "canvas"
+      },
+      "stagger": {
+        "dxPercent": 0.0,
+        "dyPercent": 0.0,
+        "rotationDeg": 0.0,
+        "scaleMultiplier": 1.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "arcWarpDeg": 0.0,
+        "skewXDeg": 0.0,
+        "skewYDeg": 0.0,
+        "stretchRatio": 1.0
+      },
+      "fill": {
+        "type": "solid",
+        "color": "#FFFFFF"
+      },
+      "materiality": {
+        "opacity": 1.0,
+        "blendMode": "normal"
+      },
+      "occlusion": {
+        "mode": "none",
+        "depthPlane": 0,
+        "clipBoundary": "silhouette",
+        "partialOverlapPercent": 0
+      },
+      "inlineTokenSwaps": [],
+      "candidates": [
+        {
+          "candidateFamily": "Inter",
+          "verified": true,
+          "classification": "serif",
+          "visualWeightConfidence": 0.95,
+          "goudyCorrectionApplied": false
+        }
+      ],
+      "zIndex": 10,
+      "behindSubject": false
+    }
+  ],
+  "annotations": [],
+  "metadata": {
+    "migratedFrom": "image (84).json",
+    "overallMood": "Analytical technical showcase, clean white modern sans in a red dashed inspector callout box",
+    "migrationVersion": "v2.1"
+  }
+}
