@@ -247,30 +247,35 @@ def main() -> None:
     enc_path = REPO_ROOT / args.enc_bundle
     repo_cookies = REPO_ROOT / "config" / "flow_cookies.json"
 
-    if repo_cookies.exists():
-        logger.info(f"Using repository flow_cookies.json directly for authentication.")
-        profile_dir.mkdir(parents=True, exist_ok=True)
-    elif auth_key and enc_path.exists():
+    hydrated = False
+    if auth_key and enc_path.exists():
         try:
             hydrate_browser_profile(
                 enc_path=enc_path,
                 target_dir=profile_dir,
                 auth_key_hex=auth_key,
             )
+            hydrated = True
         except Exception as hyd_err:
             logger.warning(f"Profile hydration failed ({hyd_err}), falling back to direct cookie injection.")
             profile_dir.mkdir(parents=True, exist_ok=True)
+    elif repo_cookies.exists():
+        logger.info(f"Using repository flow_cookies.json directly for authentication.")
+        profile_dir.mkdir(parents=True, exist_ok=True)
     else:
-        raise RuntimeError("Neither valid config/flow_cookies.json nor valid FLOW_AUTH_KEY is available.")
+        raise RuntimeError("Neither valid FLOW_AUTH_KEY with encrypted bundle nor config/flow_cookies.json is available.")
 
-    # Purge stale Chrome Account Manager database and SQLite cookies from legacy profile
-    # that mark the account as 'Signed out', allowing CDP cookie injection to authenticate cleanly.
-    for stale_item in [
+    # Purge stale Chrome Account Manager database that marks accounts as 'Signed out'
+    stale_items = [
         profile_dir / "Default" / "Account Web Data",
         profile_dir / "Default" / "Account Web Data-journal",
-        profile_dir / "Default" / "Network" / "Cookies",
-        profile_dir / "Default" / "Network" / "Cookies-journal",
-    ]:
+    ]
+    if not hydrated:
+        stale_items.extend([
+            profile_dir / "Default" / "Network" / "Cookies",
+            profile_dir / "Default" / "Network" / "Cookies-journal",
+        ])
+    for stale_item in stale_items:
         if stale_item.exists():
             try:
                 stale_item.unlink()
