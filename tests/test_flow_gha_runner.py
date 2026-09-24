@@ -16,6 +16,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from mini_run_pipeline.flow_gha_runner import (
     DEFAULT_TRANSCRIPT,
     hydrate_browser_profile,
+    resolve_auth_strategy,
     run_hostile_critique,
 )
 
@@ -100,6 +101,37 @@ class TestFlowGhaRunner(unittest.TestCase):
         tmp_path = Path(self.test_dir)
         res = run_hostile_critique(tmp_path / "non_existent.mp4")
         self.assertIn(res["status"], ("PASS", "FLAGGED", "SKIPPED"))
+
+    def test_resolve_auth_strategy_prefers_repo_cookies(self):
+        """Ensures repo cookies are strictly prioritized over encrypted bundle."""
+        tmp_path = Path(self.test_dir)
+        repo_cookies = tmp_path / "flow_cookies.json"
+        repo_cookies.write_text("[]", encoding="utf-8")
+        enc_bundle = tmp_path / "flow_auth_bundle.enc"
+        enc_bundle.write_bytes(b"mock_encrypted_data")
+
+        # When repo cookies exist, return repo_cookies even if enc_bundle and auth_key are present
+        res = resolve_auth_strategy(repo_cookies=repo_cookies, enc_path=enc_bundle, auth_key="abcdef123456")
+        self.assertEqual(res, "repo_cookies")
+
+    def test_resolve_auth_strategy_falls_back_to_bundle(self):
+        """Ensures fallback to encrypted bundle when repo cookies are absent."""
+        tmp_path = Path(self.test_dir)
+        repo_cookies = tmp_path / "absent_cookies.json"
+        enc_bundle = tmp_path / "flow_auth_bundle.enc"
+        enc_bundle.write_bytes(b"mock_encrypted_data")
+
+        res = resolve_auth_strategy(repo_cookies=repo_cookies, enc_path=enc_bundle, auth_key="abcdef123456")
+        self.assertEqual(res, "enc_bundle")
+
+    def test_resolve_auth_strategy_raises_when_neither(self):
+        """Ensures failure fast when neither auth mechanism is available."""
+        tmp_path = Path(self.test_dir)
+        repo_cookies = tmp_path / "absent_cookies.json"
+        enc_bundle = tmp_path / "absent_bundle.enc"
+
+        with self.assertRaises(RuntimeError):
+            resolve_auth_strategy(repo_cookies=repo_cookies, enc_path=enc_bundle, auth_key=None)
 
 
 if __name__ == "__main__":

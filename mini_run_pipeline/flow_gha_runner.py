@@ -235,6 +235,16 @@ def run_hostile_critique(mp4_path: Path) -> Dict[str, Any]:
         return {"status": "SKIPPED", "error": str(exc)}
 
 
+def resolve_auth_strategy(repo_cookies: Path, enc_path: Path, auth_key: Optional[str]) -> str:
+    """Resolves authentication source, strictly prioritizing fresh cookies over stale profile bundles."""
+    if repo_cookies.exists():
+        return "repo_cookies"
+    elif auth_key and enc_path.exists():
+        return "enc_bundle"
+    else:
+        raise RuntimeError("Neither valid config/flow_cookies.json nor valid FLOW_AUTH_KEY with encrypted bundle is available.")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Headless Google Flow GHA runner")
     parser.add_argument("--transcript-json", type=str, default=None)
@@ -248,7 +258,11 @@ def main() -> None:
     repo_cookies = REPO_ROOT / "config" / "flow_cookies.json"
 
     hydrated = False
-    if auth_key and enc_path.exists():
+    strategy = resolve_auth_strategy(repo_cookies=repo_cookies, enc_path=enc_path, auth_key=auth_key)
+    if strategy == "repo_cookies":
+        logger.info("Using repository flow_cookies.json directly for authentication.")
+        profile_dir.mkdir(parents=True, exist_ok=True)
+    elif strategy == "enc_bundle":
         try:
             hydrate_browser_profile(
                 enc_path=enc_path,
@@ -259,11 +273,6 @@ def main() -> None:
         except Exception as hyd_err:
             logger.warning(f"Profile hydration failed ({hyd_err}), falling back to direct cookie injection.")
             profile_dir.mkdir(parents=True, exist_ok=True)
-    elif repo_cookies.exists():
-        logger.info(f"Using repository flow_cookies.json directly for authentication.")
-        profile_dir.mkdir(parents=True, exist_ok=True)
-    else:
-        raise RuntimeError("Neither valid FLOW_AUTH_KEY with encrypted bundle nor config/flow_cookies.json is available.")
 
     # Purge stale Chrome Account Manager database that marks accounts as 'Signed out'
     stale_items = [
