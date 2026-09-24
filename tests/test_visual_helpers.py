@@ -21,9 +21,11 @@ class TestVisualHelpersEngine(unittest.TestCase):
         self.assertEqual(res_cal["badge"], "SCHEDULE MILESTONE")
         self.assertIn("202", res_cal["title"])
 
-        # Rhetorical rejection guard: dismissing calendar advice must NOT trigger a calendar widget
+        # Rhetorical rejection guard: dismissing calendar advice must NOT trigger a calendar widget (including unicode quote)
         rejection_text = "past the cookie-cutter information of how to manage your calendars"
         self.assertIsNone(_extract_calendar_widget(rejection_text))
+        rejection_unicode = "don’t manage your calendars"
+        self.assertIsNone(_extract_calendar_widget(rejection_unicode))
 
     def test_time_widget_extraction(self):
         """Phrases emphasizing finite time allocation trigger time_widget, while negative time statements are guarded."""
@@ -33,10 +35,15 @@ class TestVisualHelpersEngine(unittest.TestCase):
         self.assertIsNotNone(res_time)
         self.assertEqual(res_time["type"], "time_widget")
         self.assertEqual(res_time["badge"], "RESOURCE ALLOCATION")
+        self.assertNotIn("imageSrc", res_time, "Time widget must not hardcode static AI slop imageSrc")
 
-        # Negative/rejection statement must NOT trigger time widget
+        # Negative/rejection statement must NOT trigger time widget (including unicode quotes and colloquial time mentions)
         neg_time = "time doesn't need to be managed your priorities do"
         self.assertIsNone(_extract_time_widget(neg_time))
+        neg_time_unicode = "time doesn’t need to be managed your priorities do"
+        self.assertIsNone(_extract_time_widget(neg_time_unicode))
+        colloquial_time = "how to spend X amount of time on certain things"
+        self.assertIsNone(_extract_time_widget(colloquial_time))
 
     def test_before_after_comparison_extraction(self):
         """Phrases indicating comparison or transformation trigger before_after_comparison with dynamic titles and labels."""

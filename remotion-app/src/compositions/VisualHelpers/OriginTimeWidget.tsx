@@ -79,9 +79,9 @@ export const OriginTimeWidget: React.FC<VisualHelperComponentProps> = ({
   // Scrub timeline to current exact frame
   tl.seek(timeSec);
 
-  const imageSrc = helper.imageSrc
+  const imageSrc = helper.imageSrc && !helper.imageSrc.includes("hourglass")
     ? staticFile(helper.imageSrc.replace(/^(\/|public\/)/, ""))
-    : staticFile("showcase-assets/hourglass-sand.png");
+    : null;
 
   const accentColor = helper.accentColor || "#FBBF24"; // warm gold / amber
   const cyanAccent = "#38BDF8";
@@ -266,7 +266,7 @@ export const OriginTimeWidget: React.FC<VisualHelperComponentProps> = ({
           ＋ 810×1440
         </div>
 
-        {/* 5. Photographic Physical Asset with 3D GSAP Rotation & Volumetric Light */}
+        {/* 5. Photographic Physical Asset or Dynamic 21st.dev Chronometer Dial */}
         <div
           style={{
             position: "relative",
@@ -280,15 +280,66 @@ export const OriginTimeWidget: React.FC<VisualHelperComponentProps> = ({
             willChange: "transform, filter",
           }}
         >
-          <Img
-            src={imageSrc}
-            style={{
-              width: "165px",
-              height: "165px",
-              objectFit: "contain",
-              display: "block",
-            }}
-          />
+          {imageSrc ? (
+            <Img
+              src={imageSrc}
+              style={{
+                width: "165px",
+                height: "165px",
+                objectFit: "contain",
+                display: "block",
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: "154px",
+                height: "154px",
+                borderRadius: "50%",
+                background: "radial-gradient(circle at 35% 35%, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98))",
+                border: `2px solid ${cyanAccent}55`,
+                boxShadow: `0 20px 40px rgba(0,0,0,0.8), 0 0 25px ${cyanAccent}33, inset 0 2px 6px rgba(255,255,255,0.2)`,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                position: "relative",
+              }}
+            >
+              {/* Chronometer ticks & hand */}
+              <svg width="144" height="144" viewBox="0 0 144 144" style={{ position: "absolute", inset: "5px" }}>
+                <circle cx="72" cy="72" r="64" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" strokeDasharray="2 4" />
+                <circle
+                  cx="72"
+                  cy="72"
+                  r="56"
+                  fill="none"
+                  stroke={accentColor}
+                  strokeWidth="2.5"
+                  strokeDasharray="351"
+                  strokeDashoffset={`${351 - (timeSec % 60) * (351 / 60)}`}
+                  strokeLinecap="round"
+                  style={{ transform: "rotate(-90deg)", transformOrigin: "72px 72px" }}
+                />
+                <line
+                  x1="72"
+                  y1="72"
+                  x2={`${72 + 44 * Math.cos(((timeSec * 6) - 90) * Math.PI / 180)}`}
+                  y2={`${72 + 44 * Math.sin(((timeSec * 6) - 90) * Math.PI / 180)}`}
+                  stroke={accentColor}
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <circle cx="72" cy="72" r="4" fill="#FFFFFF" />
+              </svg>
+              <div style={{ zIndex: 5, marginTop: "42px", fontFamily: "ui-monospace, monospace", fontSize: "14px", fontWeight: 700, color: "#FFFFFF", letterSpacing: "0.08em" }}>
+                {`00:${Math.floor(timeSec % 60).toString().padStart(2, "0")}`}
+              </div>
+              <div style={{ zIndex: 5, fontFamily: "sans-serif", fontSize: "8px", fontWeight: 600, color: cyanAccent, letterSpacing: "0.2em", textTransform: "uppercase" }}>
+                PRECISION
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 6. Technical Telemetry Tag (geometric-art.com/pro) */}

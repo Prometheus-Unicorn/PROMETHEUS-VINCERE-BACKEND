@@ -305,7 +305,7 @@ def _extract_calendar_widget(text: str, context: Optional[str] = None) -> Option
     full_context = f"{context or ''} {text_lower}".lower()
 
     # Rhetorical rejection guard: do not trigger calendar when the speaker is rejecting schedules/calendars
-    if re.search(r"\b(?:past|beyond|stop|don't|not|never|instead\s+of|forget|cookie-cutter)\b", full_context):
+    if re.search(r"\b(?:past|beyond|stop|don['’]t|not|never|instead\s+of|forget|cookie[- ]cutter)\b", full_context):
         return None
 
     calendar_keywords = ["calendar", "calendars", "schedule", "scheduling", "day planner", "agenda", "timeline"]
@@ -337,8 +337,10 @@ def _extract_time_widget(text: str, context: Optional[str] = None) -> Optional[D
     text_lower = text.lower()
     full_context = f"{context or ''} {text_lower}".lower()
 
-    # Rejection guard: statements like "time doesn't need to be managed" are priority arguments, not time management widgets
-    if re.search(r"\btime\s+(?:doesn't|does\s+not|isn't|is\s+not)\b", full_context):
+    # Rejection guard: statements like "time doesn't need to be managed" or colloquial time mentions
+    if re.search(r"\btime\s+(?:doesn['’]t|does\s+not|isn['’]t|is\s+not|never)\b", full_context):
+        return None
+    if re.search(r"\b(?:spend\s+x\s+amount|amount\s+of\s+time|over\s+time|in\s+time|some\s+point\s+in\s+time)\b", full_context):
         return None
 
     if re.search(r"\btime\b", text_lower) and any(
@@ -356,7 +358,6 @@ def _extract_time_widget(text: str, context: Optional[str] = None) -> Optional[D
             "subtitle": subtitle,
             "texture": "geometric_drafting",
             "position": "cranial_top",
-            "imageSrc": "showcase-assets/hourglass-sand.png",
             "durationMs": 5200,
             "accentColor": "#FBBF24",
         }

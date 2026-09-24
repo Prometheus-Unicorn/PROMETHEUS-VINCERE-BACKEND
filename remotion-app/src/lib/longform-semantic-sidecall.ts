@@ -368,34 +368,26 @@ const GRAPHIC_ASSET_RULES: LongformSemanticGraphicAssetRule[] = [
   {
     asset: {
       assetId: "time-clock-hourglass",
-      label: "Time",
-      copy: "Two-minute rule",
+      label: "Time Allocation",
+      copy: "Precision sprint",
       src: "showcase-assets/imports/promethues-with-bg/time-clock-hourglass.png"
     },
     matchers: [
-      /\btwo[-\s]?minute\b/i,
-      /\bminute\b/i,
-      /\bminutes\b/i,
-      /\bclock\b/i,
-      /\bhourglass\b/i,
-      /\btime\b/i,
-      /\brule\b/i,
-      /\bdeadline\b/i,
-      /\btimer\b/i
+      /\btwo[-\s]?minute\s+rule\b/i,
+      /\bpomodoro\b/i,
+      /\btimebox(?:ing)?\b/i
     ]
   },
   {
     asset: {
       assetId: "hourglass-sand",
-      label: "Timing",
-      copy: "Hold / pacing",
+      label: "Strategic Pacing",
+      copy: "Deliberate pause",
       src: "showcase-assets/hourglass-sand.png"
     },
     matchers: [
-      /\bwait\b/i,
-      /\bdelay\b/i,
-      /\bpause\b/i,
-      /\bpacing\b/i
+      /\bdeliberate\s+pause\b/i,
+      /\bstrategic\s+pacing\b/i
     ]
   }
 ];
