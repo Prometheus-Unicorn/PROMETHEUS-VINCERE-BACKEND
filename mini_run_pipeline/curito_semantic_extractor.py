@@ -108,8 +108,11 @@ class DiffusionPromptPolicyCritic:
     @classmethod
     def _is_negated(cls, text: str, match_start: int) -> bool:
         """Checks if a term occurrence is explicitly negated in the prompt."""
-        preceding = text[max(0, match_start - 30):match_start]
-        negation_tokens = ["no ", "zero ", "without ", "never ", "avoid ", "not ", "no compound "]
+        preceding = text[max(0, match_start - 45):match_start]
+        negation_tokens = [
+            "no ", "zero ", "without ", "never ", "avoid ", "avoiding ", "avoids ",
+            "not ", "no compound ", "free of ", "free from "
+        ]
         return any(neg in preceding for neg in negation_tokens)
 
     @classmethod
@@ -428,7 +431,7 @@ MANDATORY OPERATING POLICIES:
    - [2. Materiality & Surface]: Textures, finishes, micro-details (e.g., hand-finished solid brass, blackened carbon steel, micro-chamfered teeth).
    - [3. Canvas & Textured Background (Strictly No Table)]: Pristine unpopulated graphic canvas at frame 0 featuring subtle halftone dot patterning, fine 35mm film grain, and explicit negative space reservation (#ECECEC matte paper, neutral void).
    - [4. Lighting & Shadow Physics]: Illumination quality, directional softness, and floating ambient occlusion volume providing spatial depth without furniture contact.
-   - [5. Camera & Kinematic Permanence Spec]: Spatially locked fixed-tripod camera (zero orbit), 1-DoF constrained axial rotation, strict rigid-body topological permanence, zero 180-degree yaw flipping, native 24fps cinema cadence.
+   - [5. Camera & Kinematic Permanence Spec]: Spatially locked fixed-tripod camera (zero orbit), 1-DoF constrained axial rotation, strict rigid-body topological permanence, single cohesive solid topological manifold with pinned UV surface coordinates, zero ghosted duplication, zero mesh fission, zero 180-degree yaw flipping, native 24fps cinema cadence.
    - [6. Dynamic Entrance Kinematic Spec]: Dynamic entrance from unpopulated canvas during 0.0s - 1.5s (e.g. vertical bottom emergence from submerged off-screen coordinates Y: +120%, or lateral friction slide, or 3D hinged swing) decelerating into locked centroid position before the sync hit. ZERO static ducks sitting stationary from frame 0!
 
 9. BACKGROUND TREATMENT SELECTION (SELECT BY ID — NEVER HARDCODE):
@@ -773,10 +776,10 @@ def extract_and_synthesize_curito_prompt(
     "materiality_and_surface": "materials, finishes, micro-details (e.g., hand-finished solid brass, blackened carbon steel)",
     "canvas_and_textured_background": "spatial-temporal graphic canvas with subtle halftone dot screening or fine film grain, reserving upper 45% negative space (strictly no table/furniture)",
     "lighting_and_shadow_physics": "illumination quality and floating ambient occlusion volume providing depth",
-    "camera_and_rendering_spec": "lens (85mm), spatially locked tripod, 1-DoF constrained axial rotation, rigid-body topological permanence, zero 180-degree yaw flipping, 24fps",
+    "camera_and_rendering_spec": "lens (85mm), spatially locked tripod, 1-DoF constrained axial rotation, rigid-body topological permanence, single cohesive solid topological manifold with pinned UV surface coordinates, zero ghosted duplication, zero mesh fission, zero 180-degree yaw flipping, 24fps",
     "entrance_kinematic_treatment": "dynamic entrance from unpopulated canvas during 0.0s - 1.5s (e.g. vertical bottom emergence from submerged Y coords, lateral friction slide, or 3D hinged swing) decelerating into locked centroid position"
   },
-  "assembled_diffusion_prompt": "Single synthesized prompt paragraph combining the 6 elements with concrete hero artifact, dynamic entrance kinematics (0.0s-1.5s from unpopulated canvas), spatial-temporal halftone/grain background (no table), locked tripod camera, rigid-body permanence, and the selected motion treatment optics clause appended at the end",
+  "assembled_diffusion_prompt": "Single synthesized prompt paragraph combining the 6 elements with concrete hero artifact, dynamic entrance kinematics (0.0s-1.5s from unpopulated canvas), spatial-temporal halftone/grain background (no table), locked tripod camera, rigid-body permanence, unitary manifold anti-ghosting physics, and the selected motion treatment optics clause appended at the end",
   "negative_prompt": "doubling, duplicate mesh, split silhouette, ghosting, asset duplication, UV sliding, texture swimming, UV seam tear, unphysical merging, snapping back, 180-degree flip, yaw flip, choppy rotation, perspective inversion, orientation swap, reversing direction, morphing geometry, warping metal, changing teeth, shifting bitting, mutating parts, melting, table, tabletop, desk, furniture, countertop, wooden desk, office room, floorboards, text, words, typography, UI elements, buttons, screen, monitor",
   "selected_background_treatment_id": "one of: halftone_raster_canvas | luxury_editorial_sunlight_canvas | newspaper_collage_deconstructed | modern_swiss_museum_poster",
   "selected_motion_treatment_id": "one of: defocus_blur | gaussian_blur | bokeh_blur | slow_shutter_motion_blur",
@@ -815,11 +818,10 @@ def extract_and_synthesize_curito_prompt(
         "gemini-3.8-flash",
         "gemini-3-flash-preview",
     ]
-    if model_name in PREFERRED_MODELS:
-        candidate_models = PREFERRED_MODELS[PREFERRED_MODELS.index(model_name):]
+    if model_name:
+        candidate_models = [model_name] + [m for m in PREFERRED_MODELS if m != model_name]
     else:
-        # Caller passed a custom model name — try it first, then fall through preferred chain
-        candidate_models = [model_name] + PREFERRED_MODELS
+        candidate_models = PREFERRED_MODELS
     # De-duplicate while preserving order
     candidate_models = list(dict.fromkeys(candidate_models))
 
@@ -873,6 +875,17 @@ def extract_and_synthesize_curito_prompt(
     # Recursive Adversarial Self-Critique Refinement Loop
     # -----------------------------------------------------------------------
     prompt = extracted.get("assembled_diffusion_prompt", "")
+    lowered_prompt = prompt.lower()
+    has_unitary = any(w in lowered_prompt for w in [
+        "unitary manifold", "single cohesive mesh", "zero ghosting", "zero duplication",
+        "zero doubling", "zero uv sliding", "zero mesh fission", "zero duplicate silhouettes",
+        "unitary topological body", "single physical object", "zero unphysical cloning"
+    ])
+    if not has_unitary and prompt:
+        unitary_clause = ", single cohesive solid topological manifold with pinned UV surface coordinates, zero ghosted duplication, zero mesh fission"
+        prompt = f"{prompt.rstrip('. ')}{unitary_clause}."
+        extracted["assembled_diffusion_prompt"] = prompt
+
     audit = DiffusionPromptPolicyCritic.audit_prompt(prompt)
 
     critique_iterations = 0
@@ -951,6 +964,20 @@ def extract_and_synthesize_curito_prompt(
 
         if not refined_success:
             break
+
+    final_prompt = extracted.get("assembled_diffusion_prompt", "")
+    if final_prompt:
+        lowered_final = final_prompt.lower()
+        has_unitary_final = any(w in lowered_final for w in [
+            "unitary manifold", "single cohesive mesh", "zero ghosting", "zero duplication",
+            "zero doubling", "zero uv sliding", "zero mesh fission", "zero duplicate silhouettes",
+            "unitary topological body", "single physical object", "zero unphysical cloning"
+        ])
+        if not has_unitary_final:
+            unitary_clause = ", single cohesive solid topological manifold with pinned UV surface coordinates, zero ghosted duplication, zero mesh fission"
+            final_prompt = f"{final_prompt.rstrip('. ')}{unitary_clause}."
+            extracted["assembled_diffusion_prompt"] = final_prompt
+            audit = DiffusionPromptPolicyCritic.audit_prompt(final_prompt)
 
     extracted["policy_critique"] = audit
 
