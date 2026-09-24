@@ -278,6 +278,15 @@ def main() -> None:
             except Exception:
                 pass
 
+    # Clean up stale diagnostic screenshots in runner workspace
+    scratch_dir = REPO_ROOT / "scratch"
+    if scratch_dir.exists():
+        for old_png in scratch_dir.glob("*.png"):
+            try:
+                old_png.unlink()
+            except Exception:
+                pass
+
     # Synchronize fresh repository cookies into profile directory if present
     repo_cookies = REPO_ROOT / "config" / "flow_cookies.json"
     if repo_cookies.exists():

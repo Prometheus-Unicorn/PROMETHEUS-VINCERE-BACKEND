@@ -331,22 +331,31 @@ class GoogleFlowServerClient:
                     # Step 3: Resilient Navigation
                     # Hydrate domain cookies and session root first
                     logger.info("Establishing Google Flow domain session...")
-                    try:
-                        await page.goto("https://flow.google.com/", timeout=45000, wait_until="commit")
-                        await asyncio.sleep(5.0)
-                    except Exception as e_root:
-                        logger.warning(f"Root domain navigation warning: {e_root}")
-
-                    logger.info(f"Navigating to workspace: {self.config.workspace_url}")
                     for attempt in range(1, 4):
                         try:
-                            await page.goto(self.config.workspace_url, timeout=45000, wait_until="commit")
+                            await page.goto("https://flow.google.com/", timeout=45000, wait_until="commit")
+                            await asyncio.sleep(5.0)
+                            break
+                        except Exception as e_root:
+                            logger.warning(f"Root domain navigation attempt {attempt}/3 warning: {e_root}")
+                            if attempt == 3:
+                                break
+                            await asyncio.sleep(attempt * 3.0)
+
+                    logger.info(f"Navigating to workspace: {self.config.workspace_url}")
+                    for attempt in range(1, 6):
+                        try:
+                            logger.info(f"Workspace navigation attempt {attempt}/5...")
+                            await page.goto(self.config.workspace_url, timeout=60000, wait_until="commit")
                             await asyncio.sleep(6.0)
                             break
                         except Exception as nav_err:
-                            if attempt == 3:
+                            logger.warning(f"Workspace navigation attempt {attempt}/5 failed: {nav_err}")
+                            if attempt == 5:
                                 raise nav_err
-                            await asyncio.sleep(2.0)
+                            backoff = attempt * 5.0
+                            logger.info(f"Retrying workspace navigation in {backoff}s...")
+                            await asyncio.sleep(backoff)
 
                     # Step 4: Session Validation
                     await FlowSessionValidator.validate_session_active(page, timeout_ms=45000)
