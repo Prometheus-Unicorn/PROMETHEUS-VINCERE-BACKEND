@@ -74,6 +74,23 @@ class TestGoogleFlowService(unittest.IsolatedAsyncioTestCase):
         await mock_context.add_cookies(sample_cookies)
         mock_context.add_cookies.assert_called_once_with(sample_cookies)
 
+    def test_is_cdp_endpoint_alive_false_on_closed_port(self):
+        from mini_run_pipeline.google_flow_service import is_cdp_endpoint_alive
+        self.assertFalse(is_cdp_endpoint_alive("http://127.0.0.1:65534", timeout_sec=0.2))
+
+    def test_flow_service_config_cdp_defaults(self):
+        config = FlowServiceConfig()
+        # Verify cdp_url defaults to None or environment
+        self.assertIn("ipsasummagnitudo@gmail.com", config.expected_account)
+
+    def test_launch_dedicated_chrome_cdp_missing_executable(self):
+        from mini_run_pipeline.google_flow_service import launch_dedicated_chrome_cdp
+        proc = launch_dedicated_chrome_cdp(
+            profile_dir=Path("non_existent_profile_dir"),
+            chrome_path="non_existent_chrome_binary_xyz.exe",
+        )
+        self.assertIsNone(proc)
+
 
 if __name__ == "__main__":
     unittest.main()

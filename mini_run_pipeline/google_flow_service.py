@@ -54,6 +54,59 @@ def resolve_browser_executable(custom_path: Optional[str] = None) -> Optional[st
     return None
 
 
+def is_cdp_endpoint_alive(url: str = "http://127.0.0.1:9222", timeout_sec: float = 1.0) -> bool:
+    """Returns True if a Chrome DevTools Protocol endpoint is responding to /json/version."""
+    import urllib.request
+    try:
+        req = urllib.request.Request(f"{url.rstrip('/')}/json/version")
+        with urllib.request.urlopen(req, timeout=timeout_sec) as resp:
+            data = json.loads(resp.read().decode())
+            return "webSocketDebuggerUrl" in data or "Browser" in data
+    except Exception:
+        return False
+
+
+def launch_dedicated_chrome_cdp(
+    profile_dir: Path,
+    chrome_path: Optional[str] = None,
+    headless: bool = True,
+    port: int = 9222,
+) -> Optional[subprocess.Popen]:
+    if chrome_path:
+        resolved_chrome = resolve_browser_executable(chrome_path)
+        if not resolved_chrome:
+            return None
+    else:
+        resolved_chrome = resolve_browser_executable() or r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+    if not (Path(resolved_chrome).exists() or shutil.which(resolved_chrome)):
+        return None
+
+    profile_dir = Path(profile_dir)
+    profile_dir.mkdir(parents=True, exist_ok=True)
+
+    args = [
+        str(resolved_chrome),
+        f"--user-data-dir={profile_dir.resolve()}",
+        f"--remote-debugging-port={port}",
+        "--remote-allow-origins=*",
+        "--no-first-run",
+        "--no-default-browser-check",
+    ]
+    if headless:
+        args.append("--headless=new")
+    if sys.platform == "win32":
+        args.extend(["--use-gl=angle", "--use-angle=d3d11"])
+
+    args.append("about:blank")
+    logger.info(f"Launching native Chrome with dedicated profile {profile_dir} on CDP port {port}...")
+    try:
+        proc = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return proc
+    except Exception as exc:
+        logger.warning(f"Failed to launch native Chrome CDP: {exc}")
+        return None
+
+
 # ---------------------------------------------------------------------------
 # Data Models & Results
 # ---------------------------------------------------------------------------
@@ -70,6 +123,12 @@ class FlowServiceConfig:
     viewport_height: int = 900
     expected_account: str = "ipsasummagnitudo@gmail.com"
     proxy_url: Optional[str] = field(default_factory=lambda: os.environ.get("FLOW_PROXY_URL"))
+    cdp_url: Optional[str] = field(default_factory=lambda: os.environ.get("FLOW_CDP_URL"))
+    dedicated_profile_dir: Optional[Path] = field(
+        default_factory=lambda: Path(os.environ["FLOW_DEDICATED_PROFILE"])
+        if "FLOW_DEDICATED_PROFILE" in os.environ
+        else (Path(r"C:\Users\HomePC\.prometheus_flow_user_data") if sys.platform == "win32" and Path(r"C:\Users\HomePC\.prometheus_flow_user_data").exists() else None)
+    )
 
 
 @dataclass
@@ -234,7 +293,28 @@ class GoogleFlowServerClient:
             FlowProcessManager.kill_stale_chrome_processes(self.config.profile_dir)
             FlowProcessManager.cleanup_stale_locks(self.config.profile_dir)
 
-            # Step 2: Launch persistent context with cross-platform browser resolution
+            # Step 2: Connection Strategy: Active CDP -> Dedicated Profile Chrome -> Persistent Context
+            cdp_target = self.config.cdp_url or "http://127.0.0.1:9222"
+            dedicated_proc: Optional[subprocess.Popen] = None
+            is_cdp_mode = False
+
+            if is_cdp_endpoint_alive(cdp_target):
+                logger.info(f"Active CDP endpoint detected at {cdp_target}. Utilizing live browser session.")
+                is_cdp_mode = True
+            elif self.config.dedicated_profile_dir and self.config.dedicated_profile_dir.exists() and sys.platform == "win32":
+                dedicated_proc = launch_dedicated_chrome_cdp(
+                    profile_dir=self.config.dedicated_profile_dir,
+                    chrome_path=self.config.chrome_path,
+                    headless=self.config.headless,
+                )
+                if dedicated_proc:
+                    for _ in range(12):
+                        await asyncio.sleep(0.5)
+                        if is_cdp_endpoint_alive(cdp_target):
+                            is_cdp_mode = True
+                            logger.info(f"Dedicated native Chrome CDP online at {cdp_target}.")
+                            break
+
             resolved_chrome = resolve_browser_executable(self.config.chrome_path)
             logger.info(f"Resolved browser executable: {resolved_chrome}")
             browser_args = [
@@ -274,7 +354,15 @@ class GoogleFlowServerClient:
                 logger.info(f"Routing browser traffic via proxy: {self.config.proxy_url.split('@')[-1]}")
 
             async with async_playwright() as p:
-                context = await p.chromium.launch_persistent_context(**launch_kwargs)
+                browser = None
+                if is_cdp_mode:
+                    browser = await p.chromium.connect_over_cdp(cdp_target)
+                    context = browser.contexts[0] if browser.contexts else await browser.new_context(
+                        viewport={"width": self.config.viewport_width, "height": self.config.viewport_height},
+                        accept_downloads=True,
+                    )
+                else:
+                    context = await p.chromium.launch_persistent_context(**launch_kwargs)
                 try:
                     page = context.pages[0] if context.pages else await context.new_page()
 
@@ -403,4 +491,16 @@ class GoogleFlowServerClient:
                     return result
 
                 finally:
-                    await context.close()
+                    if is_cdp_mode and browser:
+                        try:
+                            await browser.close()
+                        except Exception:
+                            pass
+                        if dedicated_proc:
+                            try:
+                                dedicated_proc.terminate()
+                                dedicated_proc.wait(timeout=3)
+                            except Exception:
+                                pass
+                    else:
+                        await context.close()
