@@ -366,18 +366,19 @@ class GoogleFlowServerClient:
                 try:
                     page = context.pages[0] if context.pages else await context.new_page()
 
-                    # CDP cookie injection: prioritize repo config cookies, fallback to profile dir
-                    cookies_file = REPO_ROOT / "config" / "flow_cookies.json"
-                    if not cookies_file.exists():
-                        cookies_file = self.config.profile_dir / "flow_cookies.json"
-                    if cookies_file.exists():
-                        try:
-                            with open(cookies_file, "r", encoding="utf-8") as cf:
-                                cookies_data = json.load(cf)
-                            await context.add_cookies(cookies_data)
-                            logger.info(f"Directly injected {len(cookies_data)} authentication cookies via CDP from {cookies_file}.")
-                        except Exception as c_err:
-                            logger.warning(f"CDP cookie injection warning: {c_err}")
+                    # CDP cookie injection: prioritize repo config cookies, fallback to profile dir (only in non-CDP mode)
+                    if not is_cdp_mode:
+                        cookies_file = REPO_ROOT / "config" / "flow_cookies.json"
+                        if not cookies_file.exists():
+                            cookies_file = self.config.profile_dir / "flow_cookies.json"
+                        if cookies_file.exists():
+                            try:
+                                with open(cookies_file, "r", encoding="utf-8") as cf:
+                                    cookies_data = json.load(cf)
+                                await context.add_cookies(cookies_data)
+                                logger.info(f"Directly injected {len(cookies_data)} authentication cookies via CDP from {cookies_file}.")
+                            except Exception as c_err:
+                                logger.warning(f"CDP cookie injection warning: {c_err}")
 
                     # CDP download directory setup for direct file stream writing
                     try:
