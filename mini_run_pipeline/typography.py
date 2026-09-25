@@ -3486,11 +3486,16 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
             hero_fx_preset = hook_plan.get("hookType") or "hook_cinematic_dolly_zoom"
             preset_usage_counts[hero_fx_preset] = preset_usage_counts.get(hero_fx_preset, 0) + 1
 
-        is_lockup_treatment = wants_lockup or (hero_fx_preset in ("hierarchical_asymmetric_lockup", "documentary_lockup_captions", "micro_macro_kinetic_type"))
+        target_layers = prof.get("typography_layers", [])
+        # Anti-shrink multi-word safeguard: if chunk has >= 3 words and > 16 characters,
+        # single-layer rendering forces the font to shrink < 70px to fit within the 880px safe envelope.
+        # Auto-activate 2-line lockup hierarchy so font size remains authoritative (>= 104px).
+        phrase_len = len(" ".join(words))
+        is_wide_multi_word = (len(target_layers) <= 1 and word_count >= 3 and phrase_len > 16 and not behind_subject)
+        is_lockup_treatment = wants_lockup or is_wide_multi_word or (hero_fx_preset in ("hierarchical_asymmetric_lockup", "documentary_lockup_captions", "micro_macro_kinetic_type"))
         resolved_lockup_opt = "top_tucked"
 
         # If single word is paired with a 2-layer profile, split by stem/suffix
-        target_layers = prof.get("typography_layers", [])
         if behind_subject and word_count >= 2:
             # Pivot-word architecture for behind-subject multi-word chunks:
             # The substantive pivot word (<= 8 chars, no digits) forms the hero layer,
@@ -3552,7 +3557,7 @@ def generate_font_manifest(chunks: List[Dict[str, Any]], design_override: Option
             w0_clean = "".join(ch for ch in words[0].lower() if ch.isalnum())
             last_clean = "".join(ch for ch in words[-1].lower() if ch.isalnum())
 
-            mod_scale = 0.88 if is_micro_stopword else 0.30
+            mod_scale = 0.88 if is_micro_stopword else 0.72
 
             # Compound Numeric Atomicity:
             # If chunk starts with a number: force [number, noun] to the HERO tier together;
