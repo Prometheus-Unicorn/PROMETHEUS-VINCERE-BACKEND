@@ -6498,7 +6498,7 @@ const BackgroundCanvasStage: React.FC<{
     return (
       <AbsoluteFill
         style={{
-          zIndex: 5,
+          zIndex: 60,
           pointerEvents: "none",
           overflow: "hidden",
           opacity: baseOpacity,

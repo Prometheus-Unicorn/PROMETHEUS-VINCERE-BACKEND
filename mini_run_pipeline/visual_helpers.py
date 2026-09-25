@@ -366,33 +366,30 @@ def _extract_time_widget(text: str, context: Optional[str] = None) -> Optional[D
 def _extract_optical_rack_focus(text: str) -> Optional[Dict[str, Any]]:
     """Inspect text for cinematic focus, priority inflection, or pivotal decisions."""
     text_lower = text.lower()
+    # Explicit optical directives or profound inflection phrases only — never single word 'priorities'
     if any(re.search(rf"\b{k}\b", text_lower) for k in [
-        "rack focus", "lens breathing", "focal point", "priorities", "competing priorities",
-        "inflection point", "something has to win", "sharp focus"
+        "rack focus", "lens breathing", "competing priorities",
+        "something has to win", "optical rack focus"
     ]):
-        m_pri = re.search(r"\b(competing\s+priorities|something\s+has\s+to\s+win|inflection\s+point|focal\s+point|priorities)\b", text_lower)
-        headline = m_pri.group(1).upper() if m_pri else "CINEMATIC FOCUS"
-
-        # Context-grounded dialogue subtitle, avoiding internal camera mechanics jargon
+        headline = "CINEMATIC FOCUS"
         if "something has to win" in text_lower:
-            sub = "SOMETHING HAS TO WIN"
-        elif "priorities" in text_lower:
-            sub = "ALIGNING CRITICAL FOCUS"
-        elif "focal" in text_lower:
-            sub = "CENTER OF IMPACT"
-        else:
-            sub = "DECISIVE INFLECTION POINT"
+            headline = "SOMETHING HAS TO WIN"
+        elif "competing priorities" in text_lower:
+            headline = "COMPETING PRIORITIES"
 
         return {
             "type": "optical_rack_focus",
             "headlineText": headline,
-            "subtitleText": sub,
+            "subtitleText": "ALIGNING CRITICAL FOCUS",
             "position": "fullscreen",
             "enableBloom": True,
-            "enableVignette": True,
+            "enableVignette": False,
             "enableLetterbox": False,
             "enableFilmGrain": True,
-            "enableFloorShadow": True,
+            "enableFloorShadow": False,
+            "enableHalftoneRaster": False,
+            "enableTactileShadow": False,
+            "canvasColor": "transparent",
             "focalPlaneRole": "primary",
         }
     return None

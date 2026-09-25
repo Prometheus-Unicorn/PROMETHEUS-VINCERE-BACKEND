@@ -651,21 +651,35 @@ def prescribe_after_effects_treatment(
 
     style = treatment_type
     if not style or style not in valid_styles:
-        # Intelligently assign based on beat type & evaluation
-        if beat_type in ("proof", "evidence"):
-            style = "evidentiary_dossier_card"
-        elif beat_type in ("crisis", "conflict"):
-            style = "retinal_flash_cut"
-        elif beat_type in ("revelation", "realization"):
-            style = "rack_focus_spotlight"
-        elif beat_type in ("world_context", "environment"):
-            style = "cinematic_fullbleed"
-        elif beat_type in ("tech_workflow", "system"):
-            style = "track_matte_unfurl"
-        else:
-            # Deterministic hash selection for variety
-            h = int(hashlib.md5(f"{seed}_{evaluation.chunk_index if evaluation else 0}".encode()).hexdigest(), 16)
-            style = valid_styles[h % len(valid_styles)]
+        # 1. Consult Laya Autonomous Decision Engine if available
+        try:
+            from .laya_director import LayaEditorialDirector
+            chunk_txt = evaluation.text if evaluation else ""
+            if chunk_txt:
+                laya_decision = LayaEditorialDirector.get_instance().decide_broll_cutaway(
+                    chunk_txt, beat_type=beat_type
+                )
+                if laya_decision.treatment_style in valid_styles:
+                    style = laya_decision.treatment_style
+        except Exception:
+            style = None
+
+        # 2. Heuristic fallback when style remains unresolved
+        if not style or style not in valid_styles:
+            if beat_type in ("proof", "evidence"):
+                style = "evidentiary_dossier_card"
+            elif beat_type in ("crisis", "conflict"):
+                style = "retinal_flash_cut"
+            elif beat_type in ("revelation", "realization"):
+                style = "rack_focus_spotlight"
+            elif beat_type in ("world_context", "environment"):
+                style = "cinematic_fullbleed"
+            elif beat_type in ("tech_workflow", "system"):
+                style = "track_matte_unfurl"
+            else:
+                # Deterministic hash selection for variety
+                h = int(hashlib.md5(f"{seed}_{evaluation.chunk_index if evaluation else 0}".encode()).hexdigest(), 16)
+                style = valid_styles[h % len(valid_styles)]
 
     # 1. Cinematic Full-Bleed
     if style == "cinematic_fullbleed":

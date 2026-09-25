@@ -6,19 +6,20 @@ Pulls back the rendered MP4 and the font manifest for analysis.
 """
 import json
 import modal
-import time
 import os
 import sys
 import tempfile
+import time
+from pathlib import Path
 
 app = modal.App("test_mini_run_30s")
 vol = modal.Volume.from_name("prometheus-render-artifacts")
 
 # The reference video, baked into the deployed image at this path.
-VIDEO = "/opt/prometheus/LANDSCAPE VIDEOS FOR USE/Unedited Videos Made Me a Better Editor_ Here's How....mp4"
+VIDEO = os.getenv("TEST_VIDEO_PATH", "/opt/prometheus/remotion-app/public/source/MALE-BLACK-TALKING-HEAD-PODCAST.mp4")
 
-DEST_VIDEO = "/home/ec2-user/PROMETHEUS-CORE-BACKEND/mini_run_30s_master.mp4"
-DEST_MANIFEST = "/home/ec2-user/PROMETHEUS-CORE-BACKEND/mini_run_30s_manifest.json"
+DEST_VIDEO = os.getenv("DEST_VIDEO", str(Path(__file__).parent / "mini_run_30s_master.mp4"))
+DEST_MANIFEST = os.getenv("DEST_MANIFEST", str(Path(__file__).parent / "mini_run_30s_manifest.json"))
 
 
 @app.local_entrypoint()

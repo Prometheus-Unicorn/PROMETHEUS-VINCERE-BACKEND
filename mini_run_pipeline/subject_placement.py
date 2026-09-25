@@ -843,18 +843,23 @@ def plan_subject_safe_placements(
                 else:
                     target_zone = "foreground_lower_deck"
 
+            # Lateral column envelope guard: phrases wider than 480px exceed the flank envelope (~320px)
+            # and MUST be placed in foreground_lower_deck (or centered cranial_crown) to avoid screen margin bleeds.
+            if chunk_est_w > 480.0 and target_zone in ("flank_left_column", "flank_right_column"):
+                target_zone = "foreground_lower_deck"
+
             if target_zone == "flank_left_column":
                 chosen_zone = "flank_left_column"
                 safe_id = "flank_left_pillar"
                 chosen_anchor = (font_json or {}).get("anchor") or (prev_anchor if (prev_zone == "flank_left_column" and prev_anchor) else "left")
                 chosen_align = (font_json or {}).get("textAlign") or (prev_align if (prev_zone == "flank_left_column" and prev_align) else "left")
                 if font_json and font_json.get("xPercent"):
-                    chosen_x = str(font_json["xPercent"]).strip()
+                    raw_x = str(font_json["xPercent"]).strip()
                 elif prev_zone == "flank_left_column" and prev_x:
-                    chosen_x = prev_x
+                    raw_x = prev_x
                 else:
                     raw_x = f"{round(max(0.20, flank_left * 0.48) * 100, 1)}%"
-                    chosen_x = _clamp_safe_x_percent(raw_x, est_width_px=chunk_est_w, anchor=chosen_anchor)
+                chosen_x = _clamp_safe_x_percent(raw_x, est_width_px=chunk_est_w, anchor=chosen_anchor)
 
                 # Inter-chunk hysteresis: clamp vertical stagger delta to <= 5% (e.g. ±0.03)
                 # Bounded so non-pivot transition to/from lower deck (80%) is <= 15% (i.e. y >= 0.65)
@@ -875,12 +880,12 @@ def plan_subject_safe_placements(
                 chosen_anchor = (font_json or {}).get("anchor") or (prev_anchor if (prev_zone == "flank_right_column" and prev_anchor) else "right")
                 chosen_align = (font_json or {}).get("textAlign") or (prev_align if (prev_zone == "flank_right_column" and prev_align) else "right")
                 if font_json and font_json.get("xPercent"):
-                    chosen_x = str(font_json["xPercent"]).strip()
+                    raw_x = str(font_json["xPercent"]).strip()
                 elif prev_zone == "flank_right_column" and prev_x:
-                    chosen_x = prev_x
+                    raw_x = prev_x
                 else:
                     raw_x = f"{round(min(0.80, (1.0 - flank_right) + flank_right * 0.52) * 100, 1)}%"
-                    chosen_x = _clamp_safe_x_percent(raw_x, est_width_px=chunk_est_w, anchor=chosen_anchor)
+                chosen_x = _clamp_safe_x_percent(raw_x, est_width_px=chunk_est_w, anchor=chosen_anchor)
 
                 # Inter-chunk hysteresis: clamp vertical stagger delta to <= 5% (e.g. ±0.03)
                 # Bounded so non-pivot transition to/from lower deck (80%) is <= 15% (i.e. y >= 0.65)

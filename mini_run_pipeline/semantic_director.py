@@ -63,7 +63,7 @@ def _get_google_api_key() -> str:
     raise RuntimeError("GOOGLE_AI_STUDIO_API_KEY / GEMINI_API_KEY is not configured.")
 
 
-GEMINI_MODEL = os.getenv("GOOGLE_AI_MODEL", "gemini-2.5-flash")
+GEMINI_MODEL = os.getenv("GOOGLE_AI_MODEL", "gemini-3.8-flash")
 GEMINI_GENERATE_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
 
 # ---------------------------------------------------------------------------
@@ -236,6 +236,9 @@ TASKS:
             "maxOutputTokens": 8192,
             "responseMimeType": "application/json",
             "responseSchema": RESPONSE_SCHEMA,
+            "thinkingConfig": {
+                "thinkingBudget": 2048,
+            },
         },
     }
 
@@ -274,9 +277,9 @@ TASKS:
                 print(f"[semantic_director] Warning: HTTP {e.code} received on {active_url}. Retrying in {(attempt + 1) * 3}s...")
                 time.sleep((attempt + 1) * 3)
                 if attempt >= 1:
-                    # Switch to gemini-2.5-flash-lite as fallback
-                    active_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent"
-                    print(f"[semantic_director] Switching to fallback model: gemini-2.5-flash-lite")
+                    # Switch to gemini-2.5-pro as high-intellect fallback
+                    active_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent"
+                    print(f"[semantic_director] Switching to fallback model: gemini-2.5-pro")
             else:
                 raise
 

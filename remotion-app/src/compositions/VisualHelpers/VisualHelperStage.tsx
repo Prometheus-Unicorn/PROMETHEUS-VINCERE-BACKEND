@@ -108,17 +108,17 @@ export const VisualHelperStage: React.FC<VisualHelperStageProps> = ({
             subtitleText={visualHelper.subtitleText || visualHelper.subtitle}
             bloomColor={visualHelper.bloomColor || palette?.glow}
             enableBloom={visualHelper.enableBloom ?? true}
-            enableVignette={visualHelper.enableVignette ?? true}
+            enableVignette={visualHelper.enableVignette ?? false}
             enableLetterbox={visualHelper.enableLetterbox ?? false}
-            enableFilmGrain={visualHelper.enableFilmGrain ?? true}
-            enableFloorShadow={visualHelper.enableFloorShadow ?? true}
+            enableFilmGrain={visualHelper.enableFilmGrain ?? false}
+            enableFloorShadow={visualHelper.enableFloorShadow ?? false}
             focalPlaneRole={visualHelper.focalPlaneRole || "primary"}
             staggerDelayFrames={visualHelper.staggerDelayFrames || 0}
             metalGradeStyle={visualHelper.metalGradeStyle || "desaturated_brass"}
-            enableTactileShadow={visualHelper.enableTactileShadow ?? true}
-            enableHalftoneRaster={visualHelper.enableHalftoneRaster ?? true}
+            enableTactileShadow={visualHelper.enableTactileShadow ?? false}
+            enableHalftoneRaster={visualHelper.enableHalftoneRaster ?? false}
             assetEntranceDirection={visualHelper.assetEntranceDirection || "up"}
-            canvasColor={visualHelper.canvasColor || "#F4F4F4"}
+            canvasColor={visualHelper.canvasColor || "transparent"}
           />
         );
       case "before_after_comparison":

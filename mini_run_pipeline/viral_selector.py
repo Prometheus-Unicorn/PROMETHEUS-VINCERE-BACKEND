@@ -38,7 +38,7 @@ GROQ_TEMPERATURE = float(os.getenv("GROQ_TEMPERATURE", "0.2"))
 GROQ_MAX_TOKENS = int(os.getenv("GROQ_MAX_TOKENS", "2048"))
 
 GOOGLE_AI_STUDIO_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai"
-GOOGLE_AI_MODEL = "gemini-2.0-flash"
+GOOGLE_AI_MODEL = os.getenv("GOOGLE_AI_MODEL", "gemini-3.8-flash")
 
 # Clip length constraints (ms)
 VIRAL_CLIP_MIN_MS = 25_000      # 25 s — anything shorter feels truncated

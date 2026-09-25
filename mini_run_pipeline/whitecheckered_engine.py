@@ -51,7 +51,7 @@ def _get_google_api_key() -> str:
     raise RuntimeError("GOOGLE_AI_STUDIO_API_KEY / GEMINI_API_KEY is not configured.")
 
 
-GEMINI_MODEL = os.getenv("GOOGLE_AI_MODEL", "gemini-2.5-flash")
+GEMINI_MODEL = os.getenv("GOOGLE_AI_MODEL", "gemini-3.8-flash")
 GEMINI_GENERATE_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
 
 # ---------------------------------------------------------------------------

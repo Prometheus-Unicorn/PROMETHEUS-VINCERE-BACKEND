@@ -362,6 +362,15 @@ def main():
         target_words=int(payload.get("targetChunkWords", 3)),
         max_chunk_words=int(payload.get("maxChunkWords", 5)),
     )
+    # Prune boundary cutoff artifacts (< 400ms duration or starts within 350ms of clip boundary)
+    if smart_chunks and len(smart_chunks) > 1:
+        last_c = smart_chunks[-1]
+        c_dur = int(last_c.get("endMs", 0)) - int(last_c.get("startMs", 0))
+        c_start = int(last_c.get("startMs", 0))
+        if c_dur < 400 or c_start >= (effective_duration_ms - 350):
+            print(f"[orchestrate] Pruned trailing boundary cutoff chunk: '{last_c.get('text')}' ({c_dur}ms at {c_start}ms)", flush=True)
+            smart_chunks.pop()
+
     print(f"[orchestrate] Smart chunking formed {len(smart_chunks)} cadence groups", flush=True)
 
     # 8. Causal Shot Color Grading (3D LUTs)
@@ -582,6 +591,17 @@ def main():
                 cand_p = REPO_ROOT / "remotion-app" / "public" / vid_file
                 if cand_p.exists() and cand_p.stat().st_size > 500:
                     target_p = cand_p
+                elif str(vid_file).startswith("http"):
+                    try:
+                        import urllib.request
+                        dl_path = workdir / f"broll_remote_{b_idx}.mp4"
+                        req = urllib.request.Request(vid_file, headers={"User-Agent": "Prometheus/1.0"})
+                        with urllib.request.urlopen(req, timeout=30) as resp, open(dl_path, "wb") as out_f:
+                            out_f.write(resp.read())
+                        if dl_path.exists() and dl_path.stat().st_size > 1000:
+                            target_p = dl_path
+                    except Exception as dl_err:
+                        print(f"[orchestrate] Remote B-roll download error: {dl_err}", flush=True)
 
             if target_p:
                 broll_r2_key = f"gha-renders/{job_id}/broll_{b_idx}_{target_p.name}"

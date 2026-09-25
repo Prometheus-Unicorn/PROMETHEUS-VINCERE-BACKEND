@@ -933,13 +933,13 @@ def plan_mini_run_orchestration(
             is_tech = any(k in chunk_style_repr for k in ["mono", "jetbrains", "matrix", "crt", "code", "terminal", "cyber"])
 
             if is_serif:
-                lockup_pool = ["camera_shutter_bupu", "mechanical_click", "shutter_snap", "slow_whoosh_reverb"]
+                lockup_pool = ["slow_whoosh_reverb", "whoosh_slow", "sub_impact_reverb", "shutter_snap"]
                 lockup_gain = -9.0
             elif is_tech:
                 lockup_pool = ["glitch_digital", "mechanical_click", "click_bupu", "shutter_clicks_v2_bupu"]
                 lockup_gain = -8.5
             else:
-                lockup_pool = ["mechanical_click", "camera_shutter_bupu", "shutter_snap", "whoosh_fast"]
+                lockup_pool = ["mechanical_click", "camera_shutter_bupu", "shutter_snap", "click_bupu"]
                 lockup_gain = -8.0
 
             # Visual peak moment: Kinetic text spring reaches peak overshoot at +140ms after entrance

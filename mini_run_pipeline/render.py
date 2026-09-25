@@ -193,11 +193,61 @@ def build_sfx_dialogue_mix_command(
 
 
 def resolve_sfx_event_paths(events: List[Dict[str, Any]], public_root: Path) -> List[Dict[str, Any]]:
-    """Resolve only planner-selected SFX variants from the bundled corpus."""
+    """Resolve planner-selected SFX variants from both public/sfx and the master SOUND FX corpus."""
     resolved: List[Dict[str, Any]] = []
+
+    # Locate master SOUND FX corpus root
+    possible_sound_roots = [
+        public_root.parent.parent / "SOUND FX",
+        Path("/opt/prometheus/SOUND FX"),
+        Path("SOUND FX"),
+    ]
+    sound_fx_root = next((p for p in possible_sound_roots if p.is_dir()), None)
+
+    # Build categorized index of master SOUND FX corpus if available
+    corpus_files: List[Path] = []
+    if sound_fx_root:
+        try:
+            corpus_files = [p for p in sound_fx_root.rglob("*") if p.is_file() and p.suffix.lower() in (".mp3", ".wav")]
+        except Exception:
+            corpus_files = []
+
     for event in events:
         cue = str(event.get("cue") or "").strip()
         variant = int(event.get("variant", 1))
+        cue_lower = cue.lower().replace("-", "_")
+
+        # 1. Check priority high-tier categories in master SOUND FX corpus
+        matched_corpus_file: Optional[Path] = None
+        if corpus_files:
+            target_subdirs: List[str] = []
+            if any(k in cue_lower for k in ("shutter", "camera")):
+                target_subdirs = ["MECHANICAL CLICKS", "TRANSITIONS"]
+            elif any(k in cue_lower for k in ("cinematic", "hit", "impact", "deep", "brutal")):
+                target_subdirs = ["CINEMATIC HITS", "IMPACT HITS", "METALLIC IMPACTS"]
+            elif any(k in cue_lower for k in ("whoosh", "swoosh", "swipe")):
+                target_subdirs = ["SWOOSHES", "WHOOSHES"]
+            elif any(k in cue_lower for k in ("transition", "glitch")):
+                target_subdirs = ["TRANSITIONS", "GLITCHES"]
+            elif any(k in cue_lower for k in ("type", "typing", "keyboard", "text")):
+                target_subdirs = ["TEXT"]
+            elif any(k in cue_lower for k in ("braaam", "bass", "sub")):
+                target_subdirs = ["BRAAAMS", "IMPACT HITS"]
+            elif any(k in cue_lower for k in ("riser", "sweep")):
+                target_subdirs = ["RISERS", "SWEEPS"]
+
+            if target_subdirs:
+                category_matches = [
+                    f for f in corpus_files if any(sd in str(f.parent).upper() for sd in target_subdirs)
+                ]
+                if category_matches:
+                    matched_corpus_file = category_matches[(variant - 1) % len(category_matches)]
+
+        if matched_corpus_file is not None:
+            resolved.append({**event, "localPath": str(matched_corpus_file)})
+            continue
+
+        # 2. Check public/sfx directory
         candidates = [
             public_root / "sfx" / f"{cue}_{variant}.mp3",
             public_root / "sfx" / f"{cue}_{variant}.wav",
@@ -209,6 +259,14 @@ def resolve_sfx_event_paths(events: List[Dict[str, Any]], public_root: Path) -> 
         local_path = next((candidate for candidate in candidates if candidate.is_file()), None)
         if local_path is not None:
             resolved.append({**event, "localPath": str(local_path)})
+            continue
+
+        # 3. Fallback: fuzzy match anywhere in master SOUND FX corpus
+        if corpus_files:
+            fuzzy = [f for f in corpus_files if cue_lower in f.stem.lower().replace("-", "_")]
+            if fuzzy:
+                resolved.append({**event, "localPath": str(fuzzy[(variant - 1) % len(fuzzy)])})
+
     return resolved
 
 
