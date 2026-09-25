@@ -1114,7 +1114,12 @@ def plan_backgrounds(
                 except Exception:
                     pass
 
-                if is_curito and (is_directed or curito_score >= 0.60 or prefs.get("preferredKind") == "curito_animation"):
+                is_curito_directed = (
+                    prefs.get("preferredKind") == "curito_animation"
+                    or bool(design.get("curitoAnimation"))
+                    or "curito" in str(prompt or "").lower()
+                )
+                if is_curito and is_curito_directed:
                     curito_scaled = int(curito_score * 145)
                     candidates.append({
                         "index": index,
@@ -1145,7 +1150,16 @@ def plan_backgrounds(
                     beat_type=scene.get("role") or scene.get("beatType"),
                 )
 
-                if broll_eval.is_eligible and (is_directed or broll_eval.composite_score >= auto_broll_floor):
+                is_broll_directed = (
+                    prefs.get("preferredKind") == "broll_cutaway"
+                    or "broll" in str(prompt or "").lower()
+                    or "cutaway" in str(prompt or "").lower()
+                )
+                is_broll_candidate = (
+                    (is_broll_directed and broll_eval.composite_score >= 0.45 and c_dur_sec >= 1.6)
+                    or (broll_eval.is_eligible and broll_eval.composite_score >= auto_broll_floor)
+                )
+                if is_broll_candidate:
                     score_scaled = int(broll_eval.composite_score * broll_score_scale)
                     candidates.append({
                         "index": index,
