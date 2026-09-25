@@ -78,6 +78,7 @@ jobs:
           PARALLEL_SLICES: "10"
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           PYTHONUTF8: "1"
           PYTHONPATH: "."
         run: python .github/scripts/gha_orchestrate.py
