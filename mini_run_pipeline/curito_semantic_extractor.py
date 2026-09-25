@@ -69,14 +69,14 @@ class EditorialPromptPolicyViolationError(ValueError):
 
 
 EDITORIAL_PRIMITIVES = {
-    "CONTRAST": "Juxtapose digital ease/software patch against physical constraints and geometry.",
-    "SCALE_MAGNIFICATION": "Progressive optical dive revealing microscopic tolerances/imperfections.",
-    "MICRO_DEVIATION": "Imperceptible initial displacement (e.g. 10 microns) triggering system drift.",
-    "CASCADING_PROPAGATION": "Misalignment propagating through dependent mechanical relationships.",
-    "PHYSICAL_SEIZURE": "Abrupt mechanical dead-stop / rigid freeze, zero digital glitch, one tiny part vibrating.",
-    "CONSEQUENTIAL_CONVERGENCE": "Machine throughput/counter draining directly into financial/economic collapse.",
-    "FOUNDATIONAL_PROPAGATION": "Foundational bedrock locking, stability propagating upward through structure.",
-    "INEVITABLE_YIELD": "Clockwork mechanical reliability, repetitive identical outputs (1, 2, 3, 4...).",
+    "CONTRAST": "Juxtapose simplicity/ease against physical/structural constraints or labyrinthine complexity.",
+    "SCALE_MAGNIFICATION": "Progressive optical dive revealing microscopic tolerances, hidden gaps, or systemic friction.",
+    "MICRO_DEVIATION": "Subtle initial divergence (e.g. 4 divergent decisions) triggering massive systemic drift/confusion.",
+    "CASCADING_PROPAGATION": "Fragmentation or misalignment propagating through dependent stages or journey steps.",
+    "PHYSICAL_SEIZURE": "Abrupt standstill / rigid freeze / dead-end, zero digital glitch, one tiny sub-element vibrating.",
+    "CONSEQUENTIAL_CONVERGENCE": "Fragmented paths/leads draining or collapsing directly into catastrophic drop-off or singular clarity.",
+    "FOUNDATIONAL_PROPAGATION": "Foundational bedrock/singular path locking, stability propagating outward through the system.",
+    "INEVITABLE_YIELD": "Frictionless reliability, identical repeated outputs delivering compounding throughput.",
 }
 
 
@@ -130,6 +130,51 @@ class DiffusionPromptPolicyCritic:
         "screen shake", "hud overlay", "hologram", "digital distortion", "screen tearing"
     ]
 
+    SEMANTIC_CLICHE_RULES = [
+        {
+            "trigger_keywords": ["business", "company", "lead", "leads", "customer", "customers", "prospect", "prospects", "sales", "marketing", "bottleneck", "funnel", "offer", "revenue", "traffic"],
+            "forbidden_in_prompt": ["gear", "gears", "cog", "cogs", "clockwork", "gear train", "interlocking gear"],
+            "exception_keywords": ["machinery", "mechanical", "factory", "industrial", "engine", "motor"],
+            "cliche_name": "Business / Bottleneck -> Mechanical Gears cliché",
+            "explanation": "Defaulting to mechanical gears/cogwheels for abstract business, marketing, or customer concepts is an overused conceptual cliché. Use spatial, architectural, interface, or topological visual metaphors unless the spoken monologue explicitly discusses physical machines."
+        },
+        {
+            "trigger_keywords": ["strategy", "tactic", "planning", "decision", "game plan"],
+            "forbidden_in_prompt": ["chess", "chessboard", "pawn", "knight piece", "king piece", "queen piece"],
+            "exception_keywords": ["chess", "board game"],
+            "cliche_name": "Strategy -> Chessboard cliché",
+            "explanation": "Defaulting to chess pieces for strategy is an overused conceptual cliché."
+        },
+        {
+            "trigger_keywords": ["growth", "scaling", "scale", "expansion", "increase", "metrics"],
+            "forbidden_in_prompt": ["bar chart", "line graph", "trending graph", "pie chart", "stock chart"],
+            "exception_keywords": ["chart", "graph", "stock market"],
+            "cliche_name": "Growth -> Generic Chart/Graph cliché",
+            "explanation": "Defaulting to a 2D/3D stock graph or bar chart for business growth is an overused cliché. Text and 2D charts are handled in downstream code; use tangible volumetric physical metaphors."
+        },
+        {
+            "trigger_keywords": ["pressure", "stress", "urgency", "deadline"],
+            "forbidden_in_prompt": ["pressure gauge", "dial gauge", "manometer", "steam gauge"],
+            "exception_keywords": ["gauge", "hydraulic", "pneumatic", "boiler", "steam"],
+            "cliche_name": "Pressure -> Pressure Gauge cliché",
+            "explanation": "Defaulting to a pressure gauge dial for conceptual pressure is an overused cliché."
+        },
+        {
+            "trigger_keywords": ["money", "profit", "wealth", "revenue", "income"],
+            "forbidden_in_prompt": ["dollar bill", "dollar bills", "floating cash", "flying bills", "money stack"],
+            "exception_keywords": ["cash", "dollar", "currency", "banknotes"],
+            "cliche_name": "Money -> Floating Dollar Bills cliché",
+            "explanation": "Floating banknotes or cash piles are cheap clichés."
+        },
+        {
+            "trigger_keywords": ["network", "connection", "team", "community"],
+            "forbidden_in_prompt": ["network nodes", "glowing nodes", "interconnected dots", "spiderweb nodes"],
+            "exception_keywords": ["graph theory", "neural network", "mesh topology"],
+            "cliche_name": "Connection -> Generic Network Nodes cliché",
+            "explanation": "Floating glowing interconnected nodes are generic digital clichés."
+        },
+    ]
+
     TIMECODE_REGEX = re.compile(r"(\+\d+(\.\d+)?s|\b\d+-frame\b|timed to the beat|at \d+s)", re.IGNORECASE)
 
     @classmethod
@@ -143,7 +188,33 @@ class DiffusionPromptPolicyCritic:
         return any(neg in preceding for neg in negation_tokens)
 
     @classmethod
-    def audit_prompt(cls, prompt_text: str) -> Dict[str, Any]:
+    def audit_semantic_cliches(cls, prompt_text: str, transcript_context: Optional[str] = None) -> List[str]:
+        """Audits prompt against conceptual/semantic clichés (e.g. business -> gears, strategy -> chess)."""
+        if not transcript_context:
+            return []
+
+        flaws = []
+        lowered_prompt = prompt_text.lower()
+        lowered_context = transcript_context.lower()
+
+        for rule in cls.SEMANTIC_CLICHE_RULES:
+            triggered = any(kw in lowered_context for kw in rule["trigger_keywords"])
+            has_exception = any(kw in lowered_context for kw in rule["exception_keywords"])
+
+            if triggered and not has_exception:
+                for term in rule["forbidden_in_prompt"]:
+                    matches = list(re.finditer(r"\b" + re.escape(term) + r"\b", lowered_prompt))
+                    for m in matches:
+                        if not cls._is_negated(lowered_prompt, m.start()):
+                            flaws.append(
+                                f"VIOLATION (Conceptual Cliché): Prompt commits the '{rule['cliche_name']}' by using '{term}'. "
+                                f"{rule['explanation']}"
+                            )
+                            break
+        return flaws
+
+    @classmethod
+    def audit_prompt(cls, prompt_text: str, transcript_context: Optional[str] = None) -> Dict[str, Any]:
         """Adversarially audits a diffusion prompt against mandatory policies.
         
         Returns:
@@ -171,6 +242,11 @@ class DiffusionPromptPolicyCritic:
                         "Must use mechanical silence, physical dead-stops, or physical causality instead of cheap digital glitches."
                     )
                     break
+
+        # 1c. Semantic / Conceptual Cliché Check (Anti-Stereotype Gate)
+        if transcript_context:
+            cliche_flaws = cls.audit_semantic_cliches(prompt_text, transcript_context)
+            flaws.extend(cliche_flaws)
 
         # Check for quote marks containing words
         quotes = re.findall(r"['\"](.*?)['\"]", prompt_text)
@@ -204,26 +280,40 @@ class DiffusionPromptPolicyCritic:
                     flaws.append(f"VIOLATION (No-Table): Prompt places asset on domestic/office furniture '{term}'. Must be rendered in spatial-temporal space against a textured graphic background.")
                     break
 
-        # 6. Recognizable Hero Artifact Verification
+        # 6. Recognizable Hero Artifact Verification (Mechanical, Spatial, Architectural, or Physical Metaphor)
         has_hero_artifact = any(w in lowered for w in [
+            # Mechanical / Industrial
             "scale", "balance", "fulcrum", "anvil", "weight", "beam",
             "switch", "lever", "rail", "track", "knife switch", "contacts",
             "geneva", "cam", "spool", "valve", "piston", "escapement",
             "caliper", "bearing", "gear", "clutch", "detent", "vernier",
             "key", "tumbler", "cylinder", "lock", "latch", "coupling",
-            "mechanism", "chassis", "clamp", "spindle", "rotor"
+            "mechanism", "chassis", "clamp", "spindle", "rotor", "shutter",
+            # Spatial / Architectural
+            "maze", "labyrinth", "corridor", "archway", "portal", "chamber",
+            "monolith", "pillar", "conduit", "partition", "gateway", "channel",
+            # Dimensional Instruments / Geometric Metaphors
+            "funnel", "prism", "hourglass", "compass", "dial", "pendulum",
+            "reticle", "plumb line", "pyramid", "lens"
         ])
         if not has_hero_artifact:
-            flaws.append("VIOLATION (Hero Artifact): Prompt lacks a concrete, recognizable mechanical hero artifact (e.g. dual-beam balance scale with tungsten calibration mass, industrial track switch, dual-throw knife switch, Geneva indexer).")
+            flaws.append(
+                "VIOLATION (Hero Artifact): Prompt lacks a concrete, recognizable hero artifact or spatial architecture "
+                "(e.g. 3D architectural labyrinth/maze, dual-beam balance scale, precision funnel, industrial track switch, dual-throw knife switch)."
+            )
 
         # 7. Kinetic Manner Dynamics Check (Adverb / Velocity coupling)
         has_manner_dynamics = any(w in lowered for w in [
             "torque", "decelerating", "deceleration", "rotational", "firmly", "mechanical snap",
             "locked-state", "micro-drift", "engagement", "settling", "rotates",
-            "snaps into", "seals", "overtakes", "tilts", "locks out"
+            "snaps into", "seals", "overtakes", "tilts", "locks out",
+            "collapsing", "collapse", "converging", "converges", "emerging", "emerges",
+            "unfolds", "crystallizing", "crystallizes", "sliding", "slides", "receding",
+            "funneling", "funnels", "locking", "locks", "descending", "descends",
+            "transmuting", "narrowing"
         ])
         if not has_manner_dynamics:
-            flaws.append("VIOLATION (Manner Dynamics): Prompt lacks kinetic manner dynamics reflecting spoken emphasis (e.g. rotational torque, mechanical snap, decelerating engagement).")
+            flaws.append("VIOLATION (Manner Dynamics): Prompt lacks kinetic manner dynamics reflecting spoken emphasis (e.g. rotational torque, mechanical snap, decelerating engagement, collapsing branches into a single illuminated path).")
 
         # 8. Rigid-Body Permanence & Camera Rig Discipline Check (Anti-Yaw-Flip Rule)
         for term in cls.FORBIDDEN_COMPOUND_CAMERA_TERMS:
@@ -420,6 +510,25 @@ You model the scene across the 8 CANONICAL EDITORIAL PRIMITIVES:
 8. INEVITABLE_YIELD: Clockwork mechanical reliability, identical repeated outputs (1, 2, 3, 4...) with boring, peaceful consistency.
 
 MANDATORY OPERATING POLICIES:
+0. TWO-STAGE VISUAL IDEATION & CONCEPT SEARCH (MANDATORY BEFORE PROMPT WRITING):
+   - Analyze the argument and core idea, not merely keywords.
+   - Determine whether the spoken language explicitly supplies a metaphor (e.g. "That isn't a funnel. It's a maze.").
+     If the speaker supplies an explicit metaphor, you MUST honor, elevate, and explore that metaphor rather than substituting an arbitrary unrelated machine!
+   - Evaluate candidate concepts across at least 3 distinct conceptual domains before choosing one:
+     a) Spatial / Architectural (e.g. 3D architectural labyrinth/maze, diverging corridors collapsing into a single illuminated channel, portals, chambers).
+     b) Interface / Viewport (e.g. fragmented viewports, chaotic decision layers collapsing into a single clean canvas).
+     c) Dimensional Instrument / Physical System (e.g. precision funnel, balance scale, optical prism, hourglass, track switch).
+     d) Typographic / Kinetic Structure (e.g. monumental dimensional letterforms, structural word monoliths).
+     e) Abstract / Topological Systems (e.g. geometric manifold compression, phase transitions).
+   - PENALIZE CONCEPTUAL CLICHÉS HEAVILY:
+     * business / bottleneck -> gears (HEAVILY PENALIZED unless the speaker discusses literal industrial machinery).
+     * strategy -> chess
+     * growth -> stock graph
+     * pressure -> pressure gauge
+     * money -> floating dollar bills
+     * connection -> generic glowing network nodes
+   - Record evaluated candidate concepts and rejected concepts with explicit rationale inside the concept_diversity output block.
+
 1. THE 3-ACT PHYSICAL CAUSALITY PROGRESSION (SCENE CAUSALITY):
    - Never generate an isolated static prop in a vacuum. Every scene must depict physical causality across 3 acts:
      a) Act 1 (0.0s - 1.5s): Baseline Equilibrium (system operating in precision or dynamic emergence).
@@ -429,7 +538,7 @@ MANDATORY OPERATING POLICIES:
      a) Action Verb: The core kinetic verb (e.g. 'lock', 'rotate', 'insert', 'couple', 'clamp').
      b) Manner Adverb & Torque: The physical dynamic (e.g. 'firmly', 'decisively', 'with high-torque rotational precision').
      c) Thematic Target: The conceptual topic (e.g. 'foundation', 'drag', 'scale').
-   - Transduce the concept into an iconic, tactile, volumetric mechanical hero artifact with stable geometry (balance scale, rail track switch, knife switch, toggle clamp, Geneva drive, high-precision micrometer/caliper).
+   - Transduce the concept into an iconic, tactile, volumetric hero artifact or spatial architecture (architectural maze/labyrinth, dual-beam balance scale, precision funnel, rail track switch, knife switch, toggle clamp, Geneva drive, high-precision micrometer/caliper).
    - STRICT ANTI-KEY BITTING DIRECTIVE: Avoid thin, asymmetric serrated key blades to prevent epipolar yaw flips. Favor volumetric mechanisms.
    - STRICT SAFETY GUARDRAIL: Never describe human faces, heads, or living public figures. Transduce corporate/leadership entities into architectural monoliths or precision gear trains.
 
@@ -467,8 +576,8 @@ MANDATORY OPERATING POLICIES:
 
 8. STANDARD 6-ELEMENT OUTPUT SCHEMA:
    Every diffusion prompt must strictly synthesize these 6 components into a single coherent paragraph:
-   - [1. Focal Subject & Perspective]: Concrete mechanical hero assembly in 3-act physical context (45-degree isometric studio view).
-   - [2. Materiality & Surface]: Textures, finishes, micro-details (e.g., hand-finished solid brass, blackened carbon steel).
+   - [1. Focal Subject & Perspective]: Concrete mechanical or spatial hero assembly in 3-act physical context (45-degree isometric studio view).
+   - [2. Materiality & Surface]: Textures, finishes, micro-details (e.g., hand-finished solid brass, blackened carbon steel, limestone labyrinth masonry).
    - [3. Canvas & Textured Background (Strictly No Table)]: Pristine unpopulated graphic canvas at frame 0 with subtle halftone dot screening or 35mm film grain (#ECECEC matte paper).
    - [4. Lighting & Shadow Physics]: Illumination quality, directional softness, and floating ambient occlusion volume providing spatial depth without furniture contact.
    - [5. Camera & Kinematic Permanence Spec]: Spatially locked fixed-tripod camera, 1-DoF constrained axial rotation, strict rigid-body topological permanence, single cohesive solid topological manifold with pinned UV surface coordinates, zero ghosted duplication, zero mesh fission, 24fps cadence.
@@ -488,6 +597,66 @@ MANDATORY OPERATING POLICIES:
 _RESPONSE_SCHEMA: Dict[str, Any] = {
     "type": "OBJECT",
     "properties": {
+        "concept_diversity": {
+            "type": "OBJECT",
+            "properties": {
+                "candidate_domains": {
+                    "type": "ARRAY",
+                    "items": {"type": "STRING"},
+                    "description": "List of domains evaluated (e.g. ['spatial', 'interface', 'typographic', 'instrument', 'abstract']). At least 3 domains required.",
+                },
+                "selected_domain": {
+                    "type": "STRING",
+                    "description": "Domain chosen for final visualization (e.g. 'spatial').",
+                },
+                "semantic_cliche_risk": {
+                    "type": "NUMBER",
+                    "description": "Estimated cliché risk score from 0.0 (wholly original) to 1.0 (cliché).",
+                },
+                "mechanical_metaphor_penalty": {
+                    "type": "NUMBER",
+                    "description": "Penalty score applied to mechanical metaphors (1.0 = heavy penalty when not explicitly justified).",
+                },
+                "continuity_score": {
+                    "type": "NUMBER",
+                    "description": "Score measuring visual narrative continuity across surrounding beats (0.0 to 1.0).",
+                },
+                "candidate_concepts": {
+                    "type": "ARRAY",
+                    "items": {
+                        "type": "OBJECT",
+                        "properties": {
+                            "domain": {"type": "STRING"},
+                            "concept_summary": {"type": "STRING"},
+                            "score": {"type": "NUMBER"},
+                            "rationale": {"type": "STRING"},
+                        },
+                        "required": ["domain", "concept_summary", "score", "rationale"],
+                    },
+                },
+                "rejected_concepts": {
+                    "type": "ARRAY",
+                    "items": {
+                        "type": "OBJECT",
+                        "properties": {
+                            "domain": {"type": "STRING"},
+                            "concept_summary": {"type": "STRING"},
+                            "reason_for_rejection": {"type": "STRING"},
+                        },
+                        "required": ["domain", "concept_summary", "reason_for_rejection"],
+                    },
+                },
+            },
+            "required": [
+                "candidate_domains",
+                "selected_domain",
+                "semantic_cliche_risk",
+                "mechanical_metaphor_penalty",
+                "continuity_score",
+                "candidate_concepts",
+                "rejected_concepts",
+            ],
+        },
         "editorial_causality_chain": {
             "type": "OBJECT",
             "properties": {
@@ -666,6 +835,7 @@ _RESPONSE_SCHEMA: Dict[str, Any] = {
         },
     },
     "required": [
+        "concept_diversity",
         "selected_inflection",
         "visual_plate_schema",
         "assembled_diffusion_prompt",
@@ -732,6 +902,40 @@ def _build_deterministic_curito_plan(transcript_chunks: List[Dict[str, Any]]) ->
         "the moving components, while stationary elements remain tack-sharp."
     )
     plan = {
+        "concept_diversity": {
+            "candidate_domains": ["instrument", "spatial", "typographic", "abstract"],
+            "selected_domain": "instrument",
+            "semantic_cliche_risk": 0.05,
+            "mechanical_metaphor_penalty": 0.0,
+            "continuity_score": 0.92,
+            "candidate_concepts": [
+                {
+                    "domain": "instrument",
+                    "concept_summary": "High-voltage knife switch physically isolating circuits to depict sudden systemic interruption.",
+                    "score": 0.95,
+                    "rationale": "Direct tactile physical causality with concrete switch jaws and lever arm.",
+                },
+                {
+                    "domain": "spatial",
+                    "concept_summary": "Architectural partition dropping between corridors.",
+                    "score": 0.82,
+                    "rationale": "Strong spatial separation but less immediate dynamic snap.",
+                },
+                {
+                    "domain": "abstract",
+                    "concept_summary": "Geometric line bifurcating and snapping.",
+                    "score": 0.65,
+                    "rationale": "Too abstract; lacks tactile weight.",
+                },
+            ],
+            "rejected_concepts": [
+                {
+                    "domain": "mechanical",
+                    "concept_summary": "Generic gear train jamming.",
+                    "reason_for_rejection": "Overused conceptual cliché; lacks clear binary state transition.",
+                }
+            ],
+        },
         "selected_concept": "heavy industrial dual-throw knife switch assembly",
         "reasoning": f"Synthesized from transcript context: {full_text[:120]}...",
         "visual_anchor": "heavy industrial cast-steel dual-throw knife switch with solid copper busbar jaws",
@@ -820,33 +1024,65 @@ def extract_and_synthesize_curito_prompt(
         txt = c.get("text", "")
         chunks_text.append(f"[{s_sec:.2f}s - {e_sec:.2f}s] Chunk #{c_idx}: \"{txt.strip()}\"")
 
+    full_transcript_text = " ".join(c.get("text", "") for c in transcript_chunks)
+
     user_content = (
         "Analyze this timestamped monologue transcript as an Executive Editorial Motion Director (Vox / Iman Gadzhi / High-Tier Editorial standard):\n\n"
         + "\n".join(chunks_text)
-        + "\n\nDo NOT behave like a simplistic motion-template engine (phrase -> keyword -> isolated decorative prop). "
-        "Instead, analyze: Where does the speaker introduce a concept that can be understood more powerfully through a visual event, "
-        "transformation, metaphor, mechanism, comparison, escalation, or consequence? What visual event makes the viewer understand the concept faster than the speaker can explain it? "
-        "Identify the primary Editorial Primitive from the 8 canonical primitives: "
-        "1. CONTRAST (Digital Ease vs Physical Constraint), 2. SCALE_MAGNIFICATION (Macro perfection vs Microscopic gap), "
-        "3. MICRO_DEVIATION (Imperceptible 10-micron error triggering drift), 4. CASCADING_PROPAGATION (Component misalignment dominoes through dependent relationships), "
-        "5. PHYSICAL_SEIZURE (Sudden mechanical dead-stop / rigid freeze, ZERO digital glitching/shake, one tiny component vibrating), "
-        "6. CONSEQUENTIAL_CONVERGENCE (Machine counter 100->78->41->12->0 draining directly into economic collapse), "
-        "7. FOUNDATIONAL_PROPAGATION (Foundational lock stabilizing entire upstream structure), "
-        "8. INEVITABLE_YIELD (Clockwork mechanical reliability: 1, 2, 3, 4...). "
-        "Structure the scene across a 3-act physical causality progression (Act 1: Equilibrium, Act 2: Inflection Event, Act 3: Consequential State / Physical Seizure / Stabilized Yield). "
-        "MANDATORY DYNAMIC ENTRANCE-INTO-VIEW: The scene MUST open on an unpopulated, pristine graphic canvas at 0.0s. "
-        "The hero assembly must NEVER sit statically on screen at frame zero like a static duck. "
-        "Describe dynamic entrance into view (e.g. vertical bottom emergence from submerged Y coordinates, lateral friction slide, or 3D hinged swing) "
-        "over 0.0s - 1.5s decelerating into locked centroid position before the sync hit. "
-        "THE BACKGROUND MUST BE A SPATIAL-TEMPORAL TEXTURED GRAPHIC CANVAS (subtle halftone dot screening, fine 35mm film grain, or micro-stippling). "
-        "ABSOLUTELY NO TABLES, NO TABLETOPS, NO DESKS, NO FURNITURE PLACEMENT. "
-        "CAMERA & KINEMATIC DISCIPLINE: Spatially locked fixed-tripod 45-degree isometric view (NO camera orbiting/revolving). "
-        "Constrained 1-DoF rotational axis with strict rigid-body topological permanence (single cohesive solid topological manifold, zero ghosted duplication, zero mesh fission, zero 180-degree yaw flipping). "
-        "AUDIO-VISUAL COUNTERPOINT: Calculate visual lead (-300ms to -600ms) and residual lag (+800ms to +1400ms). "
-        "ERGONOMIC SAFE-ZONE: Keep primary foveal targets in Central Diamond (Y: 320-1450, X: 140-940). Zero typography in diffusion prompt."
+        + "\n\nCRITICAL CREATIVE DIRECTIVE (TWO-STAGE VISUAL IDEATION):\n"
+        "1. VISUAL CONCEPT SEARCH: Before choosing a visual, generate and evaluate candidates across at least 3 distinct conceptual domains "
+        "(spatial, interface/ui, dimensional instrument, typographic, abstract). Record candidate concepts and rejected concepts inside 'concept_diversity'.\n"
+        "2. EXPLICIT METAPHORS TAKE HIGHEST PRECEDENCE: If the speaker explicitly introduces a visual metaphor in the transcript "
+        "(e.g., 'That isn't a funnel. It's a maze.'), you MUST honor, elevate, and explore that metaphor (e.g. 3D architectural labyrinth/maze with converging monolithic walls collapsing into a single illuminated path) "
+        "rather than substituting an arbitrary unrelated machine!\n"
+        "3. HEAVY PENALTY ON CONCEPTUAL CLICHÉS: Do NOT default to mechanical gears/cogwheels for abstract business, marketing, or customer concepts! "
+        "Overused cliché mappings (business -> gears, strategy -> chess, growth -> graph) are strictly penalized.\n"
+        "4. CANONICAL EDITORIAL PRIMITIVE: Identify the primary Editorial Primitive from the 8 canonical primitives: "
+        "1. CONTRAST (Simplicity vs physical/structural constraints or labyrinthine complexity), "
+        "2. SCALE_MAGNIFICATION (Progressive optical dive revealing microscopic tolerances or hidden gaps), "
+        "3. MICRO_DEVIATION (Subtle initial divergence triggering systemic drift), "
+        "4. CASCADING_PROPAGATION (Fragmentation propagating through dependent journey steps), "
+        "5. PHYSICAL_SEIZURE (Abrupt dead-stop / deadlock / freeze, ZERO digital glitch, one sub-element vibrating), "
+        "6. CONSEQUENTIAL_CONVERGENCE (Fragmented paths/leads collapsing directly into catastrophic drop-off or singular clarity), "
+        "7. FOUNDATIONAL_PROPAGATION (Bedrock/singular path locking, stability propagating outward), "
+        "8. INEVITABLE_YIELD (Frictionless reliability, compounding throughput).\n"
+        "5. 3-ACT PHYSICAL CAUSALITY: Act 1: Equilibrium, Act 2: Inflection Event, Act 3: Consequential State.\n"
+        "6. DYNAMIC ENTRANCE-INTO-VIEW: Pristine graphic canvas at 0.0s, dynamic entrance (e.g. vertical bottom emergence, lateral friction slide, or 3D hinged swing) "
+        "over 0.0s - 1.5s decelerating into locked centroid before the sync hit. ZERO static ducks sitting stationary from frame 0!\n"
+        "7. SPATIAL-TEMPORAL TEXTURED CANVAS: Subtle halftone dot screening, fine film grain, or micro-stippling. STRICTLY NO TABLES OR FURNITURE.\n"
+        "8. CAMERA & KINEMATICS: Spatially locked fixed-tripod isometric view (NO camera orbiting/revolving), rigid-body topological permanence (single solid manifold, zero ghosting, zero 180-deg yaw flips).\n"
+        "9. ERGONOMIC SAFE-ZONE: Central Diamond (Y: 320-1450, X: 140-940). Zero typography in diffusion prompt."
     )
 
     json_spec = """{
+  "concept_diversity": {
+    "candidate_domains": ["spatial", "interface", "typographic", "abstract"],
+    "selected_domain": "spatial",
+    "semantic_cliche_risk": 0.08,
+    "mechanical_metaphor_penalty": 1.0,
+    "continuity_score": 0.91,
+    "candidate_concepts": [
+      {
+        "domain": "spatial",
+        "concept_summary": "Architectural labyrinth with towering monolithic walls where diverging corridors collapse into a single illuminated straight channel.",
+        "score": 0.95,
+        "rationale": "Directly embodies the speaker's explicit metaphor ('It\\'s a maze') and provides powerful spatial transformation."
+      },
+      {
+        "domain": "interface",
+        "concept_summary": "Fragmented floating browser viewports consolidating into a single minimalist page.",
+        "score": 0.82,
+        "rationale": "Good match for digital funnel but less cinematic depth."
+      }
+    ],
+    "rejected_concepts": [
+      {
+        "domain": "mechanical",
+        "concept_summary": "Interlocking brass gear train jamming under friction.",
+        "reason_for_rejection": "Overused conceptual cliché (business bottleneck -> gears); unrelated to spoken maze metaphor."
+      }
+    ]
+  },
   "editorial_causality_chain": {
     "primary_editorial_primitive": "one of: CONTRAST | SCALE_MAGNIFICATION | MICRO_DEVIATION | CASCADING_PROPAGATION | PHYSICAL_SEIZURE | CONSEQUENTIAL_CONVERGENCE | FOUNDATIONAL_PROPAGATION | INEVITABLE_YIELD",
     "causality_act_1_equilibrium": "Initial physical baseline / alignment description",
@@ -873,7 +1109,7 @@ def extract_and_synthesize_curito_prompt(
     "action_verb": "e.g. lock",
     "manner_adverb": "e.g. firmly with rotational torque",
     "thematic_target": "e.g. foundation",
-    "hero_physical_artifact": "Tangible, iconic volumetric mechanical hero asset in dynamic context (e.g. dual-beam balance scale with tungsten weight, industrial track switch, dual-throw knife switch, Geneva indexer; strictly avoid thin keys/bitting)"
+    "hero_physical_artifact": "Tangible, iconic volumetric hero asset or spatial architecture (e.g. 3D architectural labyrinth/maze, dual-beam balance scale, precision funnel, dual-throw knife switch, Geneva indexer; strictly avoid thin keys/bitting)"
   },
   "selected_inflection": {
     "chunk_index": int,
@@ -898,14 +1134,14 @@ def extract_and_synthesize_curito_prompt(
     "scene_plot_description": "Detailed description of how the animation orchestrates the plot across the narrative arc"
   },
   "visual_plate_schema": {
-    "focal_subject_and_perspective": "concrete hero mechanical artifact and exact camera angle (spatially locked 45-degree isometric studio view, no orbit)",
-    "materiality_and_surface": "materials, finishes, micro-details (e.g., hand-finished solid brass, blackened carbon steel)",
+    "focal_subject_and_perspective": "concrete hero artifact or spatial architecture and exact camera angle (spatially locked 45-degree isometric studio view, no orbit)",
+    "materiality_and_surface": "materials, finishes, micro-details (e.g., hand-finished solid brass, blackened carbon steel, limestone labyrinth masonry)",
     "canvas_and_textured_background": "spatial-temporal graphic canvas with subtle halftone dot screening or fine film grain, reserving upper 45% negative space (strictly no table/furniture)",
     "lighting_and_shadow_physics": "illumination quality and floating ambient occlusion volume providing depth",
     "camera_and_rendering_spec": "lens (85mm), spatially locked tripod, 1-DoF constrained axial rotation, rigid-body topological permanence, single cohesive solid topological manifold with pinned UV surface coordinates, zero ghosted duplication, zero mesh fission, zero 180-degree yaw flipping, 24fps",
     "entrance_kinematic_treatment": "dynamic entrance from unpopulated canvas during 0.0s - 1.5s (e.g. vertical bottom emergence from submerged Y coords, lateral friction slide, or 3D hinged swing) decelerating into locked centroid position"
   },
-  "assembled_diffusion_prompt": "Single synthesized prompt paragraph combining the 6 elements with concrete hero artifact, dynamic entrance kinematics (0.0s-1.5s from unpopulated canvas), spatial-temporal halftone/grain background (no table), locked tripod camera, rigid-body permanence, unitary manifold anti-ghosting physics, and the selected motion treatment optics clause appended at the end",
+  "assembled_diffusion_prompt": "Single synthesized prompt paragraph combining the 6 elements with concrete hero artifact or spatial architecture, dynamic entrance kinematics (0.0s-1.5s from unpopulated canvas), spatial-temporal halftone/grain background (no table), locked tripod camera, rigid-body permanence, unitary manifold anti-ghosting physics, and the selected motion treatment optics clause appended at the end",
   "negative_prompt": "doubling, duplicate mesh, split silhouette, ghosting, asset duplication, UV sliding, texture swimming, UV seam tear, unphysical merging, snapping back, 180-degree flip, yaw flip, choppy rotation, perspective inversion, orientation swap, reversing direction, morphing geometry, warping metal, changing teeth, shifting bitting, mutating parts, melting, table, tabletop, desk, furniture, countertop, wooden desk, office room, floorboards, text, words, typography, UI elements, buttons, screen, monitor",
   "selected_background_treatment_id": "one of: halftone_raster_canvas | luxury_editorial_sunlight_canvas | newspaper_collage_deconstructed | modern_swiss_museum_poster",
   "selected_motion_treatment_id": "one of: defocus_blur | gaussian_blur | bokeh_blur | slow_shutter_motion_blur",
@@ -1017,7 +1253,7 @@ def extract_and_synthesize_curito_prompt(
         prompt = f"{prompt.rstrip('. ')}{unitary_clause}."
         extracted["assembled_diffusion_prompt"] = prompt
 
-    audit = DiffusionPromptPolicyCritic.audit_prompt(prompt)
+    audit = DiffusionPromptPolicyCritic.audit_prompt(prompt, transcript_context=full_transcript_text)
 
     critique_iterations = 0
     while not audit["passed"] and critique_iterations < 2:
@@ -1034,13 +1270,14 @@ def extract_and_synthesize_curito_prompt(
             f"FAILED the adversarial policy gate with these specific violations:\n"
             f"{json.dumps(audit['flaws'], indent=2)}\n\n"
             "Fix every violation immediately:\n"
-            "1. Replace any generic mass/block with a concrete tangible hero mechanical artifact with stable volumetric geometry "
-            "(e.g. dual-beam balance scale with tungsten calibration mass, heavy industrial track switch, dual-throw knife switch, or Geneva indexer; strictly avoid thin keys/bitting).\n"
+            "1. Replace any conceptual cliché (e.g. mechanical gears for business, chess for strategy, graphs for growth) "
+            "with a concrete, appropriate hero visual artifact or spatial architecture matching the spoken context "
+            "(e.g. 3D architectural labyrinth/maze, precision funnel, dual-beam balance scale, heavy industrial track switch; strictly avoid thin keys/bitting).\n"
             "2. Ensure the background is a spatial-temporal graphic canvas featuring tactile texture "
             "(halftone screening, fine film grain, or micro-stippling). STRICTLY NO TABLES, TABLETOPS, OR FURNITURE.\n"
             "3. Camera MUST be a spatially locked fixed-tripod isometric view (strictly NO camera orbiting or revolving).\n"
             "4. Kinematics must enforce 1-DoF constrained axial rotation with strict rigid-body topological permanence (ZERO 180-degree yaw flips, zero morphing).\n"
-            "5. Ensure manner dynamics (rotational torque, decelerating engagement, mechanical locked-state).\n"
+            "5. Ensure manner dynamics (rotational torque, decelerating engagement, collapsing branches into a single illuminated path, mechanical locked-state).\n"
             "6. Ensure zero typography, zero 2D UI elements, and explicit upper negative space reservation.\n"
             "7. Ensure explicit dynamic entrance-into-view kinematics from an unpopulated canvas (e.g. vertical bottom emergence from submerged Y coordinates, lateral friction slide, or 3D hinged swing) over 0.0s - 1.5s. ZERO static ducks sitting stationary from frame 0.\n"
             "8. Do NOT place quotes inside the assembled_diffusion_prompt string.\n"
@@ -1079,7 +1316,7 @@ def extract_and_synthesize_curito_prompt(
                 if isinstance(refined_extracted, list) and len(refined_extracted) > 0:
                     refined_extracted = refined_extracted[0]
                 new_prompt = refined_extracted.get("assembled_diffusion_prompt", "")
-                new_audit = DiffusionPromptPolicyCritic.audit_prompt(new_prompt)
+                new_audit = DiffusionPromptPolicyCritic.audit_prompt(new_prompt, transcript_context=full_transcript_text)
                 extracted.update(refined_extracted)
                 extracted["assembled_diffusion_prompt"] = new_prompt
                 extracted["initial_draft_prompt"] = prompt
@@ -1108,7 +1345,7 @@ def extract_and_synthesize_curito_prompt(
             unitary_clause = ", single cohesive solid topological manifold with pinned UV surface coordinates, zero ghosted duplication, zero mesh fission"
             final_prompt = f"{final_prompt.rstrip('. ')}{unitary_clause}."
             extracted["assembled_diffusion_prompt"] = final_prompt
-            audit = DiffusionPromptPolicyCritic.audit_prompt(final_prompt)
+            audit = DiffusionPromptPolicyCritic.audit_prompt(final_prompt, transcript_context=full_transcript_text)
 
     extracted["policy_critique"] = audit
 

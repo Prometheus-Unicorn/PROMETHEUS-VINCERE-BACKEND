@@ -127,6 +127,13 @@ class EditorialDirectorDetector:
         "yield", "margin", "consequence", "failure", "foundation", "alignment",
     }
 
+    # Explicit visual metaphor tokens (speaker introduces direct visual/spatial imagery)
+    VISUAL_METAPHOR_SIGNALS = {
+        "maze", "funnel", "labyrinth", "collapse", "disappear", "barrier",
+        "corridor", "path", "paths", "diverge", "threshold", "monolith",
+        "portal", "branch", "branches", "choke", "bottleneck",
+    }
+
     @classmethod
     def evaluate_chunk_for_animation(
         cls,
@@ -157,21 +164,23 @@ class EditorialDirectorDetector:
         tokens = {t.lower().strip(".,!?:;\"'") for t in text.split() if t}
         matched_affinity = tokens.intersection(cls.ANIMATION_AFFINITY_TOKENS)
         matched_causality = tokens.intersection(cls.CAUSALITY_SIGNALS)
+        matched_metaphors = tokens.intersection(cls.VISUAL_METAPHOR_SIGNALS)
 
-        # Editorial scoring: causality and physical consequences outweigh isolated abstract tokens
+        # Editorial scoring: causality and explicit visual metaphors outweigh isolated abstract tokens
         causality_bonus = len(matched_causality) * 0.25
         affinity_bonus = len(matched_affinity) * 0.15
-        score = broll_eval.abstract_penalty + affinity_bonus + causality_bonus
+        metaphor_bonus = len(matched_metaphors) * 0.35
+        score = broll_eval.abstract_penalty + affinity_bonus + causality_bonus + metaphor_bonus
 
         # Restraint / Novelty Budget Check:
-        # If time since last animation is short (< 8s) and this is not a high-causality inflection, penalize
-        if novelty_budget_enforced and time_since_last_animation_sec < 8.0 and len(matched_causality) < 2:
+        # If time since last animation is short (< 8s) and this is not a high-causality inflection or explicit metaphor, penalize
+        if novelty_budget_enforced and time_since_last_animation_sec < 8.0 and (len(matched_causality) + len(matched_metaphors)) < 2:
             return False, score * 0.5, "Restraint filter: Preserving novelty budget for primary catastrophic inflection."
 
-        if dur_sec >= 1.8 and (len(matched_causality) >= 1 or len(matched_affinity) >= 1 or broll_eval.recommended_treatment_category == "motion_graphic"):
-            matched_names = sorted(matched_causality.union(matched_affinity))
+        if dur_sec >= 1.8 and (len(matched_causality) >= 1 or len(matched_affinity) >= 1 or len(matched_metaphors) >= 1 or broll_eval.recommended_treatment_category == "motion_graphic"):
+            matched_names = sorted(matched_causality.union(matched_affinity).union(matched_metaphors))
             rationale = (
-                f"Editorial Candidate: {len(matched_causality)} causality signals, {len(matched_affinity)} concept tokens "
+                f"Editorial Candidate: {len(matched_causality)} causality signals, {len(matched_metaphors)} visual metaphor signals, {len(matched_affinity)} concept tokens "
                 f"({', '.join(matched_names) or 'motion graphics affinity'}). "
                 f"Duration {dur_sec:.1f}s allows disciplined 3-act physical staging."
             )

@@ -198,6 +198,87 @@ class EditorialMotionDirectorTests(unittest.TestCase):
             )
         self.assertIn("Per strict editorial pipeline non-negotiables, silent fallback is prohibited", str(ctx.exception))
 
+    def test_hostile_anti_cliche_gate_rejects_semantic_cliche_gears_in_business_context(self):
+        """DiffusionPromptPolicyCritic must reject mechanical gears when transcript is an abstract business/lead topic."""
+        business_transcript = (
+            "Most businesses don't have a lead problem. They have too many places for a lead to disappear. "
+            "A prospect sees one offer on Instagram, another on your website, a third through a sales rep. "
+            "That isn't a funnel. It's a maze."
+        )
+        cliche_gear_prompt = (
+            "An interlocking brass gear train with blackened carbon steel chassis and rotating cogs, "
+            "45-degree isometric studio view, spatially locked fixed tripod camera. "
+            "Pristine halftone raster canvas background with fine grain, reserving upper 45% negative space. "
+            "At 3.0s, the gear teeth jam under rotational torque, single cohesive solid topological manifold "
+            "with pinned UV surface coordinates, zero ghosted duplication, zero mesh fission, zero 180-degree yaw flipping. "
+            "Vertical bottom emergence from submerged Y coordinates during 0.0s - 1.5s decelerating into locked centroid."
+        )
+        audit = DiffusionPromptPolicyCritic.audit_prompt(cliche_gear_prompt, transcript_context=business_transcript)
+        self.assertFalse(audit["passed"])
+        flaws_str = " ".join(audit["flaws"])
+        self.assertIn("VIOLATION (Conceptual Cliché)", flaws_str)
+        self.assertIn("Business / Bottleneck -> Mechanical Gears cliché", flaws_str)
+
+    def test_hostile_anti_cliche_gate_accepts_spatial_labyrinth_hero_artifact(self):
+        """DiffusionPromptPolicyCritic must accept concrete spatial/architectural structures like 3D mazes/labyrinths."""
+        maze_transcript = "That isn't a funnel. It's a maze. Collapse it to one promise, one page, one action."
+        maze_prompt = (
+            "An architectural 3D monolithic limestone labyrinth maze with high vertical walls, "
+            "45-degree isometric studio view, spatially locked fixed tripod camera. "
+            "Hand-cut honed limestone blocks, matte architectural stone finish with subtle micro-beveling. "
+            "Pristine matte off-white graphic canvas with fine micro-stippled dot grid texture, reserving "
+            "the upper 45% as clean negative space. Dramatic high-contrast raked key lighting with floating "
+            "ambient occlusion volume, avoiding all tables and furniture. Spatially locked fixed tripod camera, "
+            "1-DoF constrained axial alignment, single cohesive solid topological manifold with pinned UV coordinates, "
+            "zero ghosted duplication, zero mesh fission, zero 180-degree yaw flipping, native 24fps cinema cadence. "
+            "The labyrinth structure dynamically emerges from submerged off-screen coordinates Y: +120% during 0.0s - 1.5s "
+            "decelerating into locked centroid position. At 3.0s, the diverging corridor walls collapse inward with physical "
+            "precision, locking into a single illuminated straight path. slow_shutter_motion_blur"
+        )
+        audit = DiffusionPromptPolicyCritic.audit_prompt(maze_prompt, transcript_context=maze_transcript)
+        self.assertTrue(audit["passed"], f"Unexpected flaws: {audit['flaws']}")
+
+    def test_response_schema_contains_concept_diversity(self):
+        """_RESPONSE_SCHEMA must enforce concept_diversity with candidate and rejected concepts."""
+        props = _RESPONSE_SCHEMA.get("properties", {})
+        self.assertIn("concept_diversity", props)
+        cd_props = props["concept_diversity"]["properties"]
+        self.assertIn("candidate_domains", cd_props)
+        self.assertIn("selected_domain", cd_props)
+        self.assertIn("semantic_cliche_risk", cd_props)
+        self.assertIn("mechanical_metaphor_penalty", cd_props)
+        self.assertIn("continuity_score", cd_props)
+        self.assertIn("candidate_concepts", cd_props)
+        self.assertIn("rejected_concepts", cd_props)
+        self.assertIn("concept_diversity", _RESPONSE_SCHEMA.get("required", []))
+
+    def test_deterministic_plan_includes_concept_diversity(self):
+        """_build_deterministic_curito_plan must return a fully valid concept_diversity block."""
+        plan = _build_deterministic_curito_plan([{"text": "high voltage knife switch"}])
+        self.assertIn("concept_diversity", plan)
+        cd = plan["concept_diversity"]
+        self.assertIn("candidate_domains", cd)
+        self.assertIn("selected_domain", cd)
+        self.assertGreaterEqual(len(cd["candidate_domains"]), 3)
+        self.assertGreaterEqual(len(cd["candidate_concepts"]), 2)
+        self.assertGreaterEqual(len(cd["rejected_concepts"]), 1)
+
+    def test_editorial_director_detector_prioritizes_explicit_visual_metaphors(self):
+        """EditorialDirectorDetector must give high candidate score to chunks with explicit visual metaphors."""
+        metaphor_chunk = {
+            "text": "That isn't a funnel. It's a maze.",
+            "startMs": 7800,
+            "endMs": 10200,
+        }
+        is_cand, score, rationale = EditorialDirectorDetector.evaluate_chunk_for_animation(
+            chunk=metaphor_chunk,
+            chunk_index=2,
+            time_since_last_animation_sec=50.0,
+        )
+        self.assertTrue(is_cand)
+        self.assertGreaterEqual(score, 0.7)
+        self.assertIn("visual metaphor signals", rationale)
+
 
 if __name__ == "__main__":
     unittest.main()
