@@ -77,3 +77,9 @@ No output may be reported as successful without inline pixel/metric verification
 - Never claim a speedup, latency drop, or performance improvement without an inline, empirical benchmark artifact measured from an actual run executed in the current session.
 - Never substitute theoretical/projected hardware specs (e.g. CPU core counts, vendor marketing claims) or unrelated test suites (e.g. in-memory unit tests, manifest checks) as proof of an end-to-end execution speedup.
 - Never present stale or pre-existing output artifacts (such as prior session MP4s) as evidence of a current run. If an actual render or benchmark has not yet been executed, state explicitly and upfront: 'No live render has been executed yet.' Nuanced evasion or concealing unverified assumptions is strictly prohibited.
+
+## 🚨 RULE 13: STRICT DISPATCH TO GITHUB ACTIONS — NEVER EXECUTE PRODUCTION RENDERS LOCALLY
+- Under NO circumstance may video rendering pipelines (including Remotion headless renders, composition renders, and multi-slice video pipelines) be executed on the local development host.
+- Windows headless Chromium lacks GPU hardware acceleration and repeatedly crashes or exhausts memory during WebGL/R3F composition rendering.
+- ALL production video renders, end-to-end composite cuts, and receipt-generating pipelines MUST be dispatched to GitHub Actions Linux runners via `gh workflow run` on `prometheus-render.yml`.
+- Local execution of video rendering is strictly prohibited and invalidates any session output claiming to produce a render.
