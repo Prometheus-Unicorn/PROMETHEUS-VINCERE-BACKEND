@@ -58,6 +58,28 @@ def _get_api_key() -> str:
     raise RuntimeError("GOOGLE_AI_STUDIO_API_KEY / GEMINI_API_KEY is not configured.")
 
 
+class EditorialPromptSynthesisError(RuntimeError):
+    """Raised when editorial prompt synthesis fails. Strict NO SILENT FALLBACK policy."""
+    pass
+
+
+class EditorialPromptPolicyViolationError(ValueError):
+    """Raised when an editorial prompt violates hostile policy gates."""
+    pass
+
+
+EDITORIAL_PRIMITIVES = {
+    "CONTRAST": "Juxtapose digital ease/software patch against physical constraints and geometry.",
+    "SCALE_MAGNIFICATION": "Progressive optical dive revealing microscopic tolerances/imperfections.",
+    "MICRO_DEVIATION": "Imperceptible initial displacement (e.g. 10 microns) triggering system drift.",
+    "CASCADING_PROPAGATION": "Misalignment propagating through dependent mechanical relationships.",
+    "PHYSICAL_SEIZURE": "Abrupt mechanical dead-stop / rigid freeze, zero digital glitch, one tiny part vibrating.",
+    "CONSEQUENTIAL_CONVERGENCE": "Machine throughput/counter draining directly into financial/economic collapse.",
+    "FOUNDATIONAL_PROPAGATION": "Foundational bedrock locking, stability propagating upward through structure.",
+    "INEVITABLE_YIELD": "Clockwork mechanical reliability, repetitive identical outputs (1, 2, 3, 4...).",
+}
+
+
 DEFAULT_MODEL = os.getenv("GOOGLE_AI_MODEL", "gemini-3.8-flash")
 
 # ---------------------------------------------------------------------------
@@ -103,6 +125,11 @@ class DiffusionPromptPolicyCritic:
         "rotating perspective", "spinning camera"
     ]
 
+    FORBIDDEN_CLICHE_TERMS = [
+        "glitch", "rgb split", "neon glow", "cyber particles", "camera shake",
+        "screen shake", "hud overlay", "hologram", "digital distortion", "screen tearing"
+    ]
+
     TIMECODE_REGEX = re.compile(r"(\+\d+(\.\d+)?s|\b\d+-frame\b|timed to the beat|at \d+s)", re.IGNORECASE)
 
     @classmethod
@@ -133,6 +160,17 @@ class DiffusionPromptPolicyCritic:
         for term in cls.FORBIDDEN_TYPOGRAPHY_TERMS:
             if re.search(r"\b" + re.escape(term) + r"\b", lowered):
                 flaws.append(f"VIOLATION (Anti-Glyph): Prompt contains forbidden typography term '{term}'.")
+
+        # 1b. Editorial Anti-Cliché Check (Vox / Master Editor Standard)
+        for term in cls.FORBIDDEN_CLICHE_TERMS:
+            matches = list(re.finditer(r"\b" + re.escape(term) + r"\b", lowered))
+            for m in matches:
+                if not cls._is_negated(lowered, m.start()):
+                    flaws.append(
+                        f"VIOLATION (Editorial Anti-Cliché): Prompt contains amateur digital cliché '{term}'. "
+                        "Must use mechanical silence, physical dead-stops, or physical causality instead of cheap digital glitches."
+                    )
+                    break
 
         # Check for quote marks containing words
         quotes = re.findall(r"['\"](.*?)['\"]", prompt_text)
@@ -365,30 +403,35 @@ class DiffusionPromptPolicyCritic:
 # ---------------------------------------------------------------------------
 
 _SYSTEM_INSTRUCTION = """\
-You are an expert prompt generation and semantic extraction engine for video diffusion models within an automated editorial video compositing pipeline.
-Your objective is to ingest a timestamped monologue transcript, select the single most powerful inflection moment for animation, and translate it into a pristine, high-tier visual asset plate conforming strictly to the Diffusion Asset Prompting Policy.
+You are the Executive Editorial Motion Director for video diffusion models within an automated editorial video compositing pipeline (Vox / Iman Gadzhi / Magnates Media documentary standard).
+You do NOT operate as a simplistic motion-template engine (phrase -> keyword -> isolated decorative prop).
+Instead, your objective is to analyze the spoken monologue and ask:
+"Where does the speaker introduce a concept that can be understood more powerfully through a visual event, transformation, metaphor, mechanism, comparison, escalation, or consequence?"
+"What visual event makes the viewer understand the concept faster than the speaker can explain it?"
+
+You model the scene across the 8 CANONICAL EDITORIAL PRIMITIVES:
+1. CONTRAST: Juxtapose digital ease / effortless software packet against physical constraints and geometry (clean line encounters thousands of physical constraints and stops dead).
+2. SCALE_MAGNIFICATION: Progressive optical dive revealing microscopic tolerances/imperfections that human scale conceals, then forcing them into ruthless conformity.
+3. MICRO_DEVIATION: Visually insignificant initial shift (e.g. 10 microns) that viewer initially overlooks ("...that's it?"), setting up cascading failure.
+4. CASCADING_PROPAGATION: Component A shifts -> Component B sits wrong -> interface compensates -> registration lost -> mechanical cadence stutters.
+5. PHYSICAL_SEIZURE: Abrupt mechanical dead-stop / rigid freeze. ZERO digital glitches, ZERO RGB splits, ZERO camera shake, ZERO explosion. Pure mechanical silence with one tiny sub-component vibrating while the system freezes.
+6. CONSEQUENTIAL_CONVERGENCE: Machine throughput counter (100 -> 78 -> 41 -> 12 -> 0) draining directly into economic collapse as a physical consequence of the stoppage.
+7. FOUNDATIONAL_PROPAGATION: Foundation bedrock locks firmly, downstream stability propagating upward through the structural hierarchy.
+8. INEVITABLE_YIELD: Clockwork mechanical reliability, identical repeated outputs (1, 2, 3, 4...) with boring, peaceful consistency.
 
 MANDATORY OPERATING POLICIES:
-1. THE ANTI-BLOB POLICY & TANGIBLE HERO ARTIFACTS (STRICT OBJECT SPECIFICITY):
-   - Never generate generic abstract shapes, monolithic cubes, floating masses, or amorphous geometric volumes. Abstract masses destroy cinematic prestige.
+1. THE 3-ACT PHYSICAL CAUSALITY PROGRESSION (SCENE CAUSALITY):
+   - Never generate an isolated static prop in a vacuum. Every scene must depict physical causality across 3 acts:
+     a) Act 1 (0.0s - 1.5s): Baseline Equilibrium (system operating in precision or dynamic emergence).
+     b) Act 2 (1.5s - 3.5s): Inflection Event (micro-displacement, torque locking, or forced conformity).
+     c) Act 3 (3.5s - 5.0s/6.0s): Systemic Consequence / Physical Seizure / Inevitable Yield.
    - Deconstruct the spoken speech into Entity-Action-Manner NLP dimensions (Event & Entity extraction):
      a) Action Verb: The core kinetic verb (e.g. 'lock', 'rotate', 'insert', 'couple', 'clamp').
      b) Manner Adverb & Torque: The physical dynamic (e.g. 'firmly', 'decisively', 'with high-torque rotational precision').
      c) Thematic Target: The conceptual topic (e.g. 'foundation', 'drag', 'scale').
-   - Transduce the concept into an iconic, tactile, volumetric mechanical hero artifact with stable geometry:
-      - For 'Competing priorities / something has to win' -> A high-precision dual-beam analytical balance scale on a knife-edge fulcrum where an authoritative solid tungsten calibration mass drops into one pan, tilting the beam decisively against a polished steel arresting anvil.
-      - For 'Choosing one path / decisive switch' -> A heavy industrial cast-steel dual-track rail switcher with a counterweighted lever snapping the switch points into rigid alignment for the winning line.
-      - For 'Lock the foundation firmly in place' -> A heavy industrial dual-throw knife switch snapping down into solid copper busbar jaws with authoritative mechanical clamping.
-      - For 'Eliminate the drag / friction' -> An aerospace-grade hybrid ceramic ball bearing assembly running in frictionless magnetic suspension.
-      - For 'Step-by-step progress / indexing' -> A Swiss hardened steel Geneva drive indexing one slot and locking rigidly against a convex cam.
-   - STRICT ANTI-KEY BITTING DIRECTIVE:
-     - Avoid keys with thin, asymmetric serrated teeth (bitting). In latent video diffusion, thin key blades and asymmetric teeth induce acute epipolar ambiguity, resulting in 180-degree yaw flips and geometric melting. Favor volumetric, planar, and well-anchored mechanisms (scales, track switches, knife switches, Geneva drives, valves).
-   - STRICT ANTI-NOTABLE PERSON & CELEBRITY TRANSDUCTION DIRECTIVE (SAFETY GUARDRAIL):
-     - Never describe human faces, heads, or recognizable living public figures (e.g. Elon Musk, Sam Altman, Jeff Bezos, Mark Zuckerberg). Prompts containing public figure likenesses trigger Google's safety classifier and are rejected upstream.
-     - When speech references leaders, corporations, or monopolistic entities (e.g. Meta, Amazon, Apple, Google, Microsoft, OpenAI):
-       a) Transduce them into minimalist 3D architectural monoliths with laser-etched geometric emblems.
-       b) Or high-precision physical mechanical gear trains, dual-beam balance scales, or monolithic subterranean copper/gold busbars.
-       c) Preserve the intellectual conflict through physical force, torque, and material dominance—never human portraits.
+   - Transduce the concept into an iconic, tactile, volumetric mechanical hero artifact with stable geometry (balance scale, rail track switch, knife switch, toggle clamp, Geneva drive, high-precision micrometer/caliper).
+   - STRICT ANTI-KEY BITTING DIRECTIVE: Avoid thin, asymmetric serrated key blades to prevent epipolar yaw flips. Favor volumetric mechanisms.
+   - STRICT SAFETY GUARDRAIL: Never describe human faces, heads, or living public figures. Transduce corporate/leadership entities into architectural monoliths or precision gear trains.
 
 2. THE SPATIAL-TEMPORAL TEXTURED CANVAS (STRICT NO-TABLE POLICY):
    - Never position the asset on top of a table, desk, countertop, room floor, or any piece of furniture. Domestic/office furniture destroys editorial prestige.
@@ -396,77 +439,109 @@ MANDATORY OPERATING POLICIES:
    - Mandatory Background Textures: Explicitly incorporate tactile graphic design textures into the backdrop: halftone screening (micro-halftone dot patterns), fine 35mm film grain, micro-stippled architectural paper texture, or technical coordinate dot grid.
    - Floating ambient occlusion volume and directional shadow falloff provide depth without anchoring to physical furniture.
 
-3. THE STRICT ANTI-GLYPH POLICY (ZERO TYPOGRAPHY):
-   - Never describe text, words, letters, numerals, logos, typography, fonts (e.g. Neue Haas Grotesk, Editorial New), or text styles (e.g. "3D beveled block letters").
-   - Never mention voiceover lines, subtitles, or cue phrases. Text is rendered downstream programmatically in code (Remotion). Video diffusion models must generate plates and assets only.
+3. THE STRICT ANTI-GLYPH & ANTI-CLICHÉ POLICY:
+   - Zero typography, words, letters, numerals, logos, or fonts in the diffusion prompt. Text is rendered downstream in code (Remotion).
+   - ZERO amateur digital clichés: no "glitch", no "rgb split", no "neon glow", no "cyber particles", no "camera shake", no "hud overlay". Convery failure through mechanical silence, friction, and rigid freeze.
 
-4. SEPARATION OF LAYERS (MODEL VS. MOTION GRAPHICS):
+4. SEPARATION OF LAYERS & ERGONOMIC SAFE ZONE:
    - Never prompt 2D UI elements: barcodes, Figma bounding boxes, dotted lines, crosshairs, anchor points, or starburst icons.
-   - Preserve Negative Space: Explicitly demand uncluttered, geometric negative space around the focal asset (e.g. "Pristine matte off-white graphic canvas with fine grain reserving the upper 45% as clean negative space").
-   - Frame the shot so the asset occupies a specific zone (central third, lower half), leaving clean margins for downstream typography.
+   - Preserve Negative Space: Explicitly demand uncluttered, geometric negative space around the focal asset (reserving the upper 45% as clean negative space).
+   - Ergonomic Safe-Zone Rule: Primary foveal targets must be situated in the Central Diamond (Y: 320px to 1450px, X: 140px to 940px) to prevent occlusion by mobile UI chrome.
 
 5. LIGHTING CHARACTERIZATION VS. OBJECT BLEEDING:
-   - Describe illumination quality, not fixtures: Avoid naming source fixtures like "tungsten bulb", "lamp", "spotlight fixture", or "neon tube". Describing fixtures causes the model to spawn literal lamps in the frame.
+   - Describe illumination quality, not fixtures: Avoid naming source fixtures like "tungsten bulb", "lamp", "spotlight fixture", or "neon tube".
    - Use abstract lighting physics: "Warm, diffuse overhead directional wash, neutral high-key studio lighting, soft falloff, floating ambient occlusion volume."
 
-6. CINEMATIC TEMPORAL SCENE ORCHESTRATION ("ADDITIVE GRACE"):
-   - An animation cutaway in an interview cannot be an abrupt 3-second jarring cut.
-   - The scene plot is structured with an Additive Grace Envelope across the narrative arc:
-     - Pre-roll Grace (2.0s - 2.5s): Lead-in establishing the hero asset and setting up trajectory before the climactic spoken word.
-     - Sync Hit (2.8s - 3.2s into the 6.0s clip): The exact mechanical lock / turn / engagement occurring precisely when the speaker utters the trigger word.
-     - Post-roll Grace (2.5s - 3.0s): Anti-stagnation micro-drift holding stability as the speech concludes into the payoff ("and the scale takes care of itself").
-     - Editorial Timeline Window: Output the full narrative arc window spanning the monologue beat.
+6. AUDIO-VISUAL COUNTERPOINT & TEMPORAL SCENE ORCHESTRATION:
+   - Do NOT 'Mickey-Mouse' every word to visual frames. Employ Audio-Visual Counterpoint:
+     - Visual Lead (-300ms to -600ms): Seed the visual question or environment before the speaker articulates the concept.
+     - Sync Hit (2.8s - 3.2s into the 6.0s clip): Decisive mechanical inflection / torque engagement on the vocal climax.
+     - Residual Lag (+800ms to +1400ms): Hold the frozen failure or locked state so the emotional/systemic weight settles before the cut.
+     - Acoustic Co-Destruction: Audio vacuum with low-pass 150Hz filter and sub-bass thump on physical seizure.
 
 7. RIGID-BODY TOPOLOGICAL INTEGRITY & CAMERA RIG DISCIPLINE (ZERO 180-DEGREE YAW FLIPS):
-   - Spatially Locked Camera (Tripod Rig): Never use compound camera orbits or revolving camera moves while an asset rotates internally. Compound movement confuses 6-DoF diffusion projection and causes choppy 180-degree yaw flips! The camera must be a spatially locked fixed-tripod 45-degree isometric perspective (or pure 1-axis optical push-in).
-   - 1-DoF Constrained Kinematics: Explicitly declare the single axis of rotation or motion (e.g., 'constrained single-axis clockwise rotation along the fixed central longitudinal shaft').
-   - Invariant Geometric Topology: Key teeth, valleys, and mechanical detents must maintain strict topological permanence without morphing or reversing direction. Explicitly state: 'The bitting profile and teeth maintain continuous topological permanence, rigidly oriented throughout the rotation, with zero geometric morphing, zero 180-degree yaw flipping, and zero perspective inversion.'
+   - Spatially Locked Camera (Tripod Rig): Never use compound camera orbits or revolving camera moves while an asset rotates internally. Fixed tripod 45-degree isometric perspective (or pure 1-axis optical push-in).
+   - 1-DoF Constrained Kinematics: Explicitly declare the single axis of rotation or motion.
    - Invariant Geometric Topology & Anti-Duplication Physics (Strict Single-Object Law):
-     - Never permit an asset or any of its sub-components to double up, split into ghost silhouettes, or fragment into multiple copies that later artificially merge or snap back.
-     - The asset must strictly obey natural classical rigid-body physics as a single cohesive solid topological manifold: zero UV texture sliding across seams, zero mesh fission, zero ghosted duplicate silhouettes, zero unphysical cloning, and zero re-convergence artifacts. All material coordinates remain pinned to the rigid geometry throughout motion.
+     - Single cohesive solid topological manifold with pinned UV surface coordinates: zero ghosted duplication, zero mesh fission, zero 180-degree yaw flipping, zero unphysical cloning.
 
 8. STANDARD 6-ELEMENT OUTPUT SCHEMA:
    Every diffusion prompt must strictly synthesize these 6 components into a single coherent paragraph:
-   - [1. Focal Subject & Perspective]: Concrete hero mechanical artifact and exact camera angle (e.g., spatially locked 45-degree isometric studio view).
-   - [2. Materiality & Surface]: Textures, finishes, micro-details (e.g., hand-finished solid brass, blackened carbon steel, micro-chamfered teeth).
-   - [3. Canvas & Textured Background (Strictly No Table)]: Pristine unpopulated graphic canvas at frame 0 featuring subtle halftone dot patterning, fine 35mm film grain, and explicit negative space reservation (#ECECEC matte paper, neutral void).
+   - [1. Focal Subject & Perspective]: Concrete mechanical hero assembly in 3-act physical context (45-degree isometric studio view).
+   - [2. Materiality & Surface]: Textures, finishes, micro-details (e.g., hand-finished solid brass, blackened carbon steel).
+   - [3. Canvas & Textured Background (Strictly No Table)]: Pristine unpopulated graphic canvas at frame 0 with subtle halftone dot screening or 35mm film grain (#ECECEC matte paper).
    - [4. Lighting & Shadow Physics]: Illumination quality, directional softness, and floating ambient occlusion volume providing spatial depth without furniture contact.
-   - [5. Camera & Kinematic Permanence Spec]: Spatially locked fixed-tripod camera (zero orbit), 1-DoF constrained axial rotation, strict rigid-body topological permanence, single cohesive solid topological manifold with pinned UV surface coordinates, zero ghosted duplication, zero mesh fission, zero 180-degree yaw flipping, native 24fps cinema cadence.
-   - [6. Dynamic Entrance Kinematic Spec]: Dynamic entrance from unpopulated canvas during 0.0s - 1.5s (e.g. vertical bottom emergence from submerged off-screen coordinates Y: +120%, or lateral friction slide, or 3D hinged swing) decelerating into locked centroid position before the sync hit. ZERO static ducks sitting stationary from frame 0!
+   - [5. Camera & Kinematic Permanence Spec]: Spatially locked fixed-tripod camera, 1-DoF constrained axial rotation, strict rigid-body topological permanence, single cohesive solid topological manifold with pinned UV surface coordinates, zero ghosted duplication, zero mesh fission, 24fps cadence.
+   - [6. Dynamic Entrance Kinematic Spec]: Dynamic entrance from unpopulated canvas during 0.0s - 1.5s (e.g. vertical bottom emergence from submerged Y coords, lateral friction slide, or 3D hinged swing) decelerating into locked centroid position before the sync hit. ZERO static ducks sitting stationary from frame 0!
 
-9. BACKGROUND TREATMENT SELECTION (SELECT BY ID — NEVER HARDCODE):
-   The diffusion prompt MUST specify one of the four canonical background treatments from the BACKGROUND_TREATMENT_REGISTRY. Select the ID that best matches the transcript's semantic tone and the hero artifact's material character. IDs and their appropriate use-cases:
-   - "halftone_raster_canvas" → DEFAULT. High-contrast monochrome or desaturated-brass artifacts, Swiss editorial aesthetic, maximum foreground–background separation. Use when tone is decisive, authoritative, or industrial.
-   - "luxury_editorial_sunlight_canvas" → Warm, aspirational, or premium lifestyle moments. Subjects with polished brass, gold-toned, or ivory finishes. Interview beats expressing achievement, refinement, or aspiration. Diagonal sunlight shadow bands on off-white paper.
-   - "newspaper_collage_deconstructed" → Gritty, counter-cultural, or disruption-themed transcripts. Raw steel, oxidized iron, or industrial finish subjects. Analog / archival documentary aesthetic with microtext, halftone grain, and green-teal signature mark.
-   - "modern_swiss_museum_poster" → Institutional, thought-leadership, or maximum-authority themes. Ultra-sharp geometric subjects (track switches, knife switches, Geneva drives). Dramatic high-contrast raked lighting, micro-stippled grid, near-monochrome palette, 8K clarity.
-   Output the selected ID in the field "selected_background_treatment_id". Then inject the corresponding dna_snippet text into the [3. Canvas & Textured Background] element of the assembled diffusion prompt.
+9. BACKGROUND TREATMENT SELECTION (SELECT BY ID):
+   - "halftone_raster_canvas" (default), "luxury_editorial_sunlight_canvas", "newspaper_collage_deconstructed", "modern_swiss_museum_poster".
 
-10. MOTION TREATMENT SELECTION (SELECT BY ID — NEVER HARDCODE):
-    The diffusion prompt MUST include one of the four canonical motion / blur treatments from the MOTION_TREATMENT_REGISTRY. Select the ID that best matches the kinetic character of the hero artifact's movement. IDs and appropriate use-cases:
-    - "defocus_blur" → DEFAULT. Optical rack-focus reveal for static-reveal or deliberate-settle kinematics (balance scale tilting to lock, knife switch closing). Asset crystallizes from soft defocus to tack-sharp at the sync hit.
-    - "gaussian_blur" → Soft entry / soft exit for warm, aspirational, or emotionally resonant moments. Subjects with polished or translucent surfaces. Luxury sunlight canvas backgrounds. No hard cuts.
-    - "bokeh_blur" → Background depth-of-field isolation. Use when background texture (newspaper collage, sunlight canvas) risks competing with the hero artifact. Foreground tack-sharp, background dissolved into large bokeh coronas.
-    - "slow_shutter_motion_blur" → Dynamic mechanical kinetics: fast rotation, lever snaps, beam sweeps, Geneva indexing at speed. Directional motion streaks on fast-moving elements, stationary elements remain sharp. Conveys high-torque authority.
-    Output the selected ID in the field "selected_motion_treatment_id". Append the corresponding dna_snippet as an additive optics clause at the end of the assembled diffusion prompt (before any negative prompt separation).
+10. MOTION TREATMENT SELECTION (SELECT BY ID):
+    - "defocus_blur" (default), "gaussian_blur", "bokeh_blur", "slow_shutter_motion_blur".
 
-11. MANDATORY DYNAMIC ENTRANCE-INTO-VIEW TREATMENT (ZERO FRAME-ZERO STATIC DUCKS):
-    The hero asset MUST NOT sit statically on screen at frame 0.0s like a stationary prop or 'sitting duck'.
-    The scene MUST open on an unpopulated/pristine graphic canvas, and the hero asset must dynamically animate into view during the initial 0.0s to 1.5s phase before the sync hit.
-    Select one of the six canonical entrance treatments from ENTRANCE_TREATMENT_REGISTRY:
-    - "vertical_bottom_emergence" → DEFAULT. Initiates submerged below lower frame boundary (Y: +120% viewport), propelled upward along vertical axis with steep power4.out cubic deceleration curve, decelerating sharply into locked centroid position.
-    - "lateral_friction_slide" → Enters horizontally from outer frame flank at high initial velocity with zero ease-in, sliding across the surface against 70% physical friction before braking into centroid position.
-    - "slapdrop_bounce" → Drops into frame along Z-axis with exponential decrescendo from above, executing a 2-frame 3% scale squash on impact with subtle contact bounce and pendulum settle.
-    - "off_axis_3d_swing" → Pinned pivot anchor at outer edge, swinging in with dynamic 3D perspective from 80 degrees off-axis down to 0 degrees before locking.
-    - "polarizing_bevel_elevation" → Elevates forward along Z-axis into frame with chamfered metallic bevel borders catching edge highlights.
-    - "optical_rack_focus_bokeh_accretion" → S-Tier anamorphic rack-focus reveal (f/1.2 cinema lens stopping down from blur: 36px / brightness: 1.6 to tack-sharp clarity, focal plane Z-depth stagger, bottom-up elevation with directional motion blur, 1.8s–4.5s breathing micro-drift hold, and 4.5s–6.0s defocus dissolve outro).
-    Output the selected ID in "selected_entrance_treatment_id". Incorporate its dynamic entrance description into the [6. Dynamic Entrance Kinematic Spec] and ensure the assembled diffusion prompt explicitly narrates the transition from unpopulated canvas to dynamic entrance into position.
+11. MANDATORY DYNAMIC ENTRANCE-INTO-VIEW TREATMENT:
+    - "vertical_bottom_emergence" (default), "lateral_friction_slide", "slapdrop_bounce", "off_axis_3d_swing", "polarizing_bevel_elevation", "optical_rack_focus_bokeh_accretion".
 """
 
 
 _RESPONSE_SCHEMA: Dict[str, Any] = {
     "type": "OBJECT",
     "properties": {
+        "editorial_causality_chain": {
+            "type": "OBJECT",
+            "properties": {
+                "primary_editorial_primitive": {
+                    "type": "STRING",
+                    "description": (
+                        "Must be one of: 'CONTRAST', 'SCALE_MAGNIFICATION', 'MICRO_DEVIATION', "
+                        "'CASCADING_PROPAGATION', 'PHYSICAL_SEIZURE', 'CONSEQUENTIAL_CONVERGENCE', "
+                        "'FOUNDATIONAL_PROPAGATION', 'INEVITABLE_YIELD'."
+                    ),
+                },
+                "causality_act_1_equilibrium": {"type": "STRING"},
+                "causality_act_2_inflection": {"type": "STRING"},
+                "causality_act_3_consequence": {"type": "STRING"},
+                "audio_visual_counterpoint": {
+                    "type": "OBJECT",
+                    "properties": {
+                        "visual_lead_sec": {"type": "NUMBER"},
+                        "residual_lag_sec": {"type": "NUMBER"},
+                    },
+                    "required": ["visual_lead_sec", "residual_lag_sec"],
+                },
+                "kinetic_momentum_vector": {
+                    "type": "OBJECT",
+                    "properties": {
+                        "velocity_x": {"type": "NUMBER"},
+                        "velocity_y": {"type": "NUMBER"},
+                        "camera_zoom_delta": {"type": "NUMBER"},
+                    },
+                    "required": ["velocity_x", "velocity_y", "camera_zoom_delta"],
+                },
+                "acoustic_co_destruction_spec": {"type": "STRING"},
+                "ergonomic_safe_zone": {
+                    "type": "OBJECT",
+                    "properties": {
+                        "top_y_px": {"type": "INTEGER"},
+                        "bottom_y_px": {"type": "INTEGER"},
+                        "left_x_px": {"type": "INTEGER"},
+                        "right_x_px": {"type": "INTEGER"},
+                    },
+                    "required": ["top_y_px", "bottom_y_px", "left_x_px", "right_x_px"],
+                },
+            },
+            "required": [
+                "primary_editorial_primitive",
+                "causality_act_1_equilibrium",
+                "causality_act_2_inflection",
+                "causality_act_3_consequence",
+                "audio_visual_counterpoint",
+                "kinetic_momentum_vector",
+                "acoustic_co_destruction_spec",
+                "ergonomic_safe_zone",
+            ],
+        },
         "semantic_entity_action_mapping": {
             "type": "OBJECT",
             "properties": {
@@ -689,6 +764,28 @@ def _build_deterministic_curito_plan(transcript_chunks: List[Dict[str, Any]]) ->
         "selected_background_treatment_id": "halftone_raster_canvas",
         "selected_motion_treatment_id": "slow_shutter_motion_blur",
         "selected_entrance_treatment_id": "vertical_bottom_emergence",
+        "editorial_causality_chain": {
+            "primary_editorial_primitive": "FOUNDATIONAL_PROPAGATION",
+            "causality_act_1_equilibrium": "Physical system initially exhibits minute structural variance and mechanical instability",
+            "causality_act_2_inflection": "Heavy industrial knife switch lever snaps down with high-torque rotational precision into solid copper busbars",
+            "causality_act_3_consequence": "Bedrock foundation locks rigidly; structural alignment propagates upward creating downstream yield certainty",
+            "audio_visual_counterpoint": {
+                "visual_lead_sec": -0.4,
+                "residual_lag_sec": 1.2
+            },
+            "kinetic_momentum_vector": {
+                "velocity_x": 0.0,
+                "velocity_y": -1.5,
+                "camera_zoom_delta": 0.05
+            },
+            "acoustic_co_destruction_spec": "Sudden audio vacuum on impact, cutting ambient room noise into sub-bass 40Hz drop",
+            "ergonomic_safe_zone": {
+                "top_y_px": 320,
+                "bottom_y_px": 1450,
+                "left_x_px": 140,
+                "right_x_px": 940
+            }
+        },
         "downstream_remotion_overlay": {
             "primary_headline": "RUTHLESS TOLERANCE",
             "secondary_italic_subline": "Zero drift across the entire line",
@@ -711,7 +808,7 @@ def extract_and_synthesize_curito_prompt(
     transcript_chunks: List[Dict[str, Any]],
     model_name: str = DEFAULT_MODEL,
 ) -> Dict[str, Any]:
-    """Runs deep semantic extraction using Gemini and enforces the prompt policy."""
+    """Runs deep semantic extraction using Gemini as an Editorial Motion Director and enforces policy."""
     api_key = _get_api_key()
 
     # Format chunks into readable text with timestamps
@@ -724,30 +821,59 @@ def extract_and_synthesize_curito_prompt(
         chunks_text.append(f"[{s_sec:.2f}s - {e_sec:.2f}s] Chunk #{c_idx}: \"{txt.strip()}\"")
 
     user_content = (
-        "Analyze this timestamped monologue transcript:\n\n"
+        "Analyze this timestamped monologue transcript as an Executive Editorial Motion Director (Vox / Iman Gadzhi / High-Tier Editorial standard):\n\n"
         + "\n".join(chunks_text)
-        + "\n\nDeconstruct the speech using NLP Entity-Action-Manner extraction. "
-        "Select the single most powerful inflection moment. Transduce the spoken metaphor into an iconic, "
-        "tactile, high-tier mechanical hero artifact—NEVER a generic geometric block or mass. "
+        + "\n\nDo NOT behave like a simplistic motion-template engine (phrase -> keyword -> isolated decorative prop). "
+        "Instead, analyze: Where does the speaker introduce a concept that can be understood more powerfully through a visual event, "
+        "transformation, metaphor, mechanism, comparison, escalation, or consequence? What visual event makes the viewer understand the concept faster than the speaker can explain it? "
+        "Identify the primary Editorial Primitive from the 8 canonical primitives: "
+        "1. CONTRAST (Digital Ease vs Physical Constraint), 2. SCALE_MAGNIFICATION (Macro perfection vs Microscopic gap), "
+        "3. MICRO_DEVIATION (Imperceptible 10-micron error triggering drift), 4. CASCADING_PROPAGATION (Component misalignment dominoes through dependent relationships), "
+        "5. PHYSICAL_SEIZURE (Sudden mechanical dead-stop / rigid freeze, ZERO digital glitching/shake, one tiny component vibrating), "
+        "6. CONSEQUENTIAL_CONVERGENCE (Machine counter 100->78->41->12->0 draining directly into economic collapse), "
+        "7. FOUNDATIONAL_PROPAGATION (Foundational lock stabilizing entire upstream structure), "
+        "8. INEVITABLE_YIELD (Clockwork mechanical reliability: 1, 2, 3, 4...). "
+        "Structure the scene across a 3-act physical causality progression (Act 1: Equilibrium, Act 2: Inflection Event, Act 3: Consequential State / Physical Seizure / Stabilized Yield). "
         "MANDATORY DYNAMIC ENTRANCE-INTO-VIEW: The scene MUST open on an unpopulated, pristine graphic canvas at 0.0s. "
-        "The hero asset must NEVER sit statically on screen at frame zero like a static duck. "
-        "The prompt must explicitly describe the hero asset's dynamic entrance into view (e.g. vertical bottom emergence from submerged Y coordinates, "
-        "lateral friction slide, or 3D hinged swing) over 0.0s - 1.5s decelerating into locked centroid position before the sync hit. "
-        "THE BACKGROUND MUST BE A SPATIAL-TEMPORAL TEXTURED GRAPHIC CANVAS (featuring subtle halftone dot screening, "
-        "fine 35mm film grain, or micro-stippling). ABSOLUTELY NO TABLES, NO TABLETOPS, NO DESKS, NO FURNITURE PLACEMENT. "
-        "CAMERA & KINEMATIC DISCIPLINE: The camera MUST be a spatially locked fixed-tripod 45-degree isometric view (NO camera orbiting/revolving). "
-        "The asset must have a constrained 1-DoF rotational axis with strict rigid-body topological permanence "
-        "(teeth, bitting profile, and mechanical detents remain rigidly oriented without 180-degree yaw flipping, morphing, or perspective inversion). "
-        "Define the scene plot temporal grace envelope (pre-roll grace, sync hit on spoken trigger, post-roll stability). "
-        "Synthesize the diffusion prompt conforming to the 6-element schema. Zero typography."
+        "The hero assembly must NEVER sit statically on screen at frame zero like a static duck. "
+        "Describe dynamic entrance into view (e.g. vertical bottom emergence from submerged Y coordinates, lateral friction slide, or 3D hinged swing) "
+        "over 0.0s - 1.5s decelerating into locked centroid position before the sync hit. "
+        "THE BACKGROUND MUST BE A SPATIAL-TEMPORAL TEXTURED GRAPHIC CANVAS (subtle halftone dot screening, fine 35mm film grain, or micro-stippling). "
+        "ABSOLUTELY NO TABLES, NO TABLETOPS, NO DESKS, NO FURNITURE PLACEMENT. "
+        "CAMERA & KINEMATIC DISCIPLINE: Spatially locked fixed-tripod 45-degree isometric view (NO camera orbiting/revolving). "
+        "Constrained 1-DoF rotational axis with strict rigid-body topological permanence (single cohesive solid topological manifold, zero ghosted duplication, zero mesh fission, zero 180-degree yaw flipping). "
+        "AUDIO-VISUAL COUNTERPOINT: Calculate visual lead (-300ms to -600ms) and residual lag (+800ms to +1400ms). "
+        "ERGONOMIC SAFE-ZONE: Keep primary foveal targets in Central Diamond (Y: 320-1450, X: 140-940). Zero typography in diffusion prompt."
     )
 
     json_spec = """{
+  "editorial_causality_chain": {
+    "primary_editorial_primitive": "one of: CONTRAST | SCALE_MAGNIFICATION | MICRO_DEVIATION | CASCADING_PROPAGATION | PHYSICAL_SEIZURE | CONSEQUENTIAL_CONVERGENCE | FOUNDATIONAL_PROPAGATION | INEVITABLE_YIELD",
+    "causality_act_1_equilibrium": "Initial physical baseline / alignment description",
+    "causality_act_2_inflection": "Core mechanical shift / deviation / lockup event",
+    "causality_act_3_consequence": "Systemic outcome / physical seizure / yield stabilization",
+    "audio_visual_counterpoint": {
+      "visual_lead_sec": -0.4,
+      "residual_lag_sec": 1.2
+    },
+    "kinetic_momentum_vector": {
+      "velocity_x": 0.0,
+      "velocity_y": -1.5,
+      "camera_zoom_delta": 0.05
+    },
+    "acoustic_co_destruction_spec": "Sudden audio vacuum on physical seizure with 40Hz sub-bass thump",
+    "ergonomic_safe_zone": {
+      "top_y_px": 320,
+      "bottom_y_px": 1450,
+      "left_x_px": 140,
+      "right_x_px": 940
+    }
+  },
   "semantic_entity_action_mapping": {
     "action_verb": "e.g. lock",
     "manner_adverb": "e.g. firmly with rotational torque",
     "thematic_target": "e.g. foundation",
-    "hero_physical_artifact": "Tangible, iconic volumetric mechanical hero asset with stable geometry (e.g. dual-beam balance scale with tungsten weight, industrial track switch, dual-throw knife switch, Geneva indexer; strictly avoid thin keys/bitting)"
+    "hero_physical_artifact": "Tangible, iconic volumetric mechanical hero asset in dynamic context (e.g. dual-beam balance scale with tungsten weight, industrial track switch, dual-throw knife switch, Geneva indexer; strictly avoid thin keys/bitting)"
   },
   "selected_inflection": {
     "chunk_index": int,
@@ -863,8 +989,13 @@ def extract_and_synthesize_curito_prompt(
             break
 
     if not res_json:
-        print(f"Warning: all online Gemini models temporarily unavailable ({last_err}). Synthesizing deterministic Curito plan from transcript...", flush=True)
-        return _build_deterministic_curito_plan(transcript_chunks)
+        err_msg = (
+            f"All online Gemini models failed during editorial prompt extraction: {last_err}. "
+            "Per strict editorial pipeline non-negotiables, silent fallback to generic mock presets is prohibited. "
+            "Execution failed."
+        )
+        logger.error(err_msg)
+        raise EditorialPromptSynthesisError(err_msg)
 
     raw_text = res_json["candidates"][0]["content"]["parts"][0]["text"]
     extracted = _parse_llm_json(raw_text)

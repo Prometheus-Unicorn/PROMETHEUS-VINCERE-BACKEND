@@ -33,11 +33,19 @@ from .curito_animation_dna import (
     CuritoWordSyncSchema,
 )
 from .curito_semantic_extractor import (
+    EDITORIAL_PRIMITIVES,
     DiffusionPromptPolicyCritic,
+    EditorialPromptPolicyViolationError,
+    EditorialPromptSynthesisError,
     extract_and_synthesize_curito_prompt,
 )
 from .google_flow_client import CuritoAnimationReport, GoogleFlowConfig, GoogleFlowMCPClient
 from .veo_backend_client import VeoBackendClient, VeoGenerationResult
+
+
+class EditorialAnimationGenerationError(RuntimeError):
+    """Raised when editorial animation generation fails. Strict NO SILENT FALLBACK policy."""
+    pass
 
 
 # ---------------------------------------------------------------------------
@@ -97,18 +105,26 @@ class CuritoPlacementDirective:
 
 
 # ---------------------------------------------------------------------------
-# Candidate Detection Engine
+# Candidate Detection Engine (Editorial Motion Director Standard)
 # ---------------------------------------------------------------------------
 
-class CuritoAnimationDetector:
-    """Evaluates transcript chunks to detect prime candidates for generative animations."""
+class EditorialDirectorDetector:
+    """Evaluates monologue chunks through the Editorial Motion Director paradigm (Vox / High-Tier standard)."""
 
-    # High conceptual affinity tokens that trigger Curito animation evaluation
+    # High conceptual affinity tokens (preserved for backwards compatibility)
     ANIMATION_AFFINITY_TOKENS = {
         "framework", "system", "algorithm", "strategy", "breakthrough", "architecture",
         "solution", "leverage", "engine", "scale", "feedback", "pillar", "code",
         "loop", "execution", "discipline", "principle", "asymmetry", "experiment",
         "process", "mechanism", "growth", "revenue", "secrets", "formula",
+    }
+
+    # Causality and physical inflection signals (Vox / Editorial causality arc)
+    CAUSALITY_SIGNALS = {
+        "drifts", "drift", "seizes", "seize", "drops", "drop", "clamps", "clamp",
+        "locks", "lock", "breaks", "causes", "because", "stops", "freezes",
+        "precision", "tolerance", "micron", "microns", "hardware", "software",
+        "yield", "margin", "consequence", "failure", "foundation", "alignment",
     }
 
     @classmethod
@@ -117,8 +133,9 @@ class CuritoAnimationDetector:
         chunk: Dict[str, Any],
         chunk_index: int = 0,
         time_since_last_animation_sec: float = 100.0,
+        novelty_budget_enforced: bool = True,
     ) -> Tuple[bool, float, str]:
-        """Evaluate if a monologue chunk is ideal for getting animated.
+        """Evaluate if a monologue chunk is an optimal candidate for editorial animation.
         
         Returns:
             (is_candidate, score, rationale)
@@ -139,20 +156,33 @@ class CuritoAnimationDetector:
 
         tokens = {t.lower().strip(".,!?:;\"'") for t in text.split() if t}
         matched_affinity = tokens.intersection(cls.ANIMATION_AFFINITY_TOKENS)
+        matched_causality = tokens.intersection(cls.CAUSALITY_SIGNALS)
 
-        score = broll_eval.abstract_penalty + (len(matched_affinity) * 0.20)
+        # Editorial scoring: causality and physical consequences outweigh isolated abstract tokens
+        causality_bonus = len(matched_causality) * 0.25
+        affinity_bonus = len(matched_affinity) * 0.15
+        score = broll_eval.abstract_penalty + affinity_bonus + causality_bonus
 
-        # If broll_engine recommended motion_graphic or if high concept affinity tokens match
-        if broll_eval.recommended_treatment_category == "motion_graphic" or len(matched_affinity) >= 1:
-            if dur_sec >= 1.8:
-                rationale = (
-                    f"Candidate identified: {len(matched_affinity)} concept tokens matched "
-                    f"({', '.join(sorted(matched_affinity)) or 'motion graphics affinity'}). "
-                    f"Duration {dur_sec:.1f}s allows proper visual staging."
-                )
-                return True, min(1.0, score + 0.3), rationale
+        # Restraint / Novelty Budget Check:
+        # If time since last animation is short (< 8s) and this is not a high-causality inflection, penalize
+        if novelty_budget_enforced and time_since_last_animation_sec < 8.0 and len(matched_causality) < 2:
+            return False, score * 0.5, "Restraint filter: Preserving novelty budget for primary catastrophic inflection."
 
-        return False, score, "Insufficient conceptual weight for animation."
+        if dur_sec >= 1.8 and (len(matched_causality) >= 1 or len(matched_affinity) >= 1 or broll_eval.recommended_treatment_category == "motion_graphic"):
+            matched_names = sorted(matched_causality.union(matched_affinity))
+            rationale = (
+                f"Editorial Candidate: {len(matched_causality)} causality signals, {len(matched_affinity)} concept tokens "
+                f"({', '.join(matched_names) or 'motion graphics affinity'}). "
+                f"Duration {dur_sec:.1f}s allows disciplined 3-act physical staging."
+            )
+            return True, min(1.0, score + 0.3), rationale
+
+        return False, score, "Insufficient conceptual or causal weight for animation."
+
+
+class CuritoAnimationDetector(EditorialDirectorDetector):
+    """Backwards-compatible alias for EditorialDirectorDetector."""
+    pass
 
 
 # ---------------------------------------------------------------------------
@@ -396,9 +426,10 @@ class CuritoAnimationOrchestrator:
                 concept_title=title,
             )
         else:
-            raise RuntimeError(
+            raise EditorialAnimationGenerationError(
                 f"Headless Curito animation generation failed for '{clip_filename}': "
-                "No active generator (VeoBackendClient/GoogleFlowMCPClient) or fixture video available."
+                "No active generator (VeoBackendClient/GoogleFlowMCPClient) or fixture video available. "
+                "Per strict editorial pipeline non-negotiables, silent fallback is prohibited."
             )
 
         mp4_path_obj = Path(report.mp4_asset_path)
