@@ -750,11 +750,12 @@ def parse_background_preferences(
             intensity = None
 
     blend_mode = brand_prefs.get("backgroundBlendMode") or design_dict.get("backgroundBlendMode")
+    motif_val = design_dict.get("motif")
     brand_colors = (
         brand_prefs.get("brandColors")
         or brand_prefs.get("colors")
         or design_dict.get("brandColors")
-        or (design_dict.get("motif") or {}).get("colors")
+        or (motif_val.get("colors") if isinstance(motif_val, dict) else None)
     )
     brand_tint = None
     if isinstance(brand_colors, dict):
