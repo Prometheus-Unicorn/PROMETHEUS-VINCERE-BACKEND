@@ -76,18 +76,18 @@ export const ComparisonHelper: React.FC<VisualHelperComponentProps> = ({
             </span>
             <span
               style={{
-                fontSize: "11px",
-                fontWeight: 700,
-                letterSpacing: "0.15em",
+                fontSize: "10px",
+                fontWeight: 600,
+                letterSpacing: "0.18em",
                 textTransform: "uppercase",
-                padding: "3px 10px",
-                borderRadius: "999px",
-                background: "rgba(255, 255, 255, 0.1)",
-                color: "#E2E8F0",
-                border: "1px solid rgba(255, 255, 255, 0.15)",
+                padding: "3px 8px",
+                borderRadius: "4px",
+                background: "rgba(255, 255, 255, 0.06)",
+                color: "#94A3B8",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
               }}
             >
-              SIDE-BY-SIDE
+              CONTRAST
             </span>
           </div>
         )}
@@ -114,30 +114,28 @@ export const ComparisonHelper: React.FC<VisualHelperComponentProps> = ({
               justifyContent: "center",
               padding: "0 24px",
               backgroundColor: "rgba(15, 23, 42, 0.75)",
-              filter: "grayscale(30%)",
             }}
           >
             <span
               style={{
-                fontFamily: '"Montserrat", sans-serif',
-                fontSize: "13px",
-                fontWeight: 800,
-                letterSpacing: "0.12em",
-                color: "#94A3B8",
-                marginBottom: "4px",
+                fontFamily: '"Montserrat", "Inter", sans-serif',
+                fontSize: "12px",
+                fontWeight: 700,
+                letterSpacing: "0.14em",
+                color: "#64748B",
+                marginBottom: "6px",
+                textTransform: "uppercase",
               }}
             >
               {beforeLabel}
             </span>
             <span
               style={{
-                fontFamily: '"Anton", sans-serif',
-                fontSize: "28px",
-                fontWeight: 900,
-                color: "#CBD5E1",
-                textDecoration: "line-through",
-                textDecorationColor: "#EF4444",
-                textDecorationThickness: "2px",
+                fontFamily: '"Montserrat", "Inter", sans-serif',
+                fontSize: "22px",
+                fontWeight: 700,
+                color: "#94A3B8",
+                letterSpacing: "-0.01em",
               }}
             >
               {beforeValue}
@@ -155,71 +153,71 @@ export const ComparisonHelper: React.FC<VisualHelperComponentProps> = ({
               justifyContent: "center",
               alignItems: "flex-end",
               padding: "0 24px",
-              background: `linear-gradient(135deg, rgba(20, 24, 40, 0.95) 0%, rgba(${brandPrimary}, 0.25) 100%)`,
+              background: `linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(${brandPrimary}, 0.2) 100%)`,
             }}
           >
             <span
               style={{
-                fontFamily: '"Montserrat", sans-serif',
-                fontSize: "13px",
-                fontWeight: 800,
-                letterSpacing: "0.12em",
+                fontFamily: '"Montserrat", "Inter", sans-serif',
+                fontSize: "12px",
+                fontWeight: 700,
+                letterSpacing: "0.14em",
                 color: brandAccent,
-                marginBottom: "4px",
-                textShadow: `0 0 10px ${brandAccent}`,
+                marginBottom: "6px",
+                textTransform: "uppercase",
               }}
             >
               {afterLabel}
             </span>
             <span
               style={{
-                fontFamily: '"Anton", sans-serif',
-                fontSize: "32px",
-                fontWeight: 900,
+                fontFamily: '"Montserrat", "Inter", sans-serif',
+                fontSize: "24px",
+                fontWeight: 800,
                 color: "#FFFFFF",
-                textShadow: `0 0 20px ${brandPrimary}AA`,
+                letterSpacing: "-0.01em",
+                textShadow: `0 0 16px ${brandAccent}66`,
               }}
             >
               {afterValue}
             </span>
           </div>
 
-          {/* Glowing Split Divider Line with Handle */}
+          {/* Sleek Hairline Split Divider Line */}
           <div
             style={{
               position: "absolute",
               top: 0,
               bottom: 0,
               left: `${splitPercent}%`,
-              width: "3px",
+              width: "1.5px",
               transform: "translateX(-50%)",
-              background: "#FFFFFF",
-              boxShadow: `0 0 16px ${brandAccent}, 0 0 8px #FFFFFF`,
+              background: "linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.9) 50%, rgba(255, 255, 255, 0.1) 100%)",
+              boxShadow: `0 0 8px ${brandAccent}88`,
               zIndex: 10,
             }}
           >
-            {/* Center Diamond Handle */}
+            {/* Minimal Center Pill Indicator */}
             <div
               style={{
                 position: "absolute",
                 top: "50%",
                 left: "50%",
                 transform: "translate(-50%, -50%)",
-                width: "28px",
-                height: "28px",
-                borderRadius: "999px",
+                width: "18px",
+                height: "18px",
+                borderRadius: "4px",
                 backgroundColor: "#0F172A",
-                border: `2px solid ${brandAccent}`,
-                boxShadow: `0 0 12px ${brandAccent}`,
+                border: "1px solid rgba(255, 255, 255, 0.3)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#FFFFFF",
-                fontSize: "11px",
-                fontWeight: 900,
+                color: "#94A3B8",
+                fontSize: "9px",
+                letterSpacing: "-0.05em",
               }}
             >
-              ⇄
+              ||
             </div>
           </div>
         </div>

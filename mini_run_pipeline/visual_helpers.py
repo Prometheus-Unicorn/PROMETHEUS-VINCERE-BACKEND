@@ -28,7 +28,6 @@ COMPARISON_PATTERNS = [
     re.compile(r"\b(?:before\s+and\s+after)\b", re.IGNORECASE),
     re.compile(r"\b(\w+[\w\s]{1,20}?)\s+(?:vs\.?|versus|compared\s+to|as\s+opposed\s+to)\s+(\w+[\w\s]{1,20}?)\b", re.IGNORECASE),
     re.compile(r"\b(?:instead\s+of)\s+([^,.;]+?)(?:,\s*|\s+we\s+|\s+use\s+|\s+choose\s+|\s+do\s+)([^,.;]+)", re.IGNORECASE),
-    re.compile(r"\b(?:switch(?:ed)?\s+from)\s+([^,.;]+?)\s+to\s+([^,.;]+)", re.IGNORECASE),
     re.compile(r"\b(?:difference\s+between)\s+([^,.;]+?)\s+and\s+([^,.;]+)", re.IGNORECASE),
 ]
 
@@ -225,25 +224,6 @@ def _extract_comparison(text: str) -> Optional[Dict[str, Any]]:
             "beforeLabel": "INSTEAD OF",
             "beforeValue": old_opt[:24],
             "afterLabel": "CHOOSE",
-            "afterValue": new_opt[:24],
-            "texture": "liquid_gradient",
-            "splitRatio": 0.5,
-            "position": "lower_deck",
-            "rippleEffect": True,
-        }
-
-    # "Moving / shifting / switching from X to Y"
-    m_shift = re.search(r"\b(?:moving|shifting|switching)\s+(?:now\s+)?(?:from\s+|for\s+)?([^,.;]+?)\s+to\s+([^,.;]+)", text, re.IGNORECASE)
-    if m_shift:
-        old_opt = m_shift.group(1).strip().title()
-        new_opt = m_shift.group(2).strip().title()
-        title = f"{old_opt[:20].upper()} ➔ {new_opt[:20].upper()}".strip()
-        return {
-            "type": "before_after_comparison",
-            "title": title,
-            "beforeLabel": "FROM",
-            "beforeValue": old_opt[:24],
-            "afterLabel": "TO",
             "afterValue": new_opt[:24],
             "texture": "liquid_gradient",
             "splitRatio": 0.5,

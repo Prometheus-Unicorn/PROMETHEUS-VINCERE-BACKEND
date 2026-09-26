@@ -73,15 +73,10 @@ class TestVisualHelpersEngine(unittest.TestCase):
         self.assertIn("GUESSING", res_c["title"])
         self.assertIn("HIGH-INT", res_c["title"])
 
-        # Case D: Moving from X to Y (dynamic entity title and role labels)
+        # Case D: Conversational transition statements ("moving now from X to Y") must NOT trigger canned before_after comparison
         text_d = "No, we're moving now from managing time to managing priorities."
         res_d = _extract_comparison(text_d)
-        self.assertIsNotNone(res_d)
-        self.assertEqual(res_d["type"], "before_after_comparison")
-        self.assertEqual(res_d["beforeLabel"], "FROM")
-        self.assertEqual(res_d["afterLabel"], "TO")
-        self.assertIn("MANAGING", res_d["title"])
-        self.assertIn("PRIORITIES", res_d["title"])
+        self.assertIsNone(res_d, "Conversational transition statements must not trigger canned before_after split cards")
 
     def test_motion_number_metric_extraction(self):
         """Numbers with currency, percentages, multipliers, or metric nouns trigger motion_number."""

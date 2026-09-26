@@ -160,7 +160,7 @@ class AudioIntelligenceTests(unittest.TestCase):
         for event in tech_sfx:
             self.assertIn(
                 event["cue"],
-                ["glitch_digital", "click_bupu", "shutter_snap"],
+                ["glitch_digital", "click_bupu", "shutter_snap", "shutter_clicks_v2_bupu", "mechanical_click"],
                 f"Unexpected acoustic cue {event['cue']} for tech typography",
             )
 

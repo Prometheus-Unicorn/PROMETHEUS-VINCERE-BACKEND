@@ -78,7 +78,7 @@ describe("VisualHelpers Architecture & Archetypes", () => {
     expect(html).toContain("PROMETHEUS TRANSFORMATION");
     expect(html).toContain("LEGACY METHOD");
     expect(html).toContain("NEW SYSTEM");
-    expect(html).toContain("SIDE-BY-SIDE");
+    expect(html).toContain("CONTRAST");
   });
 
   it("renders listicle helper with staggered items", () => {
