@@ -686,11 +686,10 @@ def main():
             ld = (bg.get("broll") or {}).get("layaDecision")
             if ld:
                 laya_decisions.append(ld)
-        for scene in orchestration_manifest.get("scenes") or []:
-            for move in scene.get("moves") or []:
-                ld = (move.get("cause") or {}).get("layaDecision")
-                if ld:
-                    laya_decisions.append(ld)
+        for move in orchestration_manifest.get("cameraMoves") or []:
+            ld = (move.get("cause") or {}).get("layaDecision")
+            if ld:
+                laya_decisions.append(ld)
 
     laya_provider = "heuristic_fallback"
     if laya_decisions:
