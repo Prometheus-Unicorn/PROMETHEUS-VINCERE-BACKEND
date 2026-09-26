@@ -132,11 +132,14 @@ REFERENCE_PATTERNS: List[Dict[str, Any]] = [
     {
         "trigger": "heirloom",
         "code": "bg_quote_canvas",
-        "candidate": "defocus_depth_anchor",
-        "default_kind": "defocus_depth",
-        "score": 66,
-        "patterns": [r"\bquote\b", r"\blesson\b", r"\bsecret\b", r"\bgolden rule\b",
-                     r"\bcore truth\b", r"\bnote\b"],
+        "candidate": "texture_canvas",
+        "default_kind": "texture_canvas",
+        "score": 96,
+        "patterns": [
+            r"\b(?:quote|lesson|secret|golden\s+rule|core\s+truth|note)\b",
+            r"\b(?:priorit(?:y|ies)|principles?|values?|trade[\s_-]?offs?|conflicts?|heritage|traditions?|culture|cultural|wisdom)\b",
+            r"\b(?:core\s+belief|uncomfortable\s+truth|hard\s+truth)\b",
+        ],
         "families": ["paper", "fabric"],
     },
     {
@@ -971,7 +974,7 @@ def plan_backgrounds(
     candidates: List[Dict[str, Any]] = []
 
     # 2a. Transition-Coupled Candidates ("changing onto a background for expressivity of context")
-    if prefs["transitionBackgrounds"] and transitions:
+    if (prefs["transitionBackgrounds"] or policy == "auto") and transitions:
         for tr in transitions:
             to_scene_id = tr.get("toSceneId")
             target_idx = next((i for i, s in enumerate(scenes) if s.get("id") == to_scene_id), None)
@@ -1073,7 +1076,9 @@ def plan_backgrounds(
             })
 
     # 2c. Semantic B-Roll Cutaway Candidates (Pexels Video Engine & Decision Formula)
-    if policy != "transitions_only":
+    brand_explicit_kind = prefs.get("preferredKind")
+    is_brand_explicit = bool(prefs.get("brandRequested") and brand_explicit_kind and brand_explicit_kind != "broll_cutaway")
+    if policy != "transitions_only" and not is_brand_explicit:
         try:
             from mini_run_pipeline.broll_engine import (
                 BrollSuitabilityEngine,

@@ -801,10 +801,13 @@ def plan_mini_run_orchestration(
         if governance:
             print(f"[orchestration] background governance warnings: {governance}", flush=True)
 
-        # Synchronize cinematic audio cues for B-roll cutaway entrances
+        # Synchronize cinematic audio cues for background entrances (B-roll, texture canvas, editorial glass)
         for b_idx, bg in enumerate(backgrounds):
-            if bg.get("kind") == "broll_cutaway":
-                entry_ms = bg.get("entry", {}).get("startMs", 0)
+            entry_ms = bg.get("entry", {}).get("startMs", 0)
+            bg_kind = bg.get("kind", "texture_canvas")
+            trans_kind = (bg.get("transition") or {}).get("kind", "crossfade")
+
+            if bg_kind == "broll_cutaway":
                 broll_meta = bg.get("broll", {})
                 treatment_name = (broll_meta.get("treatment") or {}).get("treatment_name", "cinematic_fullbleed")
                 if treatment_name == "evidentiary_dossier_card":
@@ -815,15 +818,32 @@ def plan_mini_run_orchestration(
                     cue_name = "whoosh_fast"
                 else:
                     cue_name = "whoosh_slow"
+                gain_db = -10.0
+            elif bg_kind in ("texture_canvas", "defocus_depth", "viewfinder_scaffold", "editorial_glass"):
+                if trans_kind == "zoom_punch":
+                    cue_name = "whoosh_fast"
+                    gain_db = -8.5
+                elif trans_kind == "luma_cut":
+                    cue_name = "slow_whoosh_reverb"
+                    gain_db = -9.0
+                elif trans_kind in ("directional_slide_right", "directional_slide_left"):
+                    cue_name = "whoosh_slow"
+                    gain_db = -9.5
+                else:
+                    cue_name = "slow_whoosh_reverb"
+                    gain_db = -10.0
+            else:
+                cue_name = "slow_whoosh_reverb"
+                gain_db = -10.0
 
-                sfx.append({
-                    "id": f"sfx-broll-cutaway-{b_idx}",
-                    "cue": cue_name,
-                    "variant": 1,
-                    "triggerMs": entry_ms,
-                    "gainDb": -10.0,
-                    "causedByBackgroundId": bg.get("id"),
-                })
+            sfx.append({
+                "id": f"sfx-background-entry-{b_idx}",
+                "cue": cue_name,
+                "variant": (b_idx % 4) + 1,
+                "triggerMs": entry_ms,
+                "gainDb": gain_db,
+                "causedByBackgroundId": bg.get("id"),
+            })
     except Exception as exc:  # never let a backdrop decision break the render
         print(f"[orchestration] background planning skipped: {exc}", flush=True)
         backgrounds = []

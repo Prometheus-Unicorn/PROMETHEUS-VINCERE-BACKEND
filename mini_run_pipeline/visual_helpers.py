@@ -344,23 +344,15 @@ def _extract_time_widget(text: str, context: Optional[str] = None) -> Optional[D
     return None
 
 def _extract_optical_rack_focus(text: str) -> Optional[Dict[str, Any]]:
-    """Inspect text for cinematic focus, priority inflection, or pivotal decisions."""
-    text_lower = text.lower()
-    # Explicit optical directives or profound inflection phrases only — never single word 'priorities'
-    if any(re.search(rf"\b{k}\b", text_lower) for k in [
-        "rack focus", "lens breathing", "competing priorities",
-        "something has to win", "optical rack focus"
-    ]):
-        headline = "CINEMATIC FOCUS"
-        if "something has to win" in text_lower:
-            headline = "SOMETHING HAS TO WIN"
-        elif "competing priorities" in text_lower:
-            headline = "COMPETING PRIORITIES"
+    """Inspect text for explicit optical rack focus or lens breathing cinematic directives."""
+    match = re.search(r"\b(?:optical\s+rack\s+focus|rack\s+focus|lens\s+breathing)\b(?:\s*[:\-]\s*([^\.\,\;]+))?", text, re.IGNORECASE)
+    if match:
+        extracted_phrase = (match.group(1) or "").strip().upper()
+        headline = extracted_phrase if extracted_phrase else "CINEMATIC FOCUS"
 
         return {
             "type": "optical_rack_focus",
             "headlineText": headline,
-            "subtitleText": "ALIGNING CRITICAL FOCUS",
             "position": "fullscreen",
             "enableBloom": True,
             "enableVignette": False,

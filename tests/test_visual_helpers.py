@@ -200,20 +200,25 @@ class TestVisualHelpersEngine(unittest.TestCase):
         self.assertEqual(m_chunks[0]["visualHelper"]["title"], "PRO TIP")
 
     def test_optical_rack_focus_extraction(self):
-        """Phrases referencing priorities, inflection points, or focal pull trigger optical_rack_focus."""
-        text_focus = "competing priorities. At some point, something has to win."
-        res_focus = _extract_optical_rack_focus(text_focus)
+        """Optical directives trigger optical_rack_focus with dynamic headline, while conversational phrases do not."""
+        text_directive = "optical rack focus: critical turning point"
+        res_focus = _extract_optical_rack_focus(text_directive)
         self.assertIsNotNone(res_focus)
         self.assertEqual(res_focus["type"], "optical_rack_focus")
         self.assertEqual(res_focus["position"], "fullscreen")
+        self.assertEqual(res_focus["headlineText"], "CRITICAL TURNING POINT")
         self.assertTrue(res_focus["enableBloom"])
         self.assertTrue(res_focus["enableFilmGrain"])
         self.assertEqual(res_focus["focalPlaneRole"], "primary")
 
-        chunks = [{"chunkIndex": 0, "text": text_focus}]
+        chunks = [{"chunkIndex": 0, "text": text_directive}]
         plans = detect_and_plan_visual_helpers(chunks)
         self.assertIn(0, plans)
         self.assertEqual(plans[0]["type"], "optical_rack_focus")
+
+        # Conversational priority statements must NOT trigger spurious takeover HUDs
+        conversational_priorities = "we have competing priorities at this stage"
+        self.assertIsNone(_extract_optical_rack_focus(conversational_priorities))
 
     def test_metric_noun_whitelist_rejects_adjectives(self):
         """Phrases with numbers followed by adjectives like 'physical' are rejected to prevent nonsensical cards."""

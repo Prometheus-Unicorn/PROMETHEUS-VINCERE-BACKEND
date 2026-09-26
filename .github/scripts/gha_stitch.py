@@ -290,6 +290,8 @@ receipt = {
         "sceneCount": len(orchestration_obj.get("scenes") or []),
         "sfxCount": len(resolved_sfx),
         "cameraMoveCount": len(orchestration_obj.get("cameraMoves") or []),
+        "backgrounds": orchestration_obj.get("backgrounds") or [],
+        "cameraMoves": orchestration_obj.get("cameraMoves") or [],
     },
     "look": props.get("lookPlan") or partial.get("lookPlan") or {},
     "asrWords": props.get("asrWords") or [],
