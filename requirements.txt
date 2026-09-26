@@ -1,0 +1,10 @@
+# Prometheus Core Backend & Mini-Run Pipeline Dependencies
+boto3
+mediapipe==0.10.21
+opencv-python-headless==4.11.0.86
+numpy>=1.26.0
+assemblyai
+requests
+torch>=2.0.0
+transformers>=4.48.0
+laya>=0.3.20

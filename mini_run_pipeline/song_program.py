@@ -2608,6 +2608,30 @@ def plan_song_program(
             "evidence": evidence,
         })
 
+    # Consult Laya System-1 Autonomous Decision Director for music track & energy curation
+    try:
+        from mini_run_pipeline.laya_director import LayaEditorialDirector
+        monologue_text = " ".join(c.get("text", "") for c in chunks)
+        laya_music_dec = LayaEditorialDirector.get_instance().decide_music_curation(
+            monologue_text,
+            candidate_tracks=[item["track"] for item in scored[:10]],
+        )
+        if laya_music_dec and laya_music_dec.recommended_track_id:
+            boost = round(float(laya_music_dec.confidence) * 0.30, 2)
+            for item in scored:
+                if item["track"]["id"] == laya_music_dec.recommended_track_id:
+                    item["score"] += boost
+                    item["scoreBreakdown"]["layaAutonomousCuration"] = boost
+                    item["evidence"].append(
+                        f"Laya System-1 curated track: energy={laya_music_dec.energy_intensity}, "
+                        f"role={laya_music_dec.editorial_role} (conf={laya_music_dec.confidence:.2f}, "
+                        f"provider={laya_music_dec.provider}, boost=+{boost})"
+                    )
+                    break
+            scored.sort(key=lambda x: x["score"], reverse=True)
+    except Exception as laya_music_err:
+        print(f"[song_program] Laya music curation notice: {laya_music_err}", flush=True)
+
     # Check for individual selection (including explicit natural language prompts)
     design_with_prompt = dict(design)
     if resolved_prompt:

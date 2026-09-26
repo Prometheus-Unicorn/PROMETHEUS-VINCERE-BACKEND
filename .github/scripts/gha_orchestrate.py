@@ -672,20 +672,26 @@ def main():
         v2_profile_count = 0
         runtime_treatment_count = 0
 
-    # Collect Laya editorial decisions from orchestration manifest for receipt evidence (Rule 5)
+    # Collect Laya editorial decisions from director ledger + orchestration manifest (Rule 5)
     laya_decisions = []
-    if orchestration_manifest:
-        # B-roll cutaway decisions stored on backgrounds[*].broll.layaDecision
+    try:
+        from mini_run_pipeline.laya_director import LayaEditorialDirector
+        laya_decisions = LayaEditorialDirector.get_instance().get_ledger()
+    except Exception as l_err:
+        print(f"[orchestrate] Note: Could not get director ledger: {l_err}", flush=True)
+
+    if not laya_decisions and orchestration_manifest:
+        # Fallback inspection of manifest structures
         for bg in orchestration_manifest.get("backgrounds") or []:
             ld = (bg.get("broll") or {}).get("layaDecision")
             if ld:
                 laya_decisions.append(ld)
-        # Camera move decisions stored on scenes[*].moves[*].cause.layaDecision
         for scene in orchestration_manifest.get("scenes") or []:
             for move in scene.get("moves") or []:
                 ld = (move.get("cause") or {}).get("layaDecision")
                 if ld:
                     laya_decisions.append(ld)
+
     laya_provider = "heuristic_fallback"
     if laya_decisions:
         providers = {d.get("provider", "heuristic_fallback") for d in laya_decisions}
