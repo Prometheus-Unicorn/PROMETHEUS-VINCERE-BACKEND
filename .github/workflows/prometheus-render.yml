@@ -42,7 +42,9 @@ jobs:
           cache: "pip"
 
       - name: Install Python deps
-        run: pip install --quiet assemblyai boto3 "mediapipe==0.10.21" opencv-python-headless numpy requests
+        run: |
+          pip install --quiet assemblyai boto3 "mediapipe==0.10.21" opencv-python-headless numpy requests
+          pip install --quiet "laya>=0.3.20" torch --extra-index-url https://download.pytorch.org/whl/cpu
 
       - name: Install ffmpeg
         run: |
@@ -81,6 +83,7 @@ jobs:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           PYTHONUTF8: "1"
           PYTHONPATH: "."
+          LAYA_OFFLINE_MODE: "0"
         run: python .github/scripts/gha_orchestrate.py
 
   render_slice:

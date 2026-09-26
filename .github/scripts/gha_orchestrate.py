@@ -672,6 +672,28 @@ def main():
         v2_profile_count = 0
         runtime_treatment_count = 0
 
+    # Collect Laya editorial decisions from orchestration manifest for receipt evidence (Rule 5)
+    laya_decisions = []
+    if orchestration_manifest:
+        # B-roll cutaway decisions stored on backgrounds[*].broll.layaDecision
+        for bg in orchestration_manifest.get("backgrounds") or []:
+            ld = (bg.get("broll") or {}).get("layaDecision")
+            if ld:
+                laya_decisions.append(ld)
+        # Camera move decisions stored on scenes[*].moves[*].cause.layaDecision
+        for scene in orchestration_manifest.get("scenes") or []:
+            for move in scene.get("moves") or []:
+                ld = (move.get("cause") or {}).get("layaDecision")
+                if ld:
+                    laya_decisions.append(ld)
+    laya_provider = "heuristic_fallback"
+    if laya_decisions:
+        providers = {d.get("provider", "heuristic_fallback") for d in laya_decisions}
+        laya_provider = "laya_local" if "laya_local" in providers else "heuristic_fallback"
+    print(f"[orchestrate] Laya decisions collected: {len(laya_decisions)} (provider={laya_provider})", flush=True)
+    if laya_decisions:
+        print(f"[orchestrate] LAYA_DECISIONS_JSON: {json.dumps(laya_decisions, indent=2)}", flush=True)
+
     receipt_partial = json.dumps({
         "jobId": job_id,
         "chunkCount": len(chunks),
@@ -690,6 +712,11 @@ def main():
         "curitoAnimations": {
             "count": len(curito_r2_keys),
             "r2Keys": curito_r2_keys,
+        },
+        "layaDecisions": {
+            "count": len(laya_decisions),
+            "provider": laya_provider,
+            "decisions": laya_decisions,
         },
         "deploymentFingerprint": {
             "gitSha": git_sha,
