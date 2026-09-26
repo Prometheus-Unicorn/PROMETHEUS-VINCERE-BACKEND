@@ -330,11 +330,38 @@ def plan_zoom_ins(
             previous_salience = float(prev_scene.get("salience", 0.0))
         salience_delta = float(scene.get("salience", 0.0)) - previous_salience
         is_hero = _chunk_is_hero(chunk)
-        impact = _zoom_impact_reason(str(chunk.get("text", "")), is_hero, salience_delta)
-        if impact is None:
-            continue
+        chunk_text = str(chunk.get("text", ""))
+        impact = _zoom_impact_reason(chunk_text, is_hero, salience_delta)
 
-        kind = _select_zoom_kind(impact["gate"], salience_delta, rng, preferred_kind=preferred_kind)
+        # Consult Laya System-1 Autonomous Decision Director for camera cadence
+        laya_cam_decision = None
+        try:
+            from mini_run_pipeline.laya_director import LayaEditorialDirector
+            laya_cam_decision = LayaEditorialDirector.get_instance().decide_camera_movement(
+                chunk_text,
+                is_hero=is_hero,
+                salience_delta=salience_delta,
+            )
+        except Exception as laya_err:
+            print(f"[orchestration] Laya camera evaluation skipped/failed: {laya_err}", flush=True)
+
+        if preferred_kind:
+            if impact is None:
+                continue
+            kind = _select_zoom_kind(impact["gate"], salience_delta, rng, preferred_kind=preferred_kind)
+        elif impact is not None:
+            kind = _select_zoom_kind(impact["gate"], salience_delta, rng, preferred_kind=preferred_kind)
+        elif laya_cam_decision and laya_cam_decision.should_zoom:
+            impact = {
+                "gate": "laya_autonomous_cadence",
+                "reason": laya_cam_decision.rationale,
+            }
+            if laya_cam_decision.zoom_kind in ZOOM_KINDS:
+                kind = laya_cam_decision.zoom_kind
+            else:
+                kind = _select_zoom_kind(impact["gate"], salience_delta, rng)
+        else:
+            continue
         spec = ZOOM_KINDS[kind]
 
         if kind == "jcut_zoom_in":
@@ -350,6 +377,7 @@ def plan_zoom_ins(
         midpoint_ms = zoom_start + (zoom_end - zoom_start) // 2
         anchor_x, anchor_y = _nearest_subject_anchor(subject_observation, midpoint_ms)
 
+        from dataclasses import asdict
         move: Dict[str, Any] = {
             "id": zoom_id,
             "startMs": zoom_start,
@@ -367,6 +395,7 @@ def plan_zoom_ins(
                 "reason": impact["reason"],
                 "policy": "high_impact_zoom_in",
                 "chunkIndex": index,
+                "layaDecision": asdict(laya_cam_decision) if laya_cam_decision else None,
             },
         }
 

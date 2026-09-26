@@ -77,7 +77,8 @@ studio_image = (
         "libgles2",
         "libvulkan1",
     )
-    .pip_install("numpy==1.26.4", "boto3", "mediapipe==0.10.21", "opencv-python-headless==4.11.0.86")
+    .pip_install("torch", extra_index_url="https://download.pytorch.org/whl/cpu")
+    .pip_install("numpy==1.26.4", "boto3", "mediapipe==0.10.21", "opencv-python-headless==4.11.0.86", "laya>=0.3.20")
     .run_commands(
         "npm install -g tsx@4.22.4",
         f"mkdir -p {APP_ROOT / 'remotion-app/node_modules/@remotion/compositor-linux-x64-gnu'}",
@@ -210,6 +211,62 @@ def matte_segment(payload: dict) -> dict:
     from mini_run_gateway import handle_matte
 
     return handle_matte(payload)
+
+
+@app.function(
+    image=studio_image,
+    secrets=[shared_secrets, backend_secrets],
+    volumes={str(ARTIFACT_ROOT): artifacts},
+    cpu=2,
+    memory=4096,
+    min_containers=0,
+    max_containers=2,
+    scaledown_window=10,
+    timeout=5 * 60,
+)
+def test_laya_in_modal(
+    text: str = "We signed the contract on the desk and wired $50,000 immediately.",
+    beat: str = "evidence",
+    duration_sec: float = 3.2,
+) -> dict:
+    """Execute direct verification of Laya System-1 Decision Engine inside Modal."""
+    from dataclasses import asdict
+    import time
+    from mini_run_pipeline.laya_director import LayaEditorialDirector
+
+    dur = duration_sec
+
+    t0 = time.monotonic()
+    director = LayaEditorialDirector.get_instance()
+    broll_dec = director.decide_broll_cutaway(
+        text,
+        beat_type=beat,
+        duration_sec=dur,
+    )
+    cam_dec = director.decide_camera_movement(
+        text,
+        is_hero=True,
+        salience_delta=0.45,
+    )
+    music_dec = director.decide_music_selection(
+        text,
+        energy_level="medium",
+    )
+    total_sec = time.monotonic() - t0
+
+    result = {
+        "ok": True,
+        "durationSec": round(total_sec, 3),
+        "initialized": director._initialized,
+        "loadFailed": director._load_failed,
+        "failureReason": director._failure_reason,
+        "brollDecision": asdict(broll_dec),
+        "cameraDecision": asdict(cam_dec),
+        "musicDecision": asdict(music_dec),
+    }
+    print("[test_laya_in_modal] Execution result:", result, flush=True)
+    return result
+
 
 
 # ---------------------------------------------------------------------------

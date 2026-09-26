@@ -1150,17 +1150,33 @@ def plan_backgrounds(
                     beat_type=scene.get("role") or scene.get("beatType"),
                 )
 
+                # Consult Laya System-1 Decision Engine for B-roll cutaway evaluation
+                laya_broll_dec = None
+                try:
+                    from mini_run_pipeline.laya_director import LayaEditorialDirector
+                    laya_broll_dec = LayaEditorialDirector.get_instance().decide_broll_cutaway(
+                        c_text,
+                        beat_type=scene.get("role") or scene.get("beatType"),
+                        duration_sec=c_dur_sec,
+                    )
+                except Exception as laya_err:
+                    print(f"[backgrounds] Laya decision call skipped/failed: {laya_err}", flush=True)
+
                 is_broll_directed = (
                     prefs.get("preferredKind") == "broll_cutaway"
                     or "broll" in str(prompt or "").lower()
                     or "cutaway" in str(prompt or "").lower()
                 )
                 is_broll_candidate = (
-                    (is_broll_directed and broll_eval.composite_score >= 0.45 and c_dur_sec >= 1.6)
+                    (laya_broll_dec is not None and laya_broll_dec.should_cutaway and c_dur_sec >= 1.4)
+                    or (is_broll_directed and broll_eval.composite_score >= 0.45 and c_dur_sec >= 1.6)
                     or (broll_eval.is_eligible and broll_eval.composite_score >= auto_broll_floor)
                 )
                 if is_broll_candidate:
                     score_scaled = int(broll_eval.composite_score * broll_score_scale)
+                    if laya_broll_dec is not None and laya_broll_dec.should_cutaway:
+                        # Elevate score if Laya policy strongly advocates for cutaway
+                        score_scaled = max(score_scaled, int(laya_broll_dec.cutaway_probability * broll_score_scale))
                     candidates.append({
                         "index": index,
                         "chunk": chunk,
@@ -1172,8 +1188,9 @@ def plan_backgrounds(
                         "code": "bg_broll_cutaway",
                         "texture": None,
                         "broll_eval": broll_eval,
-                        "gate": "broll_semantic_suitability",
-                        "reason": broll_eval.rationale,
+                        "laya_decision": laya_broll_dec,
+                        "gate": "laya_autonomous_policy" if (laya_broll_dec and laya_broll_dec.should_cutaway) else "broll_semantic_suitability",
+                        "reason": laya_broll_dec.rationale if (laya_broll_dec and laya_broll_dec.should_cutaway) else broll_eval.rationale,
                     })
         except Exception as exc:
             print(f"[backgrounds] B-roll candidate evaluation skipped: {exc}", flush=True)
@@ -1567,10 +1584,12 @@ def plan_backgrounds(
                         evaluation=broll_eval,
                         seed=seed,
                     )
+                    laya_dec_item = item.get("laya_decision")
                     background["broll"] = {
                         **asset_data,
                         "treatment": asdict(treatment_obj),
                         "evaluation": asdict(broll_eval) if broll_eval else {},
+                        "layaDecision": asdict(laya_dec_item) if (laya_dec_item and hasattr(laya_dec_item, "__dataclass_fields__")) else (laya_dec_item or None),
                     }
                     if treatment_obj.treatment_name == "retinal_flash_cut":
                         background["transition"]["kind"] = "hard_cut"

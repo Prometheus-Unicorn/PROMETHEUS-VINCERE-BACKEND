@@ -789,8 +789,29 @@ def execute_pipeline_job(
         r2.upload_file(str(final_path), r2_key, content_type="video/mp4")
         output_url = r2.object_url(r2_key)
 
+    # 8) Aggregate all Laya System-1 autonomous decisions across pipeline components
+    laya_decisions: List[Dict[str, Any]] = []
+    for bg in orchestration_manifest.get("backgrounds", []):
+        broll_data = bg.get("broll")
+        if isinstance(broll_data, dict) and broll_data.get("layaDecision"):
+            laya_decisions.append({
+                "component": "broll",
+                "sceneIndex": bg.get("sceneIndex"),
+                "chunkIndex": bg.get("chunkIndex"),
+                "decision": broll_data["layaDecision"],
+            })
+    for move in orchestration_manifest.get("cameraMoves", []):
+        cause = move.get("cause")
+        if isinstance(cause, dict) and cause.get("layaDecision"):
+            laya_decisions.append({
+                "component": "camera",
+                "moveId": move.get("id"),
+                "decision": cause["layaDecision"],
+            })
+
     result: Dict[str, Any] = {
         **render_receipt,
+        "layaDecisions": laya_decisions,
         "resolution": render_receipt.get("resolution", resolution_plan),
         "r2Key": r2_key if uploaded else None,
         "outputUrl": output_url or None,
