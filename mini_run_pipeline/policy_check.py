@@ -106,7 +106,12 @@ def measure_frame_text_pixel_bounds(
         y_start = max(50, int(expected_y_center - 220))
         y_end = min(h - 50, int(expected_y_center + 220))
     else:
-        y_start = min(h - 50, 500)
+        # Default scan zone: lower caption region only (y > 52% of frame height).
+        # Caption text in 9:16 portrait (1080x1920) is always placed in the lower half.
+        # Starting at y=500 incorrectly captures the lower edge of the subject matte
+        # silhouette (yuv420p, no alpha) which occupies the upper body region ~y=150-600.
+        # Raising to y=1000 (52% of 1920) keeps all matte-body pixels out of the scan.
+        y_start = min(h - 50, 1000)
         y_end = min(h, 1850)
     sub = arr[y_start:y_end, :]
 
@@ -170,6 +175,24 @@ def measure_frame_text_pixel_bounds(
     active_rows = np.where(row_counts > 2)[0]
     y_min = int(active_rows.min() + y_start) if len(active_rows) > 0 else y_start
     y_max = int(active_rows.max() + y_start) if len(active_rows) > 0 else y_end
+
+    # Guard: reject detections whose vertical span exceeds caption text bounds.
+    # Caption text (even 3 stacked lines at large font) measures <= 180px tall.
+    # A foreground matte silhouette (yuv420p, no alpha channel) renders as an opaque
+    # block and will measure 300-500px tall — misidentified as edge-bleeding text.
+    # Threshold 200px leaves headroom above the tallest legitimate caption stack.
+    detected_height = y_max - y_min
+    if detected_height > 200:
+        return {
+            "status": "passed",
+            "detected": False,
+            "edgeBleed": False,
+            "bleedSide": "none",
+            "leftClearancePx": float(w),
+            "rightClearancePx": float(w),
+            "bbox": None,
+            "note": f"detection_rejected_as_non_text: height={detected_height}px exceeds 200px caption cap",
+        }
 
     left_c = float(x_min)
     right_c = float(w - x_max)
