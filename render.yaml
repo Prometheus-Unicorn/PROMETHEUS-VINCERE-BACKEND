@@ -1,0 +1,23 @@
+{
+  "services": [
+    {
+      "type": "web",
+      "name": "prometheus-mcp-gateway",
+      "runtime": "docker",
+      "dockerfilePath": "./Dockerfile.gateway",
+      "plan": "free",
+      "region": "oregon",
+      "envVars": [
+        {
+          "key": "PORT",
+          "value": "3100"
+        },
+        {
+          "key": "NODE_ENV",
+          "value": "production"
+        }
+      ],
+      "healthCheckPath": "/healthz"
+    }
+  ]
+}
