@@ -7726,6 +7726,20 @@ export const PrometheusMinRun: React.FC<PrometheusMinRunProps> = ({
             relativeNextChunkStartFrame = nextAbsoluteStartFrame - startFrame;
           }
 
+          // If the chunk has a takeover visual helper that already renders its own headline
+          // (such as optical_rack_focus, before_after_comparison, or fullscreen HUD),
+          // suppress the standard caption card so identical phrases are never rendered twice.
+          const hasTakeoverVisualHelper = Boolean(
+            chunk.visualHelper &&
+            (chunk.visualHelper.type === "optical_rack_focus" ||
+             chunk.visualHelper.type === "before_after_comparison" ||
+             chunk.visualHelper.position === "fullscreen" ||
+             chunk.visualHelper.headlineText)
+          );
+          if (hasTakeoverVisualHelper) {
+            return null;
+          }
+
           return (
             <Sequence
               key={`chunk-${idx}-${startMs}`}
@@ -7761,7 +7775,7 @@ export const PrometheusMinRun: React.FC<PrometheusMinRunProps> = ({
             {/* 3. Foreground Subject Matte Cutout Layer (Z: 50) */}
             {matteSrc && (() => {
               const state = resolveSceneVisualState(orchestration, frame, fps);
-              const mediaStyle = resolvePanScanMediaStyle(state, 1.0);
+              const mediaStyle = resolvePanScanMediaStyle(state, state.dollyBackgroundScale ?? 1.0);
               const {
                 hookBlur,
                 hookBrightness,
@@ -7781,25 +7795,7 @@ export const PrometheusMinRun: React.FC<PrometheusMinRunProps> = ({
 
               return (
                 <AbsoluteFill style={{ zIndex: 50, pointerEvents: "none", overflow: "hidden" }}>
-                  {/* Layer 2: Ambient Drop Shadow / Depth Occluder behind Subject (Z: 45) */}
-                  <OffthreadVideo
-                    src={resolveSourceUri(matteSrc)}
-                    transparent
-                    muted
-                    style={{
-                      position: "absolute",
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      objectPosition: mediaStyle.objectPosition || "50% 50%",
-                      transform: `${mediaStyle.transform || ""} ${hookTransform}`.trim(),
-                      transformOrigin: mediaStyle.transformOrigin || "center center",
-                      filter: "brightness(0) blur(8px) opacity(0.18)",
-                      zIndex: 45,
-                    }}
-                  />
-
-                  {/* Layer 3: Foreground Subject Matte Cutout Layer (Z: 50) */}
+                  {/* Foreground Subject Matte Cutout Layer (Z: 50) */}
                   <OffthreadVideo
                     src={resolveSourceUri(matteSrc)}
                     transparent
